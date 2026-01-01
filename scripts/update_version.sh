@@ -150,6 +150,11 @@ update_file_version "hydra_router/__init__.py" \
     "s/__version__ = \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/__version__ = \"$NEW_VERSION\"/" \
     "main package version"
 
+# Update test file that checks package version
+update_file_version "tests/unit/test_package_structure.py" \
+    "s/assert hydra_router.__version__ == \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/assert hydra_router.__version__ == \"$NEW_VERSION\"/" \
+    "package version test"
+
 # Update documentation conf.py (if it exists)
 if [ -f "docs/source/conf.py" ]; then
     print_status "Updating documentation version: docs/source/conf.py"
@@ -187,6 +192,12 @@ fi
 if [ -f "hydra_router/__init__.py" ]; then
     echo "🐍 hydra_router/__init__.py:"
     grep "__version__" hydra_router/__init__.py
+fi
+
+# Check test file
+if [ -f "tests/unit/test_package_structure.py" ]; then
+    echo "🧪 tests/unit/test_package_structure.py:"
+    grep "assert hydra_router.__version__" tests/unit/test_package_structure.py
 fi
 
 # Check documentation
