@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.2.3] - 2026-01-01 17:57
+
+
 ### Changed
 - **CI**: Updated GitHub Actions upload-artifact action from v3 to v4 for improved compatibility
 
