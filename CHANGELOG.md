@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Scripts**: Updated project references from AI Hydra to Hydra Router in version update script
+- **Specs**: Marked Task 1.1 acceptance criteria as completed in implementation tasks
 
 ### Fixed
 
