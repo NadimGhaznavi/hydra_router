@@ -9,10 +9,10 @@ import logging
 import logging.config
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 
-def get_logging_config(
+def get_logging_config(  # type: ignore[misc]
     log_level: str = "INFO",
     log_file: Optional[Path] = None,
     enable_console: bool = True,
@@ -94,8 +94,8 @@ def get_logging_config(
             "formatter": "simple",
             "stream": "ext://sys.stdout",
         }
-        config["loggers"]["hydra_router"]["handlers"].append("console")  # type: ignore[index]
-        config["root"]["handlers"].append("console")  # type: ignore[index]
+        config["loggers"]["hydra_router"]["handlers"].append("console")  # type: ignore
+        config["root"]["handlers"].append("console")  # type: ignore
 
     # Add file handler if enabled
     if enable_file:
@@ -108,8 +108,8 @@ def get_logging_config(
             "backupCount": 5,
             "encoding": "utf8",
         }
-        config["loggers"]["hydra_router"]["handlers"].append("file")  # type: ignore[index]
-        config["root"]["handlers"].append("file")  # type: ignore[index]
+        config["loggers"]["hydra_router"]["handlers"].append("file")  # type: ignore
+        config["root"]["handlers"].append("file")  # type: ignore
 
     return config
 
