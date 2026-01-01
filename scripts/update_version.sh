@@ -1,11 +1,11 @@
 #!/bin/bash
-# update_version.sh - Automated version update script for AI Hydra
+# update_version.sh - Automated version update script for Hydra Router
 #
-# This script updates the version number across all relevant files in the AI Hydra project.
+# This script updates the version number across all relevant files in the Hydra Router project.
 # It ensures consistency across pyproject.toml, Python packages, and documentation.
 #
 # Usage: ./update_version.sh <new_version>
-# Example: ./update_version.sh 0.6.0
+# Example: ./update_version.sh 0.2.0
 
 set -e  # Exit on any error
 
@@ -37,7 +37,7 @@ print_error() {
 if [ $# -eq 0 ]; then
     print_error "No version number provided"
     echo "Usage: $0 <new_version>"
-    echo "Example: $0 0.6.0"
+    echo "Example: $0 0.2.0"
     echo ""
     echo "The version should follow semantic versioning (MAJOR.MINOR.PATCH)"
     exit 1
@@ -52,7 +52,7 @@ if ! [[ $NEW_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     exit 1
 fi
 
-print_status "Updating AI Hydra version to $NEW_VERSION..."
+print_status "Updating Hydra Router version to $NEW_VERSION..."
 
 # Check if we're in the right directory
 if [ ! -f "pyproject.toml" ]; then
@@ -146,29 +146,24 @@ update_file_version "pyproject.toml" \
     "primary version (pyproject.toml)"
 
 # Update main package __init__.py
-update_file_version "ai_hydra/__init__.py" \
+update_file_version "hydra_router/__init__.py" \
     "s/__version__ = \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/__version__ = \"$NEW_VERSION\"/" \
     "main package version"
 
-# Update TUI package __init__.py
-update_file_version "ai_hydra/tui/__init__.py" \
-    "s/__version__ = \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/__version__ = \"$NEW_VERSION\"/" \
-    "TUI package version"
-
-# Update documentation conf.py
-if [ -f "docs/_source/conf.py" ]; then
-    print_status "Updating documentation version: docs/_source/conf.py"
-    sed -i.bak "s/release = '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'/release = '$NEW_VERSION'/" docs/_source/conf.py
-    sed -i.bak "s/version = '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'/version = '$NEW_VERSION'/" docs/_source/conf.py
-    rm -f docs/_source/conf.py.bak
-    print_success "✓ Updated docs/_source/conf.py"
+# Update documentation conf.py (if it exists)
+if [ -f "docs/source/conf.py" ]; then
+    print_status "Updating documentation version: docs/source/conf.py"
+    sed -i.bak "s/release = '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'/release = '$NEW_VERSION'/" docs/source/conf.py
+    sed -i.bak "s/version = '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'/version = '$NEW_VERSION'/" docs/source/conf.py
+    rm -f docs/source/conf.py.bak
+    print_success "✓ Updated docs/source/conf.py"
 fi
 
-# Update setup.py if it exists (DEPRECATED - setup.py has been removed)
-# This section is kept for backward compatibility but setup.py is no longer used
+# Update setup.py if it exists (DEPRECATED - hydra-router uses pyproject.toml exclusively)
+# This section is kept for backward compatibility but setup.py is not used in hydra-router
 if [ -f "setup.py" ]; then
     print_warning "Found setup.py - this file should be removed as it's no longer used"
-    print_warning "The project now uses pyproject.toml exclusively for packaging"
+    print_warning "The hydra-router project uses pyproject.toml exclusively for packaging"
 fi
 
 # Update CHANGELOG.md with new release heading
@@ -189,21 +184,15 @@ if [ -f "pyproject.toml" ]; then
 fi
 
 # Check main package
-if [ -f "ai_hydra/__init__.py" ]; then
-    echo "🐍 ai_hydra/__init__.py:"
-    grep "__version__" ai_hydra/__init__.py
-fi
-
-# Check TUI package
-if [ -f "ai_hydra/tui/__init__.py" ]; then
-    echo "🖥️  ai_hydra/tui/__init__.py:"
-    grep "__version__" ai_hydra/tui/__init__.py
+if [ -f "hydra_router/__init__.py" ]; then
+    echo "🐍 hydra_router/__init__.py:"
+    grep "__version__" hydra_router/__init__.py
 fi
 
 # Check documentation
-if [ -f "docs/_source/conf.py" ]; then
-    echo "📚 docs/_source/conf.py:"
-    grep -E "(release|version) = " docs/_source/conf.py
+if [ -f "docs/source/conf.py" ]; then
+    echo "📚 docs/source/conf.py:"
+    grep -E "(release|version) = " docs/source/conf.py
 fi
 
 # Check setup.py (DEPRECATED)
@@ -222,7 +211,7 @@ echo ""
 
 # Test Python import
 print_status "Testing Python package import..."
-if python -c "import ai_hydra; print(f'✓ Main package version: {ai_hydra.__version__}')" 2>/dev/null; then
+if python -c "import hydra_router; print(f'✓ Main package version: {hydra_router.__version__}')" 2>/dev/null; then
     print_success "Python import test passed"
 else
     print_warning "Python import test failed - you may need to reinstall the package"
@@ -238,9 +227,10 @@ echo "1. Review all changes: git diff"
 echo "2. Review CHANGELOG.md to ensure release notes are complete"
 echo "3. Run tests: pytest tests/"
 echo "4. Build documentation: cd docs && make html"
-echo "5. Commit changes: git add . && git commit -m 'Release version $NEW_VERSION'"
+echo "5. Commit changes: git add . && git commit -m 'chore(release): bump version to $NEW_VERSION'"
 echo "6. Create tag: git tag -a v$NEW_VERSION -m 'Release version $NEW_VERSION'"
 echo "7. Push changes: git push origin main --tags"
+echo "8. Build and publish to PyPI: python -m build && python -m twine upload dist/*"
 echo ""
 echo "💡 Tip: Use 'git checkout .' to revert all changes if needed"
 
