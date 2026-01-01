@@ -9,12 +9,15 @@ __version__ = "0.1.0"
 __author__ = "Nadim-Daniel Ghaznavi"
 __email__ = "nghaznavi@gmail.com"
 
-from .router_constants import RouterConstants
+from .logging_config import get_logger, setup_logging
 from .mq_client import MQClient
 from .router import HydraRouter
+from .router_constants import RouterConstants
 
 __all__ = [
     "RouterConstants",
     "MQClient",
     "HydraRouter",
+    "setup_logging",
+    "get_logger",
 ]

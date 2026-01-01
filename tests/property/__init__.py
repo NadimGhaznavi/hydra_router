@@ -1,1 +1,1 @@
-# Property-based tests for hydra-router
+"""Property-based tests for hydra-router components."""

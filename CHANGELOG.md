@@ -16,4 +16,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Specs**: Marked Task 1.1 acceptance criteria as completed in implementation tasks
 
 ### Fixed
-

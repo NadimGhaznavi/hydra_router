@@ -1,1 +1,1 @@
-# Test package for hydra-router
+"""Test package for hydra-router."""

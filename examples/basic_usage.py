@@ -6,11 +6,12 @@ This example will be expanded as components are implemented.
 """
 
 import asyncio
+
 from hydra_router import HydraRouter, MQClient, RouterConstants
 
 
-async def main():
-    """Basic usage example."""
+async def main() -> None:
+    """Demonstrate basic usage example."""
     print("Hydra Router Basic Usage Example")
     print("================================")
 

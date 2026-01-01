@@ -22,45 +22,45 @@ graph TB
         APP3[Application N<br/>HydraClient]
         SERVER[Server Application<br/>HydraServer]
     end
-    
+
     subgraph "Hydra Router System"
         ROUTER[HydraRouter<br/>ZMQ ROUTER Socket]
         HEARTBEAT[Heartbeat Monitor]
         REGISTRY[Client Registry]
         VALIDATOR[Message Validator]
     end
-    
+
     subgraph "MQClient Library"
         CLIENT1[MQClient Instance 1]
         CLIENT2[MQClient Instance 2]
         CLIENT3[MQClient Instance N]
         CLIENTSRV[MQClient Instance Server]
-        
+
         subgraph "Format Conversion"
             ADAPTER[Message Format Adapter]
             ZMQMSG[ZMQMessage Format]
             ROUTERCONST[RouterConstants Format]
         end
     end
-    
+
     APP1 --> CLIENT1
     APP2 --> CLIENT2
     APP3 --> CLIENT3
     SERVER --> CLIENTSRV
-    
+
     CLIENT1 --> ADAPTER
     CLIENT2 --> ADAPTER
     CLIENT3 --> ADAPTER
     CLIENTSRV --> ADAPTER
-    
+
     ADAPTER --> ZMQMSG
     ADAPTER --> ROUTERCONST
-    
+
     CLIENT1 -.->|RouterConstants Format| ROUTER
     CLIENT2 -.->|RouterConstants Format| ROUTER
     CLIENT3 -.->|RouterConstants Format| ROUTER
     CLIENTSRV -.->|RouterConstants Format| ROUTER
-    
+
     ROUTER --> HEARTBEAT
     ROUTER --> REGISTRY
     ROUTER --> VALIDATOR
@@ -74,13 +74,13 @@ sequenceDiagram
     participant MQCLIENT as MQClient
     participant ROUTER as HydraRouter
     participant SERVER as Server App
-    
+
     Note over CLIENT,SERVER: Connection Establishment
     CLIENT->>MQCLIENT: connect()
     MQCLIENT->>ROUTER: Connect via ZMQ DEALER
     MQCLIENT->>ROUTER: Send Heartbeat (RouterConstants)
     ROUTER->>ROUTER: Register Client
-    
+
     Note over CLIENT,SERVER: Command Flow
     CLIENT->>MQCLIENT: send_command(START_SIMULATION)
     MQCLIENT->>MQCLIENT: Convert ZMQMessage → RouterConstants
@@ -91,13 +91,13 @@ sequenceDiagram
     ROUTER->>MQCLIENT: Broadcast to All Clients
     MQCLIENT->>MQCLIENT: Convert RouterConstants → ZMQMessage
     MQCLIENT->>CLIENT: Deliver Response
-    
+
     Note over CLIENT,SERVER: Heartbeat Monitoring
     loop Every 5 seconds
         MQCLIENT->>ROUTER: Send Heartbeat
         ROUTER->>ROUTER: Update Client Timestamp
     end
-    
+
     Note over CLIENT,SERVER: Error Handling
     MQCLIENT->>ROUTER: Send Malformed Message
     ROUTER->>ROUTER: Validate & Log Error Details
@@ -112,30 +112,30 @@ sequenceDiagram
     participant CLIENT as SimpleClient
     participant ROUTER as HydraRouter
     participant SERVER as SimpleServer
-    
+
     Note over USER,SERVER: Initial Setup
     CLIENT->>ROUTER: Connect & Send Heartbeat
     SERVER->>ROUTER: Connect & Send Heartbeat
     ROUTER->>ROUTER: Register both clients
-    
+
     Note over USER,SERVER: Square Calculation Request
     USER->>CLIENT: Enter number: 5
     CLIENT->>CLIENT: Validate input (integer)
     CLIENT->>ROUTER: square_request(number=5, client_id="client-001")
     ROUTER->>ROUTER: Validate message format
     ROUTER->>SERVER: Forward square_request to server
-    
+
     Note over USER,SERVER: Processing and Response
     SERVER->>SERVER: Calculate: 5² = 25
     SERVER->>ROUTER: square_response(result=25, original_request_id)
     ROUTER->>CLIENT: Broadcast response to all clients
     CLIENT->>USER: Display: "Result: 25"
-    
+
     Note over USER,SERVER: Error Handling Example
     USER->>CLIENT: Enter invalid input: "abc"
     CLIENT->>CLIENT: Validate input (fails)
     CLIENT->>USER: Display: "Error: Please enter a valid integer"
-    
+
     Note over USER,SERVER: Connection Error Example
     CLIENT->>ROUTER: Attempt connection (router down)
     CLIENT->>CLIENT: Connection fails
@@ -164,11 +164,11 @@ class HydraRouter:
     async def broadcast_to_clients(self, elem: str, data: Any, sender_id: str) -> None
     async def prune_dead_clients(self) -> None
     async def shutdown(self) -> None
-    
+
     # Client registry query
     async def handle_client_registry_request(self, sender: bytes) -> None
     def get_client_registry_data(self) -> Dict[str, Dict[str, Any]]
-    
+
     # Message validation and error handling
     def _validate_message_format(self, message: Dict[str, Any]) -> Tuple[bool, str]
     def _log_malformed_message(self, message: Dict[str, Any], error: str, client_identity: str) -> None
@@ -188,7 +188,7 @@ class HydraRouter:
 if sender_type == RouterConstants.HYDRA_CLIENT:
     await self.forward_to_server(elem=elem, data=data, sender=identity)
 
-# Server responses → All Clients  
+# Server responses → All Clients
 elif sender_type == RouterConstants.HYDRA_SERVER:
     await self.broadcast_to_clients(elem=elem, data=data, sender_id=identity_str)
 ```
@@ -211,17 +211,17 @@ class MQClient:
     async def send_message(self, message: ZMQMessage) -> None
     async def receive_message(self) -> Optional[Dict[str, Any]]
     async def send_command(self, message_type: MessageType, data: Dict[str, Any], timeout: float) -> Optional[Dict[str, Any]]
-    
+
     # Client registry query
     async def request_client_registry(self, timeout: float = 5.0) -> Optional[Dict[str, Dict[str, Any]]]
-    
+
     # Format conversion methods
     def _convert_to_router_format(self, message: ZMQMessage) -> Dict[str, Any]
     def _convert_from_router_format(self, router_message: Dict[str, Any]) -> ZMQMessage
     def _map_message_type_to_elem(self, message_type: str) -> str
     def _map_elem_to_message_type(self, elem: str) -> MessageType
     def _validate_router_message(self, message: Dict[str, Any]) -> Tuple[bool, Optional[str]]
-    
+
     # Heartbeat management
     async def _send_heartbeat(self) -> None
 ```
@@ -236,7 +236,7 @@ hydra_client = MQClient(
 )
 
 hydra_server = MQClient(
-    router_address="tcp://localhost:5556", 
+    router_address="tcp://localhost:5556",
     client_type="HydraServer",
     client_id="server-001"
 )
@@ -261,11 +261,11 @@ custom_client = MQClient(
 class RouterConstants:
     # Client/Server Types
     HYDRA_CLIENT = "HydraClient"
-    HYDRA_SERVER = "HydraServer" 
+    HYDRA_SERVER = "HydraServer"
     HYDRA_ROUTER = "HydraRouter"
     SIMPLE_CLIENT = "SimpleClient"
     SIMPLE_SERVER = "SimpleServer"
-    
+
     # Valid Client Types (for validation)
     VALID_CLIENT_TYPES = [
         HYDRA_CLIENT,
@@ -274,7 +274,7 @@ class RouterConstants:
         SIMPLE_CLIENT,
         SIMPLE_SERVER
     ]
-    
+
     # Message Structure Keys
     SENDER = "sender"
     ELEM = "elem"
@@ -282,25 +282,25 @@ class RouterConstants:
     CLIENT_ID = "client_id"
     TIMESTAMP = "timestamp"
     REQUEST_ID = "request_id"
-    
+
     # System Messages
     HEARTBEAT = "heartbeat"
     STATUS = "status"
     ERROR = "error"
-    
+
     # Simple Client/Server Messages
     SQUARE_REQUEST = "square_request"
     SQUARE_RESPONSE = "square_response"
-    
+
     # Client Registry Messages
     CLIENT_REGISTRY_REQUEST = "client_registry_request"
     CLIENT_REGISTRY_RESPONSE = "client_registry_response"
-    
+
     # Simulation Control Commands
     START_SIMULATION = "start_simulation"
     STOP_SIMULATION = "stop_simulation"
     # ... additional message types
-    
+
     # Configuration
     HEARTBEAT_INTERVAL = 5  # seconds
     DEFAULT_ROUTER_PORT = 5556
@@ -470,36 +470,36 @@ Based on the router-message-protocol-fix improvements, the HydraRouter implement
 ```python
 def _validate_message_format(self, message: Dict[str, Any]) -> Tuple[bool, str]:
     """Comprehensive message validation with detailed error reporting."""
-    
+
     # 1. Type validation
     if not isinstance(message, dict):
         return False, f"Message must be dictionary, got {type(message).__name__}"
-    
+
     # 2. Required field validation
     required_fields = [RouterConstants.SENDER, RouterConstants.ELEM]
     missing_fields = [field for field in required_fields if field not in message]
     if missing_fields:
         return False, f"Missing required fields: {', '.join(missing_fields)}"
-    
+
     # 3. Field type and value validation
     sender = message.get(RouterConstants.SENDER)
     if not isinstance(sender, str) or not sender.strip():
         return False, f"Field 'sender' must be non-empty string, got: {repr(sender)}"
-    
+
     elem = message.get(RouterConstants.ELEM)
     if not isinstance(elem, str) or not elem.strip():
         return False, f"Field 'elem' must be non-empty string, got: {repr(elem)}"
-    
+
     # 4. Sender type validation
     if sender not in RouterConstants.VALID_CLIENT_TYPES:
         return False, f"Invalid sender type '{sender}', expected: {', '.join(RouterConstants.VALID_CLIENT_TYPES)}"
-    
+
     # 5. Optional field validation
     if RouterConstants.DATA in message:
         data = message[RouterConstants.DATA]
         if not isinstance(data, (dict, type(None))):
             return False, f"Field 'data' must be dict or None, got {type(data).__name__}"
-    
+
     return True, ""
 ```
 
@@ -510,10 +510,10 @@ Leveraging the detailed error logging from the existing HydraRouter implementati
 ```python
 def _log_malformed_message(self, message: Dict[str, Any], error: str, client_identity: str) -> None:
     """Detailed error logging for troubleshooting."""
-    
+
     # Log main error
     self.logger.error(f"Malformed message from client {client_identity}: {error}")
-    
+
     # Log expected vs actual format
     expected_format = {
         RouterConstants.SENDER: "string (HydraClient|HydraServer|CustomApp)",
@@ -524,25 +524,25 @@ def _log_malformed_message(self, message: Dict[str, Any], error: str, client_ide
         RouterConstants.REQUEST_ID: "string (optional)"
     }
     self.logger.error(f"Expected format: {expected_format}")
-    
+
     # Log actual message (truncated for safety)
     actual_message = str(message)
     if len(actual_message) > 500:
         actual_message = actual_message[:500] + "... (truncated)"
     self.logger.error(f"Actual message: {actual_message}")
-    
+
     # Provide debugging hints
     if RouterConstants.MESSAGE_TYPE in message and RouterConstants.ELEM not in message:
         self.logger.error("Detected ZMQMessage format instead of RouterConstants format")
         self.logger.error("This suggests the client is sending ZMQMessage format instead of RouterConstants format")
-    
+
     # Log field analysis
     if isinstance(message, dict):
         present_fields = list(message.keys())
         self.logger.error(f"Present fields: {present_fields}")
         field_types = {k: type(v).__name__ for k, v in message.items()}
         self.logger.error(f"Field types: {field_types}")
-    
+
     self.logger.error("Debugging hints: Check MQClient format conversion is working correctly")
 
 def _log_frame_error(self, frames: List[bytes], client_identity: str) -> None:
@@ -550,7 +550,7 @@ def _log_frame_error(self, frames: List[bytes], client_identity: str) -> None:
     self.logger.error(f"Malformed ZMQ frames from client {client_identity}: incorrect frame count")
     self.logger.error("Expected frame structure: [identity_frame, message_frame] (2 frames total)")
     self.logger.error(f"Actual frame count: {len(frames)}")
-    
+
     for i, frame in enumerate(frames):
         frame_str = str(frame)
         if len(frame_str) > 200:
@@ -560,15 +560,15 @@ def _log_frame_error(self, frames: List[bytes], client_identity: str) -> None:
 def _log_json_parse_error(self, msg_bytes: bytes, error: Exception, client_identity: str) -> None:
     """Log detailed information about JSON parsing errors."""
     self.logger.error(f"JSON parsing error from client {client_identity}: {error}")
-    
+
     try:
         msg_str = msg_bytes.decode("utf-8", errors="replace")
     except Exception:
         msg_str = str(msg_bytes)
-    
+
     if len(msg_str) > 300:
         msg_str = msg_str[:300] + "... (truncated)"
-    
+
     self.logger.error(f"Actual message bytes: {msg_str}")
     self.logger.error(f"Message length: {len(msg_bytes)} bytes")
 ```
@@ -651,7 +651,7 @@ client = MQClient(
 # Server setup
 server = MQClient(
     router_address="tcp://localhost:5556",
-    client_type="HydraServer", 
+    client_type="HydraServer",
     heartbeat_interval=5.0,
     client_id="my-server-001"
 )
@@ -690,7 +690,7 @@ server = MQClient(
 *For any* valid ZMQMessage, converting to RouterConstants format and back should preserve all essential message content including type, data, timestamps, and identifiers
 **Validates: Requirements 3.1, 3.2, 3.3, 3.5**
 
-### Property 2: RouterConstants Format Compliance  
+### Property 2: RouterConstants Format Compliance
 *For any* message sent by MQClient to the router, the message should have the required RouterConstants format with `sender`, `elem`, `data`, `client_id`, and `timestamp` fields
 **Validates: Requirements 1.1, 1.2, 2.1, 2.2**
 
@@ -761,17 +761,17 @@ Using Hypothesis framework with the following configuration:
 def test_message_format_round_trip_conversion(message, client_type):
     """
     Property 1: Message Format Round-Trip Conversion
-    For any valid ZMQMessage, converting to RouterConstants format and back 
+    For any valid ZMQMessage, converting to RouterConstants format and back
     should preserve all essential message content.
     """
     client = MQClient(client_type=client_type)
-    
+
     # Convert to router format
     router_message = client._convert_to_router_format(message)
-    
+
     # Convert back to ZMQ format
     converted_back = client._convert_from_router_format(router_message)
-    
+
     # Verify essential content is preserved
     assert converted_back.message_type == message.message_type
     assert converted_back.data == message.data
@@ -788,7 +788,7 @@ def valid_zmq_messages(draw):
     timestamp = draw(st.floats(min_value=0, max_value=2**31))
     client_id = draw(st.text(min_size=1, max_size=50, alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd'))))
     data = draw(st.dictionaries(st.text(), st.one_of(st.text(), st.integers(), st.floats())))
-    
+
     return ZMQMessage(
         message_type=message_type,
         timestamp=timestamp,
@@ -804,7 +804,7 @@ def router_constants_messages(draw):
     data = draw(st.dictionaries(st.text(), st.one_of(st.text(), st.integers())))
     client_id = draw(st.text(min_size=1, max_size=50))
     timestamp = draw(st.floats(min_value=0, max_value=2**31))
-    
+
     return {
         RouterConstants.SENDER: sender,
         RouterConstants.ELEM: elem,
@@ -868,7 +868,7 @@ The MQClient is designed to support any client type:
 ```python
 # Example custom client types
 monitoring_client = MQClient(client_type="MonitoringAgent")
-analytics_client = MQClient(client_type="AnalyticsEngine") 
+analytics_client = MQClient(client_type="AnalyticsEngine")
 backup_client = MQClient(client_type="BackupService")
 ```
 
@@ -920,7 +920,7 @@ The hydra-router is a standalone PyPI package:
 hydra_router/
 ├── __init__.py
 ├── router.py              # HydraRouter implementation
-├── mq_client.py           # MQClient implementation  
+├── mq_client.py           # MQClient implementation
 ├── router_constants.py    # RouterConstants definitions
 ├── simple_client.py       # SimpleClient implementation
 ├── simple_server.py       # SimpleServer implementation

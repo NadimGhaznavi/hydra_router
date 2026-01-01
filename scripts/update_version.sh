@@ -83,7 +83,7 @@ update_file_version() {
     local pattern=$2
     local replacement=$3
     local description=$4
-    
+
     if [ -f "$file" ]; then
         print_status "Updating $description: $file"
         if sed -i.bak "$pattern" "$file"; then
@@ -102,21 +102,21 @@ update_file_version() {
 update_changelog() {
     local version=$1
     local changelog_file="CHANGELOG.md"
-    
+
     if [ ! -f "$changelog_file" ]; then
         print_warning "CHANGELOG.md not found (skipping changelog update)"
         return 0
     fi
-    
+
     print_status "Updating CHANGELOG.md with release $version"
-    
+
     # Get current date and time in the desired format
     local release_date=$(date '+%Y-%m-%d %H:%M')
     local release_heading="## [Release $version] - $release_date"
-    
+
     # Create a temporary file for the updated changelog
     local temp_file=$(mktemp)
-    
+
     # Process the changelog: add new release heading after [Unreleased]
     awk -v release_heading="$release_heading" '
     /^## \[Unreleased\]/ {
@@ -128,7 +128,7 @@ update_changelog() {
     }
     { print }
     ' "$changelog_file" > "$temp_file"
-    
+
     # Replace the original file
     if mv "$temp_file" "$changelog_file"; then
         print_success "✓ Updated CHANGELOG.md with release $version"

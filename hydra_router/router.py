@@ -5,12 +5,13 @@ This module will be implemented in Task 4.1.
 """
 
 
-# Placeholder - will be implemented in Task 4.1
 class HydraRouter:
+    """Placeholder - will be implemented in Task 4.1."""
+
     pass
 
 
-def main():
+def main() -> None:
     """Main entry point for the hydra-router command."""
     print("Hydra Router - Implementation coming in Task 4.1")
 

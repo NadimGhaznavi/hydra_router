@@ -28,13 +28,13 @@ requires-python = ">=3.11,<3.15"
 dependencies = [
     # ZeroMQ for headless server communication
     "pyzmq>=25.0.0",
-    
+
     # System monitoring and utilities
     "psutil>=5.9.0",
-    
+
     # Data handling and serialization
     "pyyaml>=6.0",
-    
+
     # Testing framework (needed for runtime property-based testing)
     "pytest>=7.0.0",
     "hypothesis>=6.0.0",
@@ -101,7 +101,7 @@ addopts = [
 ]
 markers = [
     "unit: Unit tests",
-    "property: Property-based tests", 
+    "property: Property-based tests",
     "integration: Integration tests",
     "performance: Performance tests",
     "slow: Slow tests (skip in CI)",

@@ -5,6 +5,7 @@ This module will be implemented in Task 3.1.
 """
 
 
-# Placeholder - will be implemented in Task 3.1
 class MQClient:
+    """Placeholder - will be implemented in Task 3.1."""
+
     pass

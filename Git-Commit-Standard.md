@@ -68,7 +68,7 @@ fix: race condition on startup (#42)
 
 ---
 
-# Links 
+# Links
 
 * [Conventional Commits](https://www.conventionalcommits.org/)
 * [Semantic Versioning](https://semver.org/)

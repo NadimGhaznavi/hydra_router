@@ -1,10 +1,9 @@
-"""
-Pytest configuration and shared fixtures for hydra-router tests.
-"""
+"""Pytest configuration and shared fixtures for hydra-router tests."""
 
-import pytest
 import asyncio
 from typing import Generator
+
+import pytest
 
 
 @pytest.fixture(scope="session")
@@ -17,11 +16,11 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 
 @pytest.fixture
 def router_address() -> str:
-    """Default router address for testing."""
+    """Provide default router address for testing."""
     return "tcp://localhost:5556"
 
 
 @pytest.fixture
 def test_client_id() -> str:
-    """Default client ID for testing."""
+    """Provide default client ID for testing."""
     return "test-client-001"

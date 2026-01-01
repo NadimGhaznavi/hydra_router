@@ -5,6 +5,7 @@ This module will be implemented in Task 2.1.
 """
 
 
-# Placeholder - will be implemented in Task 2.1
 class RouterConstants:
+    """Placeholder - will be implemented in Task 2.1."""
+
     pass

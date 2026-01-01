@@ -1,1 +1,1 @@
-# Examples for hydra-router usage
+"""Examples package for hydra-router demonstrations."""

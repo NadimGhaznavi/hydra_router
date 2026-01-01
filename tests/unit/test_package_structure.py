@@ -1,32 +1,29 @@
-"""
-Test basic package structure and imports.
-"""
+"""Test basic package structure and imports."""
 
-import pytest
 import hydra_router
 
 
 class TestPackageStructure:
     """Test that the package structure is correct."""
 
-    def test_package_version(self):
+    def test_package_version(self) -> None:
         """Test that package has correct version."""
         assert hydra_router.__version__ == "0.1.0"
 
-    def test_package_author(self):
+    def test_package_author(self) -> None:
         """Test that package has correct author."""
         assert hydra_router.__author__ == "Nadim-Daniel Ghaznavi"
 
-    def test_main_components_importable(self):
+    def test_main_components_importable(self) -> None:
         """Test that main components can be imported."""
-        from hydra_router import RouterConstants, MQClient, HydraRouter
+        from hydra_router import HydraRouter, MQClient, RouterConstants
 
         # These are placeholder classes for now
         assert RouterConstants is not None
         assert MQClient is not None
         assert HydraRouter is not None
 
-    def test_entry_point_modules_exist(self):
+    def test_entry_point_modules_exist(self) -> None:
         """Test that entry point modules exist."""
         import hydra_router.router
         import hydra_router.simple_client

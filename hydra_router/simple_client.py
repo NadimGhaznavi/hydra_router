@@ -5,7 +5,7 @@ This module will be implemented in Task 6.4.
 """
 
 
-def main():
+def main() -> None:
     """Main entry point for the hydra-client_simple command."""
     print("Simple Client - Implementation coming in Task 6.4")
 
