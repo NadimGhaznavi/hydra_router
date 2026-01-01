@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Logging**: Added type safety checks for handler list operations to prevent AttributeError exceptions
+
 ## [Release 0.2.2] - 2026-01-01 17:45
 
 
