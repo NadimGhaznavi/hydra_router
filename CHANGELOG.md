@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **CI**: Updated GitHub Actions upload-artifact action from v3 to v4 for improved compatibility
+
 ### Fixed
 - **Logging**: Added type safety checks for handler list operations to prevent AttributeError exceptions
 
