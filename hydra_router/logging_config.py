@@ -8,7 +8,7 @@ of the Hydra Router system.
 import logging
 import logging.config
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 
 def get_logging_config(
@@ -94,18 +94,30 @@ def get_logging_config(
 
     # Add console handler if enabled
     if enable_console:
-        config["handlers"]["console"] = {
+        console_handler = {
             "class": "logging.StreamHandler",
             "level": log_level,
             "formatter": "simple",
             "stream": "ext://sys.stdout",
         }
-        config["loggers"]["hydra_router"]["handlers"].append("console")  # type: ignore
-        config["root"]["handlers"].append("console")  # type: ignore
+        config["handlers"]["console"] = console_handler  # type: ignore[index]
+
+        # Add console handler to loggers
+        loggers_dict = cast(Dict[str, Any], config["loggers"])
+        hydra_logger = cast(Dict[str, Any], loggers_dict["hydra_router"])
+        root_logger = cast(Dict[str, Any], config["root"])
+        if isinstance(hydra_logger, dict) and "handlers" in hydra_logger:
+            handlers_list = hydra_logger.get("handlers", [])
+            if isinstance(handlers_list, list):
+                handlers_list.append("console")
+        if isinstance(root_logger, dict) and "handlers" in root_logger:
+            handlers_list = root_logger.get("handlers", [])
+            if isinstance(handlers_list, list):
+                handlers_list.append("console")
 
     # Add file handler if enabled
     if enable_file:
-        config["handlers"]["file"] = {
+        file_handler = {
             "class": "logging.handlers.RotatingFileHandler",
             "level": log_level,
             "formatter": "detailed",
@@ -114,8 +126,20 @@ def get_logging_config(
             "backupCount": 5,
             "encoding": "utf8",
         }
-        config["loggers"]["hydra_router"]["handlers"].append("file")  # type: ignore
-        config["root"]["handlers"].append("file")  # type: ignore
+        config["handlers"]["file"] = file_handler  # type: ignore[index]
+
+        # Add file handler to loggers
+        loggers_dict = cast(Dict[str, Any], config["loggers"])
+        hydra_logger = cast(Dict[str, Any], loggers_dict["hydra_router"])
+        root_logger = cast(Dict[str, Any], config["root"])
+        if isinstance(hydra_logger, dict) and "handlers" in hydra_logger:
+            handlers_list = hydra_logger.get("handlers", [])
+            if isinstance(handlers_list, list):
+                handlers_list.append("file")
+        if isinstance(root_logger, dict) and "handlers" in root_logger:
+            handlers_list = root_logger.get("handlers", [])
+            if isinstance(handlers_list, list):
+                handlers_list.append("file")
 
     return config
 

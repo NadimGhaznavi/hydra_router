@@ -1,6 +1,6 @@
 [project]
 name = "hydra-router"
-version = "0.2.1"
+version = "0.2.2"
 description = "A ZeroMQ messaging router and client"
 authors = [{ name = "Nadim-Daniel Ghaznavi", email = "nghaznavi@gmail.com" }]
 license = { text = "GPL-3.0" }
@@ -94,10 +94,6 @@ addopts = [
     "-v",
     "--strict-markers",
     "--strict-config",
-    "--cov=hydra_router",
-    "--cov-report=html",
-    "--cov-report=term-missing",
-    "--timeout=600",  # 10 minute global timeout
 ]
 markers = [
     "unit: Unit tests",
