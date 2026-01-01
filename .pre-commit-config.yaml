@@ -64,9 +64,8 @@ repos:
     rev: 1.7.5
     hooks:
       - id: bandit
-        args: [-r, hydra_router/, -f, json]
+        args: [-r, hydra_router/]
         exclude: tests/
-        additional_dependencies: [pbr]
 
 # Configuration for pre-commit.ci (if using)
 ci:
