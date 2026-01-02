@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **HydraRouter Core**: Complete Phase 4 implementation of central message routing system
+  - Implemented ClientRegistry for thread-safe client tracking with heartbeat monitoring
+  - Created MessageRouter with intelligent routing logic for client/server communication
+  - Built comprehensive HydraRouter class with ZeroMQ ROUTER socket management
+  - Added background tasks for request handling and client pruning
+  - Implemented CLI interface with signal handling for graceful shutdown
+  - Includes comprehensive error handling and logging throughout
+  - Supports client registry queries, heartbeat management, and message validation
+  - Handles server availability detection and no-server error responses
+
 ### Changed
 - **Hooks**: Integrated CHANGELOG updater functionality into auto-git-commit hook
   - Removed redundant changelog-updater hook to eliminate conflicts
