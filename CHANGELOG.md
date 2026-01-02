@@ -11,8 +11,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Router Constants**: Comprehensive RouterConstants module with message format definitions, client/server types, and validation helpers
+  - Complete client/server type definitions (HydraClient, HydraServer, SimpleClient, SimpleServer)
+  - Message structure field names and validation constants
+  - System, simulation, and error message type definitions
+  - Configuration constants for timeouts, ports, and message size limits
+  - Utility methods for client type validation and message categorization
+  - Support for simple client/server square calculation workflow
+  - Client registry query message types
 - **Message Validation**: Complete message validation framework with detailed error reporting and type checking
+  - MessageValidator class with comprehensive RouterConstants format validation
+  - Field type validation with specific error messages
+  - Message size constraint validation
+  - Detailed debugging information for troubleshooting format issues
+  - Convenience functions for common validation tasks
+  - Message template creation for valid RouterConstants format
 - **Exception Handling**: Comprehensive exception hierarchy for router-specific errors with context information
+  - HydraRouterError base class with context support
+  - MessageValidationError for format validation failures
+  - ConnectionError for network communication issues
+  - ClientRegistrationError for client management problems
+  - MessageRoutingError for routing failures
+  - TimeoutError for operation timeout scenarios
+  - ConfigurationError for config-related issues
+  - MessageFormatError for format conversion problems
+  - ServerNotAvailableError for missing server scenarios
+  - Convenience functions for common exception creation
 
 ## [Release 0.2.3] - 2026-01-01 17:57
 
