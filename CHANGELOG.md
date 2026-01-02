@@ -12,10 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Constants**: Add constants package __init__.py with proper exports for clean package imports
 - **Integration Tests**: Add comprehensive real communication tests with end-to-end ZeroMQ testing
-- **Debug Tools**: Add client-server communication debug script for testing real communication patterns
+- **Migration Tests**: Add validation tests to catch incomplete migrations and ensure code consistency
+- **Example Tests**: Add integration tests that validate all example files work correctly
 
 ### Fixed
+- **Communication**: Fix MQClient heartbeat timing issue by sending immediate heartbeat in background loop
+- **Router**: Fix server recognition to include both HYDRA_SERVER and SIMPLE_SERVER types
 - **Tests**: Resolve type annotations and improve test reliability in integration tests
+- **Naming**: Rename test_router_constants.py to test_drouter.py for consistency
 
 ### Changed
 - **Examples**: Migrate RouterConstants to DRouter across all example files for consistency
