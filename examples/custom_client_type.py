@@ -17,11 +17,12 @@ from enum import Enum
 from typing import Any, Dict, Optional
 
 from hydra_router.constants.DHydraLog import DHydraLog
-from hydra_router.mq_client import MessageType, MQClient, ZMQMessage
+from hydra_router.constants.DMsgType import MsgType
+from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.util.HydraLog import HydraLog
 
 
-class CustomMessageType(Enum):
+class CustomMsgType(Enum):
     """Custom message types for specialized client."""
 
     MATH_OPERATION = "MATH_OPERATION"
@@ -81,7 +82,7 @@ class CustomMathClient:
 
             # Register custom message handlers
             self.client.register_message_handler(
-                MessageType.SQUARE_RESPONSE, self._handle_math_result
+                MsgType.SQUARE_RESPONSE, self._handle_math_result
             )
 
         except Exception as e:
@@ -130,7 +131,7 @@ class CustomMathClient:
         try:
             # For demonstration, we'll use SQUARE_REQUEST but with custom data
             message = ZMQMessage(
-                message_type=MessageType.SQUARE_REQUEST,
+                message_type=MsgType.SQUARE_REQUEST,
                 timestamp=time.time(),
                 client_id=self.client_id,
                 request_id=request_id,
@@ -198,7 +199,7 @@ class CustomMathClient:
         try:
             # Send a heartbeat with custom status information
             status_message = ZMQMessage(
-                message_type=MessageType.HEARTBEAT,
+                message_type=MsgType.HEARTBEAT,
                 timestamp=time.time(),
                 client_id=self.client_id,
                 data={
@@ -266,7 +267,7 @@ class CustomMathServer:
 
             # Register message handlers
             self.client.register_message_handler(
-                MessageType.SQUARE_REQUEST, self._handle_math_operation
+                MsgType.SQUARE_REQUEST, self._handle_math_operation
             )
 
         except Exception as e:
@@ -341,7 +342,7 @@ class CustomMathServer:
 
             # Send response
             response = ZMQMessage(
-                message_type=MessageType.SQUARE_RESPONSE,
+                message_type=MsgType.SQUARE_RESPONSE,
                 timestamp=time.time(),
                 client_id=self.server_id,
                 request_id=request_id,
@@ -381,7 +382,7 @@ class CustomMathServer:
 
         # Send response
         response = ZMQMessage(
-            message_type=MessageType.SQUARE_RESPONSE,
+            message_type=MsgType.SQUARE_RESPONSE,
             timestamp=time.time(),
             client_id=self.server_id,
             request_id=request_id,

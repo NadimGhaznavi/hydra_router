@@ -10,13 +10,13 @@ import asyncio
 import time
 import uuid
 from dataclasses import dataclass
-from enum import Enum
 from typing import Any, Callable, Dict, Optional
 
 import zmq
 import zmq.asyncio
 
 from .constants.DHydraLog import DHydraLog
+from .constants.DMsgType import MsgType
 from .constants.DRouter import DRouter
 from .exceptions import (
     ConnectionError,
@@ -29,29 +29,6 @@ from .util.HydraLog import HydraLog
 from .validation import MessageValidator
 
 
-class MessageType(Enum):
-    """Enumeration of message types for internal application use."""
-
-    HEARTBEAT = "heartbeat"
-    SQUARE_REQUEST = "square_request"
-    SQUARE_RESPONSE = "square_response"
-    ERROR = "error"
-    CLIENT_REGISTRY_REQUEST = "client_registry_request"
-    CLIENT_REGISTRY_RESPONSE = "client_registry_response"
-    START_SIMULATION = "start_simulation"
-    STOP_SIMULATION = "stop_simulation"
-    PAUSE_SIMULATION = "pause_simulation"
-    RESUME_SIMULATION = "resume_simulation"
-    RESET_SIMULATION = "reset_simulation"
-    GET_SIMULATION_STATUS = "get_simulation_status"
-    STATUS_UPDATE = "status_update"
-    SIMULATION_STARTED = "simulation_started"
-    SIMULATION_STOPPED = "simulation_stopped"
-    SIMULATION_PAUSED = "simulation_paused"
-    SIMULATION_RESUMED = "simulation_resumed"
-    SIMULATION_RESET = "simulation_reset"
-
-
 @dataclass
 class ZMQMessage:
     """
@@ -61,7 +38,7 @@ class ZMQMessage:
     converted to/from DRouter format by the MQClient.
     """
 
-    message_type: MessageType
+    message_type: MsgType
     timestamp: Optional[float] = None
     client_id: Optional[str] = None
     request_id: Optional[str] = None
@@ -131,7 +108,7 @@ class MQClient:
 
         # Message handling
         self.pending_requests: Dict[str, asyncio.Future] = {}
-        self.message_handlers: Dict[MessageType, Callable] = {}
+        self.message_handlers: Dict[MsgType, Callable] = {}
 
         # Logging
         self.logger = HydraLog(f"mq_client_{self.client_id}", to_console=True)
@@ -141,26 +118,26 @@ class MQClient:
         self.message_type_mapping = self._create_message_type_mapping()
 
     def _create_message_type_mapping(self) -> Dict[str, str]:
-        """Create mapping between MessageType enum and DRouter."""
+        """Create mapping between MsgType enum and DRouter."""
         return {
-            MessageType.HEARTBEAT.value: DRouter.HEARTBEAT,
-            MessageType.SQUARE_REQUEST.value: DRouter.SQUARE_REQUEST,
-            MessageType.SQUARE_RESPONSE.value: DRouter.SQUARE_RESPONSE,
-            MessageType.CLIENT_REGISTRY_REQUEST.value: DRouter.CLIENT_REGISTRY_REQUEST,
-            MessageType.CLIENT_REGISTRY_RESPONSE.value: DRouter.CLIENT_REGISTRY_RESPONSE,
-            MessageType.START_SIMULATION.value: DRouter.START_SIMULATION,
-            MessageType.STOP_SIMULATION.value: DRouter.STOP_SIMULATION,
-            MessageType.PAUSE_SIMULATION.value: DRouter.PAUSE_SIMULATION,
-            MessageType.RESUME_SIMULATION.value: DRouter.RESUME_SIMULATION,
-            MessageType.RESET_SIMULATION.value: DRouter.RESET_SIMULATION,
-            MessageType.GET_SIMULATION_STATUS.value: DRouter.GET_SIMULATION_STATUS,
-            MessageType.STATUS_UPDATE.value: DRouter.STATUS_UPDATE,
-            MessageType.SIMULATION_STARTED.value: DRouter.SIMULATION_STARTED,
-            MessageType.SIMULATION_STOPPED.value: DRouter.SIMULATION_STOPPED,
-            MessageType.SIMULATION_PAUSED.value: DRouter.SIMULATION_PAUSED,
-            MessageType.SIMULATION_RESUMED.value: DRouter.SIMULATION_RESUMED,
-            MessageType.SIMULATION_RESET.value: DRouter.SIMULATION_RESET,
-            MessageType.ERROR.value: DRouter.ERROR,
+            MsgType.HEARTBEAT.value: DRouter.HEARTBEAT,
+            MsgType.SQUARE_REQUEST.value: DRouter.SQUARE_REQUEST,
+            MsgType.SQUARE_RESPONSE.value: DRouter.SQUARE_RESPONSE,
+            MsgType.CLIENT_REGISTRY_REQUEST.value: DRouter.CLIENT_REGISTRY_REQUEST,
+            MsgType.CLIENT_REGISTRY_RESPONSE.value: DRouter.CLIENT_REGISTRY_RESPONSE,
+            MsgType.START_SIMULATION.value: DRouter.START_SIMULATION,
+            MsgType.STOP_SIMULATION.value: DRouter.STOP_SIMULATION,
+            MsgType.PAUSE_SIMULATION.value: DRouter.PAUSE_SIMULATION,
+            MsgType.RESUME_SIMULATION.value: DRouter.RESUME_SIMULATION,
+            MsgType.RESET_SIMULATION.value: DRouter.RESET_SIMULATION,
+            MsgType.GET_SIMULATION_STATUS.value: DRouter.GET_SIMULATION_STATUS,
+            MsgType.STATUS_UPDATE.value: DRouter.STATUS_UPDATE,
+            MsgType.SIMULATION_STARTED.value: DRouter.SIMULATION_STARTED,
+            MsgType.SIMULATION_STOPPED.value: DRouter.SIMULATION_STOPPED,
+            MsgType.SIMULATION_PAUSED.value: DRouter.SIMULATION_PAUSED,
+            MsgType.SIMULATION_RESUMED.value: DRouter.SIMULATION_RESUMED,
+            MsgType.SIMULATION_RESET.value: DRouter.SIMULATION_RESET,
+            MsgType.ERROR.value: DRouter.ERROR,
         }
 
     async def connect(self) -> bool:
@@ -307,7 +284,7 @@ class MQClient:
 
     async def send_command(
         self,
-        message_type: MessageType,
+        message_type: MsgType,
         data: Dict[str, Any],
         timeout: Optional[float] = None,
     ) -> Optional[Dict[str, Any]]:
@@ -376,7 +353,7 @@ class MQClient:
         """
         try:
             response = await self.send_command(
-                MessageType.CLIENT_REGISTRY_REQUEST, {}, timeout=timeout
+                MsgType.CLIENT_REGISTRY_REQUEST, {}, timeout=timeout
             )
 
             if response and response.get("elem") == DRouter.CLIENT_REGISTRY_RESPONSE:
@@ -468,26 +445,26 @@ class MQClient:
             )
 
     def _map_message_type_to_elem(self, message_type: str) -> str:
-        """Map MessageType to DRouter elem."""
+        """Map MsgType to DRouter elem."""
         return self.message_type_mapping.get(message_type, message_type)
 
-    def _map_elem_to_message_type(self, elem: str) -> MessageType:
-        """Map DRouter elem to MessageType."""
+    def _map_elem_to_message_type(self, elem: str) -> MsgType:
+        """Map DRouter elem to MsgType."""
         # Reverse lookup in mapping
         for msg_type, router_elem in self.message_type_mapping.items():
             if router_elem == elem:
                 try:
-                    return MessageType(msg_type)
+                    return MsgType(msg_type)
                 except ValueError:
                     pass
 
-        # If not found, try to create MessageType directly
+        # If not found, try to create MsgType directly
         try:
-            return MessageType(elem)
+            return MsgType(elem)
         except ValueError:
             # For completely unknown message types, raise an exception
             raise MessageFormatError(
-                f"Unknown message type '{elem}' cannot be converted to MessageType",
+                f"Unknown message type '{elem}' cannot be converted to MsgType",
                 source_format="DRouter",
                 target_format="ZMQMessage",
                 conversion_step="elem_to_message_type_mapping",
@@ -504,7 +481,7 @@ class MQClient:
         """Send a heartbeat message to the router."""
         try:
             heartbeat_message = ZMQMessage(
-                message_type=MessageType.HEARTBEAT,
+                message_type=MsgType.HEARTBEAT,
                 timestamp=time.time(),
                 client_id=self.client_id,
                 data={"status": "alive"},
@@ -573,7 +550,7 @@ class MQClient:
             self.logger.error(f"Failed to process received message: {e}")
 
     def register_message_handler(
-        self, message_type: MessageType, handler: Callable
+        self, message_type: MsgType, handler: Callable
     ) -> None:
         """
         Register a handler for a specific message type.
@@ -585,7 +562,7 @@ class MQClient:
         self.message_handlers[message_type] = handler
         self.logger.debug(f"Registered handler for {message_type}")
 
-    def unregister_message_handler(self, message_type: MessageType) -> None:
+    def unregister_message_handler(self, message_type: MsgType) -> None:
         """
         Unregister a message handler.
 
@@ -635,4 +612,4 @@ class MQClient:
 
     def _create_heartbeat_message(self) -> ZMQMessage:
         """Create a heartbeat message."""
-        return ZMQMessage(message_type=MessageType.HEARTBEAT, client_id=self.client_id)
+        return ZMQMessage(message_type=MsgType.HEARTBEAT, client_id=self.client_id)

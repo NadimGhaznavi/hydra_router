@@ -14,7 +14,8 @@ Usage:
 import asyncio
 import time
 
-from hydra_router.mq_client import MessageType, MQClient, ZMQMessage
+from hydra_router.constants.DMsgType import MsgType
+from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.router_constants import RouterConstants
 
 
@@ -55,7 +56,7 @@ async def test_invalid_messages():
         # Test 1: Message with missing data
         print("📤 Sending message with missing data...")
         message = ZMQMessage(
-            message_type=MessageType.SQUARE_REQUEST,
+            message_type=MsgType.SQUARE_REQUEST,
             timestamp=time.time(),
             client_id="invalid-msg-client",
             request_id="invalid-1",
@@ -68,7 +69,7 @@ async def test_invalid_messages():
         # Test 2: Message with invalid data type
         print("📤 Sending message with invalid data...")
         message = ZMQMessage(
-            message_type=MessageType.SQUARE_REQUEST,
+            message_type=MsgType.SQUARE_REQUEST,
             timestamp=time.time(),
             client_id="invalid-msg-client",
             request_id="invalid-2",
@@ -104,7 +105,7 @@ async def test_client_reconnection():
 
         # Send a message
         message = ZMQMessage(
-            message_type=MessageType.HEARTBEAT,
+            message_type=MsgType.HEARTBEAT,
             timestamp=time.time(),
             client_id="reconnect-client",
         )
@@ -126,7 +127,7 @@ async def test_client_reconnection():
 
         # Send another message
         message = ZMQMessage(
-            message_type=MessageType.HEARTBEAT,
+            message_type=MsgType.HEARTBEAT,
             timestamp=time.time(),
             client_id="reconnect-client",
         )
@@ -181,7 +182,7 @@ async def test_server_error_handling():
 
             # Send response
             response = ZMQMessage(
-                message_type=MessageType.SQUARE_RESPONSE,
+                message_type=MsgType.SQUARE_RESPONSE,
                 timestamp=time.time(),
                 client_id="error-handling-server",
                 request_id=message.request_id,
@@ -196,7 +197,7 @@ async def test_server_error_handling():
     try:
         await server.connect()
         server.register_message_handler(
-            MessageType.SQUARE_REQUEST, handle_request_with_errors
+            MsgType.SQUARE_REQUEST, handle_request_with_errors
         )
         print("🔢 Error-handling server started")
 
@@ -222,7 +223,7 @@ async def test_server_error_handling():
             print(f"📤 Client: Sending test case {i+1}: {test_data}")
 
             message = ZMQMessage(
-                message_type=MessageType.SQUARE_REQUEST,
+                message_type=MsgType.SQUARE_REQUEST,
                 timestamp=time.time(),
                 client_id="error-test-client",
                 request_id=f"error-test-{i+1}",
@@ -261,7 +262,7 @@ async def test_timeout_scenarios():
         print("📤 Sending request with response timeout simulation...")
 
         message = ZMQMessage(
-            message_type=MessageType.SQUARE_REQUEST,
+            message_type=MsgType.SQUARE_REQUEST,
             timestamp=time.time(),
             client_id="timeout-client",
             request_id="timeout-test",

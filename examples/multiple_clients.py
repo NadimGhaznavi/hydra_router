@@ -15,7 +15,8 @@ import asyncio
 import random
 import time
 
-from hydra_router.mq_client import MessageType, MQClient, ZMQMessage
+from hydra_router.constants.DMsgType import MsgType
+from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.router_constants import RouterConstants
 
 
@@ -35,7 +36,7 @@ class MultiClientServer:
         """Start the server."""
         await self.client.connect()
         self.client.register_message_handler(
-            MessageType.SQUARE_REQUEST, self._handle_request
+            MsgType.SQUARE_REQUEST, self._handle_request
         )
         print("🔢 Multi-Client Server started")
 
@@ -58,7 +59,7 @@ class MultiClientServer:
 
         # Send response
         response = ZMQMessage(
-            message_type=MessageType.SQUARE_RESPONSE,
+            message_type=MsgType.SQUARE_RESPONSE,
             timestamp=time.time(),
             client_id="multi-server",
             request_id=message.request_id,
@@ -91,7 +92,7 @@ class TestClient:
         """Start the client."""
         await self.client.connect()
         self.client.register_message_handler(
-            MessageType.SQUARE_RESPONSE, self._handle_response
+            MsgType.SQUARE_RESPONSE, self._handle_response
         )
         print(f"📱 Client {self.client_id} connected")
 
@@ -119,7 +120,7 @@ class TestClient:
             number = random.randint(1, 20)
 
             message = ZMQMessage(
-                message_type=MessageType.SQUARE_REQUEST,
+                message_type=MsgType.SQUARE_REQUEST,
                 timestamp=time.time(),
                 client_id=self.client_id,
                 request_id=f"{self.client_id}-req-{i+1}",
