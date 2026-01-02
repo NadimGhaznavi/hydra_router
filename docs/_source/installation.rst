@@ -194,7 +194,7 @@ Windows
 
 3. **Install HydraRouter**:
 
-   .. code-block:: bash
+   .. code-block:: shell
 
       pip install hydra-router
 
@@ -221,7 +221,7 @@ Common Issues
 **"Microsoft Visual C++ 14.0 is required" (Windows)**
    Install Visual Studio Build Tools:
 
-   .. code-block:: cmd
+   .. code-block:: shell
 
       # Download and install from:
       # https://visualstudio.microsoft.com/visual-cpp-build-tools/
