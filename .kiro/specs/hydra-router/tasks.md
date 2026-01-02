@@ -229,15 +229,16 @@ class MessageFormatAdapter:
 **Priority**: High
 **Estimated Time**: 2 hours
 **Assignee**: Developer
+**Status**: ✅ COMPLETED
 
 **Description**: Implement robust heartbeat mechanism for client health monitoring.
 
 **Acceptance Criteria**:
-- [ ] Create `HeartbeatManager` class
-- [ ] Implement periodic heartbeat sending
-- [ ] Add configurable heartbeat intervals
-- [ ] Handle heartbeat failures gracefully
-- [ ] Provide heartbeat status monitoring
+- [x] Create `HeartbeatManager` class
+- [x] Implement periodic heartbeat sending
+- [x] Add configurable heartbeat intervals
+- [x] Handle heartbeat failures gracefully
+- [x] Provide heartbeat status monitoring
 
 **Key Features**:
 - Automatic heartbeat scheduling
@@ -249,15 +250,16 @@ class MessageFormatAdapter:
 **Priority**: Medium
 **Estimated Time**: 3 hours
 **Assignee**: Developer
+**Status**: ✅ COMPLETED
 
 **Description**: Implement comprehensive asynchronous communication patterns for the MQClient.
 
 **Acceptance Criteria**:
-- [ ] Implement async message sending with error handling
-- [ ] Add non-blocking message receiving
-- [ ] Implement command/response patterns with timeouts
-- [ ] Add message correlation for request/response matching
-- [ ] Handle concurrent operations safely
+- [x] Implement async message sending with error handling
+- [x] Add non-blocking message receiving
+- [x] Implement command/response patterns with timeouts
+- [x] Add message correlation for request/response matching
+- [x] Handle concurrent operations safely
 
 **Key Methods**:
 ```python
