@@ -166,6 +166,9 @@ class MQClient:
             # Connect to router
             self.socket.connect(self.router_address)
 
+            # Give ZeroMQ time to establish connection
+            await asyncio.sleep(0.1)
+
             # Send initial heartbeat to establish connection
             await self._send_heartbeat()
 
@@ -490,8 +493,8 @@ class MQClient:
             await self.send_message(heartbeat_message)
             self.logger.debug("Sent heartbeat")
 
-        except Exception:
-            self.logger.error("Failed to send heartbeat")
+        except Exception as e:
+            self.logger.error(f"Failed to send heartbeat: {e}")
 
     async def _heartbeat_loop(self) -> None:
         """Background task for sending periodic heartbeats."""

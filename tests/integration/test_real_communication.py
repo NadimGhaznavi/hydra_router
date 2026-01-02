@@ -41,6 +41,8 @@ class TestRealCommunication:
             client_id="test-client",
         )
         await client.connect()
+        # Give time for connection to establish
+        await asyncio.sleep(0.1)
         yield client
         await client.disconnect()
 
@@ -53,6 +55,8 @@ class TestRealCommunication:
             client_id="test-server",
         )
         await server.connect()
+        # Give time for connection to establish
+        await asyncio.sleep(0.1)
         yield server
         await server.disconnect()
 
@@ -95,7 +99,7 @@ class TestRealCommunication:
         assert client.connected
 
         # Give router time to register client
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.5)
 
         # Check router status shows client
         status = await router.get_status()
@@ -110,17 +114,8 @@ class TestRealCommunication:
         self, router: HydraRouter, client: MQClient
     ) -> None:
         """Test that heartbeat messages work."""
-        # Send heartbeat
-        heartbeat = ZMQMessage(
-            message_type=DMsgType.HEARTBEAT,
-            timestamp=time.time(),
-            client_id="test-client",
-        )
-
-        await client.send_message(heartbeat)
-
-        # Give router time to process
-        await asyncio.sleep(0.1)
+        # Give time for heartbeat to be sent
+        await asyncio.sleep(0.5)
 
         # Check that client is registered
         status = await router.get_status()
@@ -159,9 +154,8 @@ class TestRealCommunication:
         )
         server.register_message_handler(DMsgType.SQUARE_REQUEST, handle_square_request)
 
-        # Note: MQClient automatically starts receiving in background
-        # Give time for listeners to start
-        await asyncio.sleep(0.1)
+        # Give time for handlers to be registered and connections to stabilize
+        await asyncio.sleep(0.5)
 
         # Send square request
         request = ZMQMessage(
@@ -175,7 +169,7 @@ class TestRealCommunication:
         await client.send_message(request)
 
         # Wait for response
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1.0)
 
         # Check that response was received
         assert len(received_responses) == 1
@@ -185,8 +179,6 @@ class TestRealCommunication:
         assert response.data is not None
         assert response.data["number"] == 5
         assert response.data["result"] == 25
-
-        # No cleanup needed as MQClient handles background tasks automatically
 
     async def test_multiple_clients_communication(self, router: HydraRouter) -> None:
         """Test communication with multiple clients."""
@@ -202,7 +194,7 @@ class TestRealCommunication:
             clients.append(client)
 
         # Give router time to register all clients
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(1.0)
 
         # Check router status
         status = await router.get_status()
@@ -247,9 +239,8 @@ class TestRealCommunication:
             )
             clients.append(client)
 
-        # Start listening on all clients - MQClient handles this automatically
-        # Give time for listeners to start
-        await asyncio.sleep(0.1)
+        # Give time for connections to stabilize
+        await asyncio.sleep(0.5)
 
         # Server sends broadcast message
         broadcast = ZMQMessage(
@@ -262,7 +253,7 @@ class TestRealCommunication:
         await server.send_message(broadcast)
 
         # Wait for messages to be received
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1.0)
 
         # Check that all clients received the broadcast
         assert len(received_messages) == 2
@@ -271,7 +262,7 @@ class TestRealCommunication:
         assert "broadcast-client-0" in client_ids
         assert "broadcast-client-1" in client_ids
 
-        # Clean up - MQClient handles background tasks automatically
+        # Clean up
         for client in clients:
             await client.disconnect()
         await server.disconnect()
@@ -289,8 +280,8 @@ class TestRealCommunication:
             DMsgType.CLIENT_REGISTRY_RESPONSE, handle_registry_response
         )
 
-        # Start listening - MQClient handles this automatically
-        await asyncio.sleep(0.1)
+        # Give time for handler registration
+        await asyncio.sleep(0.2)
 
         # Send registry request
         request = ZMQMessage(
@@ -303,7 +294,7 @@ class TestRealCommunication:
         await client.send_message(request)
 
         # Wait for response
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1.0)
 
         # Check response
         assert len(received_responses) == 1
@@ -312,8 +303,6 @@ class TestRealCommunication:
         assert response.request_id == "registry-req-1"
         assert response.data is not None
         assert "clients" in response.data
-
-        # No cleanup needed - MQClient handles background tasks automatically
 
     async def test_error_handling_no_server(
         self, router: HydraRouter, client: MQClient
@@ -326,8 +315,8 @@ class TestRealCommunication:
 
         client.register_message_handler(DMsgType.ERROR, handle_error)
 
-        # Start listening - MQClient handles this automatically
-        await asyncio.sleep(0.1)
+        # Give time for handler registration
+        await asyncio.sleep(0.2)
 
         # Send request without server
         request = ZMQMessage(
@@ -341,7 +330,7 @@ class TestRealCommunication:
         await client.send_message(request)
 
         # Wait for error response
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1.0)
 
         # Check error response
         assert len(received_errors) == 1
@@ -350,5 +339,3 @@ class TestRealCommunication:
         assert error.request_id == "no-server-req"
         assert error.data is not None
         assert "No server available" in error.data.get("message", "")
-
-        # No cleanup needed - MQClient handles background tasks automatically

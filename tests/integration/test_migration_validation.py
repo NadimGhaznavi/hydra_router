@@ -152,9 +152,16 @@ class TestMigrationValidation:
 
     def test_grep_search_for_old_references(self) -> None:
         """Use grep to search for any remaining old references."""
-        # Search for router_constants
+        # Search for router_constants, excluding this test file
         result = subprocess.run(
-            ["grep", "-r", "router_constants", ".", "--include=*.py"],
+            [
+                "grep",
+                "-r",
+                "router_constants",
+                ".",
+                "--include=*.py",
+                "--exclude=test_migration_validation.py",
+            ],
             capture_output=True,
             text=True,
         )

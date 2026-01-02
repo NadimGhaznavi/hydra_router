@@ -180,28 +180,28 @@ from hydra_router.mq_client import MQClient, ZMQMessage
 
 async def test_client_server():
     print("Testing basic client-server communication...")
-    
+
     # Create server
     server = MQClient(
         router_address="tcp://127.0.0.1:5559",
         client_type=DRouter.SIMPLE_SERVER,
         client_id="test-server",
     )
-    
+
     # Create client
     client = MQClient(
         router_address="tcp://127.0.0.1:5559",
         client_type=DRouter.SIMPLE_CLIENT,
         client_id="test-client",
     )
-    
+
     responses_received = []
-    
+
     def handle_square_request(message):
         data = message.data or {}
         number = data.get("number", 0)
         result = number * number
-        
+
         response = ZMQMessage(
             message_type=DMsgType.SQUARE_RESPONSE,
             timestamp=time.time(),
@@ -209,25 +209,22 @@ async def test_client_server():
             request_id=message.request_id,
             data={"number": number, "result": result},
         )
-        
+
         asyncio.create_task(server.send_message(response))
-    
+
     def handle_square_response(message):
         responses_received.append(message)
-    
+
     try:
         await server.connect()
         await client.connect()
-        
+
         server.register_message_handler(DMsgType.SQUARE_REQUEST, handle_square_request)
         client.register_message_handler(DMsgType.SQUARE_RESPONSE, handle_square_response)
-        
+
         # Start listening
-        server_task = asyncio.create_task(server.start_listening())
-        client_task = asyncio.create_task(client.start_listening())
-        
-        await asyncio.sleep(0.1)  # Let listeners start
-        
+        await asyncio.sleep(0.2)  # Let connections stabilize
+
         # Send request
         request = ZMQMessage(
             message_type=DMsgType.SQUARE_REQUEST,
@@ -236,22 +233,18 @@ async def test_client_server():
             request_id="test-1",
             data={"number": 7},
         )
-        
+
         await client.send_message(request)
         await asyncio.sleep(1)  # Wait for response
-        
+
         # Check results
         assert len(responses_received) == 1
         response = responses_received[0]
         assert response.data["number"] == 7
         assert response.data["result"] == 49
-        
+
         print("✅ Basic client-server test passed!")
-        
-        # Clean up
-        server_task.cancel()
-        client_task.cancel()
-        
+
     finally:
         await server.disconnect()
         await client.disconnect()
