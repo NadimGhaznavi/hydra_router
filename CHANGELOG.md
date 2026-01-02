@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Documentation**: Updated Sphinx source and build directory paths in Makefile to align with standard conventions
 - **Documentation**: Fixed RST heading underline length in architecture.rst for proper formatting
+- **Documentation**: Fixed RST heading underline lengths for proper formatting in deployment.rst
 
 ## [Release 0.3.2] - 2026-01-02 08:45
 
