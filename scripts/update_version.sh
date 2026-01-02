@@ -34,16 +34,19 @@ print_error() {
 }
 
 # Check if version argument is provided
-if [ $# -eq 0 ]; then
+if [ $# -lt 1 ]; then
     print_error "No version number provided"
-    echo "Usage: $0 <new_version>"
+    echo "Usage: $0 <new_version> [comment]"
     echo "Example: $0 0.2.0"
+    echo "Example: $0 0.3.7 \"Release v0.3.7 - Sun\""
     echo ""
     echo "The version should follow semantic versioning (MAJOR.MINOR.PATCH)"
+    echo "The comment is optional and will be used in git commit and tag messages"
     exit 1
 fi
 
 NEW_VERSION=$1
+COMMENT=${2:-"Bump version to v$NEW_VERSION"}
 
 # Validate version format (basic check for X.Y.Z)
 if ! [[ $NEW_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
