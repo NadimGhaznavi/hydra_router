@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Constants**: Add constants package __init__.py with proper exports for clean package imports
+
 ## [Release 0.3.10] - 2026-01-02 16:09
 
 
