@@ -10,6 +10,7 @@ hydra_router/utils/HydraLog.py.
 """
 
 import logging
+from typing import Any, Optional
 
 from hydra_router.constants.DHydraLog import LOG_LEVELS, DHydraLog
 
@@ -17,7 +18,9 @@ from hydra_router.constants.DHydraLog import LOG_LEVELS, DHydraLog
 class HydraLog:
     """Hydra Router logging utility class."""
 
-    def __init__(self, client_id: str, log_file=None, to_console=True):
+    def __init__(
+        self, client_id: str, log_file: Optional[str] = None, to_console: bool = True
+    ) -> None:
         """Initialize the HydraLog instance.
 
         Args:
@@ -51,7 +54,7 @@ class HydraLog:
 
         self._logger.propagate = False
 
-    def loglevel(self, loglevel):
+    def loglevel(self, loglevel: str) -> None:
         """Set the logging level.
 
         Args:
@@ -59,13 +62,13 @@ class HydraLog:
         """
         self._logger.setLevel(LOG_LEVELS[loglevel])
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Shutdown the logger cleanly."""
         # Exit cleanly
         logging.shutdown()  # Flush all handler
 
     # Basic log message handling, wraps Python's logging object
-    def info(self, message, extra=None):
+    def info(self, message: str, extra: Optional[Any] = None) -> None:
         """Log an info message.
 
         Args:
@@ -74,7 +77,7 @@ class HydraLog:
         """
         self._logger.info(message, extra=extra)
 
-    def debug(self, message, extra=None):
+    def debug(self, message: str, extra: Optional[Any] = None) -> None:
         """Log a debug message.
 
         Args:
@@ -83,7 +86,7 @@ class HydraLog:
         """
         self._logger.debug(message, extra=extra)
 
-    def warning(self, message, extra=None):
+    def warning(self, message: str, extra: Optional[Any] = None) -> None:
         """Log a warning message.
 
         Args:
@@ -92,7 +95,7 @@ class HydraLog:
         """
         self._logger.warning(message, extra=extra)
 
-    def error(self, message, extra=None):
+    def error(self, message: str, extra: Optional[Any] = None) -> None:
         """Log an error message.
 
         Args:
@@ -101,7 +104,7 @@ class HydraLog:
         """
         self._logger.error(message, extra=extra)
 
-    def critical(self, message, extra=None):
+    def critical(self, message: str, extra: Optional[Any] = None) -> None:
         """Log a critical message.
 
         Args:

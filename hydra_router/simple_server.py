@@ -10,6 +10,7 @@ import asyncio
 import signal
 import sys
 import time
+from types import FrameType
 from typing import Optional
 
 from .constants.DHydraLog import DHydraLog
@@ -146,7 +147,7 @@ class SimpleServer:
         print()
 
         # Setup signal handlers for graceful shutdown
-        def signal_handler(signum, frame):
+        def signal_handler(signum: int, frame: Optional[FrameType]) -> None:
             print(f"\n🛑 Received signal {signum}, shutting down...")
             self.running = False
 

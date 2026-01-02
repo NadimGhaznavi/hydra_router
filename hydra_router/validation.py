@@ -36,7 +36,7 @@ class MessageValidator:
         """
         # 1. Type validation
         if not isinstance(message, dict):
-            return False, f"Message must be dictionary, got {type(message).__name__}"
+            return False, f"Message must be dictionary, got {type(message).__name__}"  # type: ignore[unreachable]
 
         # 2. Required field validation
         missing_fields = []
