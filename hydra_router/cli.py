@@ -50,7 +50,9 @@ class HydraRouterCLI:
 
         try:
             # Create and start router
-            self.router = HydraRouter(address=args.address, port=args.port)
+            self.router = HydraRouter(
+                router_address=args.address, router_port=args.port
+            )
             await self.router.start()
             self.running = True
 
