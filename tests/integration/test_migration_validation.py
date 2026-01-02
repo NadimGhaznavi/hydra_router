@@ -61,7 +61,7 @@ class TestMigrationValidation:
                 f"These should be updated to use 'constants.DRouter' instead."
             )
 
-    def test_no_old_message_type_references(self) -> None:
+    def test_no_old_dmsgtype_references(self) -> None:
         """Test that no files reference the old MessageType class."""
         python_files = self.get_python_files()
 

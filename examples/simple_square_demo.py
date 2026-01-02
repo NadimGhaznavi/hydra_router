@@ -38,6 +38,10 @@ async def run_demo_server() -> None:
 
     except Exception as e:
         print(f"❌ Demo server error: {e}")
+        # If we can't connect to router, just continue for demo purposes
+        if "Connection refused" in str(e) or "No route to host" in str(e):
+            print("⚠️  Router not available - this is expected in test mode")
+            return
     finally:
         await server.stop()
 
