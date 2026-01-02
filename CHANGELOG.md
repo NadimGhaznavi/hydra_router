@@ -11,19 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Release 0.3.9] - 2026-01-02 14:08
 
-
-## [Release 0.3.8] - 2026-01-02 14:08
-
-
-## [Release 0.3.7] - 2026-01-02 14:08
-
-
-## [Release 0.3.8] - 2026-01-02 14:01
-
-
-## [Release 0.3.7] - 2026-01-02 14:00
-
-
 ### Fixed
 - **MQ Client**: Resolve all mypy type checking issues with proper type annotations
 - **Exceptions**: Resolve all mypy type checking issues with proper type annotations
@@ -31,15 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Specs**: Update CLI parameter fix task status to reflect current implementation progress
 
-## [Release 0.3.7] - 2026-01-02 13:30
 
+## [Release 0.3.7] - 2026-01-02 13:30
 
 ### Changed
 - **Specs**: Add requirements document for CLI router parameter fix
 - **Specs**: Mark CLI parameter fix task as completed
 
-## [Release 0.3.6] - 2026-01-02 13:17
 
+## [Release 0.3.6] - 2026-01-02 13:17
 
 ### Added
 - **Scripts**: Optional comment parameter to version update script for custom commit and tag messages
@@ -47,14 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Scripts**: Automate git operations in version update script with automatic staging, committing, tagging, and pushing
 
-## [Release 0.3.6] - 2026-01-02 13:09
 
+## [Release 0.3.6] - 2026-01-02 13:09
 
 ### Changed
 - **Router**: Reformatted type annotation in ClientRegistry for improved code style
 
-## [Release 0.3.5] - 2026-01-02 12:58
 
+## [Release 0.3.5] - 2026-01-02 12:58
 
 ### Added
 - **Tests**: Comprehensive unit tests for DHydraLog module with 100% coverage
@@ -71,14 +58,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **CLI**: Correct default log level to WARNING for consistent logging behavior
 
-## [Release 0.3.4] - 2026-01-02 12:12
 
+## [Release 0.3.4] - 2026-01-02 12:12
 
 ### Fixed
 - **CLI**: Correct setup_logging function call signature
 
-## [Release 0.3.3] - 2026-01-02 12:03
 
+## [Release 0.3.3] - 2026-01-02 12:03
 
 ### Fixed
 - **CLI**: Correct logging setup parameter and f-string issues
@@ -91,11 +78,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation**: Added deployment and configuration sections to documentation index for improved navigation
 - **Installation**: Fixed code block directive from cmd to bash for consistency in Windows installation instructions
 
+
 ## [Release 0.3.2] - 2026-01-02 08:45
-
-
-## [Release 0.3.1] - 2026-01-02 08:41
-
 
 ### Fixed
 - **Tests**: Resolved failing unit tests and enabled asyncio auto mode for improved test execution
@@ -107,8 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added proper timing to router tests for client timeout testing
   - Cleaned up unused imports and fixed boolean comparisons in tests
 
-## [Release 0.3.0] - 2026-01-02 07:27
 
+## [Release 0.3.0] - 2026-01-02 07:27
 
 ### Added
 - **Simple Client**: Complete interactive client implementation with async communication and CLI interface
