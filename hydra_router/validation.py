@@ -5,7 +5,8 @@ This module provides comprehensive message validation with detailed error report
 for RouterConstants format messages and other validation needs.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Tuple
+
 from .router_constants import RouterConstants
 
 
@@ -17,7 +18,7 @@ class MessageValidator:
     identify and resolve message format issues.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the message validator."""
         self.router_constants = RouterConstants
 

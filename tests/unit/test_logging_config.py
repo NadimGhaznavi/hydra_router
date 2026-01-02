@@ -1,12 +1,8 @@
-"""
-Test logging configuration.
-"""
+"""Test logging configuration."""
 
 import logging
 import tempfile
 from pathlib import Path
-
-import pytest
 
 from hydra_router.logging_config import (
     configure_logging_from_args,

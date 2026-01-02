@@ -358,7 +358,8 @@ class MessageFormatError(MessageValidationError):
         if conversion_step:
             context["conversion_step"] = conversion_step
 
-        super().__init__(message, original_message, context=context)
+        super().__init__(message, original_message, validation_details=None)
+        self.context.update(context)
         self.source_format = source_format
         self.target_format = target_format
         self.conversion_step = conversion_step
@@ -388,13 +389,14 @@ class ServerNotAvailableError(MessageRoutingError):
             message_type: Type of message that requires server processing
             server_required: Whether a server is required for this operation
         """
-        context = {"server_required": server_required, "available_servers": 0}
-
         super().__init__(
             message,
             source_client=client_id,
             message_type=message_type,
             routing_rule="client_to_server",
+        )
+        self.context.update(
+            {"server_required": server_required, "available_servers": 0}
         )
         self.server_required = server_required
 
