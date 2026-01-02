@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Examples**: Remove unreachable else clause in operation printing for improved code clarity
+- **Examples**: Update imports to use specific module paths for improved import clarity and explicit import patterns
 
 ## [Release 0.3.11] - 2026-01-02 17:18
 
