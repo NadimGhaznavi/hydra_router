@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Hooks**: Integrated CHANGELOG updater functionality into auto-git-commit hook
+  - Removed redundant changelog-updater hook to eliminate conflicts
+  - CHANGELOG.md now updates automatically as part of every commit workflow
+  - Eliminated duplicate hook execution and potential race conditions
+
 ## [Release 0.2.5] - 2026-01-01 20:07
 
 
