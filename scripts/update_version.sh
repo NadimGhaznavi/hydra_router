@@ -56,6 +56,9 @@ if ! [[ $NEW_VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 print_status "Updating Hydra Router version to $NEW_VERSION..."
+if [ -n "$2" ]; then
+    print_status "Using comment: $COMMENT"
+fi
 
 # Check if we're in the right directory
 if [ ! -f "pyproject.toml" ]; then
@@ -235,18 +238,53 @@ fi
 echo ""
 print_success "Version update completed successfully!"
 
+# Git operations
 echo ""
-echo "📋 Next Steps:"
-echo "1. Review all changes: git diff"
-echo "2. Review CHANGELOG.md to ensure release notes are complete"
-echo "3. Run tests: pytest tests/"
-echo "4. Build documentation: cd docs && make html"
-echo "5. Commit changes: git add . && git commit -m 'chore(release): bump version to $NEW_VERSION'"
-echo "6. Create tag: git tag -a v$NEW_VERSION -m 'Release version $NEW_VERSION'"
-echo "7. Push changes: git push origin main --tags"
-echo "8. Build and publish to PyPI: python -m build && python -m twine upload dist/*"
+print_status "Performing git operations..."
+
+# Stage all changes
+print_status "Staging all changes..."
+if git add .; then
+    print_success "✓ Changes staged successfully"
+else
+    print_error "✗ Failed to stage changes"
+    exit 1
+fi
+
+# Commit changes
+print_status "Committing changes..."
+if git commit -m "Bump version to v$NEW_VERSION"; then
+    print_success "✓ Changes committed successfully"
+else
+    print_error "✗ Failed to commit changes"
+    exit 1
+fi
+
+# Create annotated tag
+print_status "Creating tag v$NEW_VERSION..."
+if git tag -a "v$NEW_VERSION" -m "$COMMENT"; then
+    print_success "✓ Tag v$NEW_VERSION created successfully"
+else
+    print_error "✗ Failed to create tag"
+    exit 1
+fi
+
+# Push to origin with tags
+print_status "Pushing to origin main with tags..."
+if git push origin main --tags; then
+    print_success "✓ Pushed to origin main with tags"
+else
+    print_error "✗ Failed to push to origin"
+    exit 1
+fi
+
 echo ""
-echo "💡 Tip: Use 'git checkout .' to revert all changes if needed"
+print_success "All git operations completed successfully! 🎉"
+
+echo ""
+echo "📋 Additional Steps (if needed):"
+echo "1. Build documentation: cd docs && make html"
+echo "2. Build and publish to PyPI: python -m build && python -m twine upload dist/*"
 
 echo ""
 print_status "Version update process complete! 🎉"
