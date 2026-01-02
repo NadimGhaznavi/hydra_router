@@ -300,7 +300,7 @@ class TestMQClient:
             client_id=self.client_id,
         )
 
-        message = ZMQMessage(MessageType.HEARTBEAT)
+        message = ZMQMessage(MessageType.HEARTBEAT, timestamp=time.time())
 
         with pytest.raises(ConnectionError):
             await client.send_message(message)

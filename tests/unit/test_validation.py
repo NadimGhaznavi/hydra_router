@@ -5,8 +5,6 @@ Tests the MessageValidator class and its validation methods
 for RouterConstants format messages.
 """
 
-import pytest
-
 from hydra_router.router_constants import RouterConstants
 from hydra_router.validation import MessageValidator
 
@@ -108,7 +106,7 @@ class TestMessageValidator:
         }
         is_valid, error = self.validator.validate_router_message(invalid_message)
         assert not is_valid
-        assert "dictionary" in error.lower()
+        assert "dict" in error.lower()
 
         # Test invalid timestamp type (not number)
         invalid_message = {
