@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Router Constants**: Comprehensive RouterConstants module with message format definitions, client/server types, and validation helpers
+- **Message Validation**: Complete message validation framework with detailed error reporting and type checking
+- **Exception Handling**: Comprehensive exception hierarchy for router-specific errors with context information
+
 ## [Release 0.2.3] - 2026-01-01 17:57
 
 
