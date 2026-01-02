@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.3.3] - 2026-01-02 12:03
+
+
 ### Fixed
 - **CLI**: Correct logging setup parameter and f-string issues
 - **Documentation**: Comment out html_static_path in Sphinx config to prevent build errors when _static directory doesn't exist
