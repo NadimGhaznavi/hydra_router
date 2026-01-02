@@ -6,7 +6,7 @@ This implementation plan addresses the parameter mismatch between the CLI and Hy
 
 ## Tasks
 
-- [x] 1. Fix CLI parameter mapping
+- [-] 1. Fix CLI parameter mapping
   - Update the HydraRouter constructor call in cli.py to use correct parameter names
   - Change `address=args.address, port=args.port` to `router_address=args.address, router_port=args.port`
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
