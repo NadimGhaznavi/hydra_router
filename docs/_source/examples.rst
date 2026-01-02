@@ -188,16 +188,18 @@ Deployment Patterns
    import asyncio
    import signal
    from hydra_router.router import HydraRouter
-   from hydra_router.logging_config import setup_logging
+   from hydra_router.util.HydraLog import HydraLog
+   from hydra_router.constants.DHydraLog import DHydraLog
 
    async def main():
-       setup_logging(__name__, level="INFO")
+       logger = HydraLog("production_router", to_console=True)
+       logger.loglevel(DHydraLog.INFO)
 
        router = HydraRouter(address="0.0.0.0", port=5556)
 
        # Graceful shutdown handling
        def signal_handler(signum, frame):
-           print(f"Received signal {signum}, shutting down...")
+           logger.info(f"Received signal {signum}, shutting down...")
            router.running = False
 
        signal.signal(signal.SIGINT, signal_handler)

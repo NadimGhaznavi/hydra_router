@@ -200,15 +200,16 @@ Enable Detailed Logging
 
 .. code-block:: python
 
-   from hydra_router.logging_config import setup_logging
+   from hydra_router.util.HydraLog import HydraLog
+   from hydra_router.constants.DHydraLog import DHydraLog
 
    # Enable debug logging
-   setup_logging(__name__, level="DEBUG")
+   logger = HydraLog("debug_app", to_console=True)
+   logger.loglevel(DHydraLog.DEBUG)
 
-   # Or configure specific loggers
-   import logging
-   logging.getLogger("hydra_router.router").setLevel(logging.DEBUG)
-   logging.getLogger("hydra_router.mq_client").setLevel(logging.DEBUG)
+   # Use the logger for debugging
+   logger.debug("Debug information")
+   logger.info("Application status")
 
 Message Tracing
 ~~~~~~~~~~~~~~~

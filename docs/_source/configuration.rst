@@ -184,36 +184,40 @@ Basic Logging Setup
 
 .. code-block:: python
 
-   from hydra_router.logging_config import setup_logging
+   from hydra_router.util.HydraLog import HydraLog
+   from hydra_router.constants.DHydraLog import DHydraLog
 
    # Basic setup
-   setup_logging(__name__)
+   logger = HydraLog("my_app", to_console=True)
 
    # Custom log level
-   setup_logging(__name__, level="DEBUG")
+   logger = HydraLog("my_app", to_console=True)
+   logger.loglevel(DHydraLog.DEBUG)
 
    # File logging
-   setup_logging(__name__, level="INFO", log_file="hydra-router.log")
+   logger = HydraLog("my_app", log_file="hydra-router.log", to_console=True)
+   logger.loglevel(DHydraLog.INFO)
 
 Advanced Logging
 ~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
-   import logging
-   from hydra_router.logging_config import get_logging_config
+   from hydra_router.util.HydraLog import HydraLog
+   from hydra_router.constants.DHydraLog import DHydraLog
 
-   # Get default configuration
-   config = get_logging_config(level="INFO")
+   # Create logger with file rotation (handled internally)
+   logger = HydraLog(
+       "production_app",
+       log_file="/var/log/hydra-router.log",
+       to_console=True
+   )
+   logger.loglevel(DHydraLog.INFO)
 
-   # Customize configuration
-   config['handlers']['file'] = {
-       'class': 'logging.handlers.RotatingFileHandler',
-       'filename': '/var/log/hydra-router.log',
-       'maxBytes': 10485760,  # 10MB
-       'backupCount': 5,
-       'formatter': 'detailed'
-   }
+   # Use the logger
+   logger.info("Application started")
+   logger.error("An error occurred")
+   logger.debug("Debug information")
 
    # Apply configuration
    logging.config.dictConfig(config)
@@ -231,11 +235,13 @@ High Availability Setup
    import signal
    import sys
    from hydra_router.router import HydraRouter
-   from hydra_router.logging_config import setup_logging
+   from hydra_router.util.HydraLog import HydraLog
+   from hydra_router.constants.DHydraLog import DHydraLog
 
    async def main():
        # Production logging
-       setup_logging(__name__, level="INFO", log_file="/var/log/hydra-router.log")
+       logger = HydraLog("production_router", log_file="/var/log/hydra-router.log", to_console=True)
+       logger.loglevel(DHydraLog.INFO)
 
        # Production router
        router = HydraRouter(
