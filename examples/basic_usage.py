@@ -15,15 +15,19 @@ async def main() -> None:
     print("Hydra Router Basic Usage Example")
     print("================================")
 
-    # This will be implemented in later tasks
-    print("Router implementation: Coming in Task 4.1")
-    print("MQClient implementation: Coming in Task 3.1")
-    print("DRouter implementation: Coming in Task 2.1")
+    # Demonstrate MQClient creation
+    print("Creating MQClient")
+    client = MQClient(
+        router_address="tcp://localhost:5556",
+        client_type="SimpleClient",
+        client_id="basic-usage-demo",
+    )
 
-    # For now, just show that imports work
+    print(f"✓ MQClient created: {client}")
     print(f"✓ HydraRouter class: {HydraRouter}")
     print(f"✓ MQClient class: {MQClient}")
     print("✓ DRouter constants: Available via hydra_router.constants.DRouter")
+    print("✓ Basic usage demonstration complete")
 
 
 if __name__ == "__main__":

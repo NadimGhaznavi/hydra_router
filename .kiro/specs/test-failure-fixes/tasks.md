@@ -6,14 +6,14 @@ This implementation plan focuses on fixing the single failing test `tests/integr
 
 ## Tasks
 
-- [ ] 1. Update basic_usage.py script to include expected output
+- [x] 1. Update basic_usage.py script to include expected output
   - Modify the main() function to print "Creating MQClient" before creating an MQClient instance
   - Create an actual MQClient instance instead of showing placeholder messages
   - Maintain the existing "Basic Usage Example" header
   - Ensure the script runs without errors
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 2. Verify the test passes
+- [x] 2. Verify the test passes
   - Run the specific failing test to confirm it now passes
   - Check that the script output contains both required strings
   - Ensure the script exits with code 0
