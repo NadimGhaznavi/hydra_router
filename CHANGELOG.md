@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **MQ Client**: Complete ZeroMQ client library implementation with comprehensive async communication capabilities
+  - Full MQClient class with automatic message format conversion between ZMQMessage and RouterConstants
+  - Connection lifecycle management with heartbeat functionality and background task handling
+  - Request/response pattern with timeout handling and correlation IDs for reliable communication
+  - Message handler registration system for event-driven processing and custom message handling
+  - Client registry querying and connection status management for network topology awareness
+  - Support for both client and server application types with comprehensive validation
+  - MessageType enum and ZMQMessage dataclass for type-safe internal message handling
+
 ## [Release 0.2.4] - 2026-01-01 19:43
 
 
