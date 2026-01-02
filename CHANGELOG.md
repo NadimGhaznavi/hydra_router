@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Constants**: Updated DHydraLog class and project references for consistency with Hydra Router naming
 - **Logging**: Updated HydraLog class name and added comprehensive documentation for consistency with project naming
 - **Client/Server**: Replace setup_logging with HydraLog system for consistent logging behavior
+- **Documentation**: Update logging example to use HydraLog instead of deprecated logging_config
 
 ### Fixed
 - **CLI**: Correct default log level to WARNING for consistent logging behavior
