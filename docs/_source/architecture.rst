@@ -1,5 +1,5 @@
 Architecture Overview
-====================
+=====================
 
 HydraRouter is designed as a high-performance, scalable message routing system built on ZeroMQ. This document explains the core architectural concepts and design decisions.
 
