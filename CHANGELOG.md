@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Constants**: Rename RouterConstants class to DRouter for consistency and improved naming conventions
+- **Constants**: Centralize message type definitions in DMsgType.py with MsgType enum
 - **Changelog**: Improve formatting consistency between release sections
 
 ## [Release 0.3.9] - 2026-01-02 14:08
