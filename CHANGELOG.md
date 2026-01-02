@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Router**: Reformatted type annotation in ClientRegistry for improved code style
+
 ## [Release 0.3.5] - 2026-01-02 12:58
 
 
