@@ -29,9 +29,9 @@ class ClientRegistry:
 
     def __init__(self):
         """Initialize the client registry."""
-        self.clients: Dict[
-            str, Tuple[str, float]
-        ] = {}  # client_id -> (client_type, last_heartbeat)
+        self.clients: Dict[str, Tuple[str, float]] = (
+            {}
+        )  # client_id -> (client_type, last_heartbeat)
         self.server_id: Optional[str] = None
         self.lock = asyncio.Lock()
         self.logger = logging.getLogger("hydra_router.client_registry")
