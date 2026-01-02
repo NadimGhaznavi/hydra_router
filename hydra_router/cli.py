@@ -29,7 +29,7 @@ class HydraRouterCLI:
             args: Parsed command line arguments
         """
         # Setup logging
-        setup_logging(__name__, log_level=args.log_level)
+        setup_logging(log_level=args.log_level)
 
         print("🚀 Starting HydraRouter...")
         print(f"   Address: {args.address}")
