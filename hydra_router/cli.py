@@ -10,6 +10,7 @@ import signal
 import sys
 from typing import Optional
 
+from . import __version__
 from .constants.DHydraLog import DHydraLog
 from .router import HydraRouter
 from .util.HydraLog import HydraLog
@@ -148,7 +149,9 @@ Examples:
     )
 
     # Global options
-    parser.add_argument("--version", action="version", version="%(prog)s 1.0.0")
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"%(prog)s {__version__}"
+    )
 
     # Subcommands
     subparsers = parser.add_subparsers(
