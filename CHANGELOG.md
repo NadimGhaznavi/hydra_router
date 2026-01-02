@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.3.10] - 2026-01-02 16:09
+
+
 ### Fixed
 - **Constants**: Resolve DMsgType import and naming inconsistencies across codebase
 - **Types**: Add missing type annotations for mypy compliance across all modules
