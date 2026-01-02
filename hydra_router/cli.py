@@ -8,6 +8,7 @@ import argparse
 import asyncio
 import signal
 import sys
+from types import FrameType
 from typing import Optional
 
 from . import __version__
@@ -19,13 +20,13 @@ from .util.HydraLog import HydraLog
 class HydraRouterCLI:
     """Command-line interface for HydraRouter management."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the CLI."""
         self.router: Optional[HydraRouter] = None
         self.running = False
         self.logger: Optional[HydraLog] = None
 
-    async def start_router(self, args) -> None:
+    async def start_router(self, args: argparse.Namespace) -> None:
         """Start the HydraRouter with specified configuration.
 
         Args:
@@ -61,8 +62,9 @@ class HydraRouterCLI:
             self.logger.info("   Press Ctrl+C to stop")
 
             # Setup signal handlers for graceful shutdown
-            def signal_handler(signum, frame):
-                self.logger.info(f"🛑 Received signal {signum}, shutting down...")
+            def signal_handler(signum: int, frame: Optional[FrameType]) -> None:
+                if self.logger:
+                    self.logger.info(f"🛑 Received signal {signum}, shutting down...")
                 self.running = False
 
             signal.signal(signal.SIGINT, signal_handler)
@@ -73,7 +75,8 @@ class HydraRouterCLI:
                 await asyncio.sleep(1)
 
         except Exception as e:
-            self.logger.error(f"❌ Failed to start router: {e}")
+            if self.logger:
+                self.logger.error(f"❌ Failed to start router: {e}")
             sys.exit(1)
         finally:
             await self.stop_router()
@@ -83,12 +86,12 @@ class HydraRouterCLI:
         if self.router and self.router.running:
             if self.logger:
                 self.logger.info("🛑 Stopping HydraRouter...")
-            await self.router.stop()
+            await self.router.shutdown()
             if self.logger:
                 self.logger.info("👋 HydraRouter stopped")
                 self.logger.shutdown()
 
-    async def show_status(self, args) -> None:
+    async def show_status(self, args: argparse.Namespace) -> None:
         """Show router status information.
 
         Args:
