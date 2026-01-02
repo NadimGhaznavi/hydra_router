@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Specs**: Update CLI parameter fix task status to reflect current implementation progress
+
 ## [Release 0.3.7] - 2026-01-02 13:30
 
 
