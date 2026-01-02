@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Logging**: Enhanced debug output with full router message content in MQClient for improved troubleshooting
 
 ### Fixed
+- **Examples**: Add test mode detection to simple_square_demo to prevent router connection attempts during automated testing
 - **Examples**: Resolve error_handling.py timeout issue in integration tests with connection timeouts and graceful handling
 - **Examples**: Improve error handling and test reliability with timeout handling, simulation mode, and better type safety
 - **Examples**: Improve error handling in simple_square_demo with graceful handling for connection refused errors
