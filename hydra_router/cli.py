@@ -29,9 +29,9 @@ class HydraRouterCLI:
             args: Parsed command line arguments
         """
         # Setup logging
-        setup_logging(__name__, level=args.log_level)
+        setup_logging(__name__, log_level=args.log_level)
 
-        print(f"🚀 Starting HydraRouter...")
+        print("🚀 Starting HydraRouter...")
         print(f"   Address: {args.address}")
         print(f"   Port: {args.port}")
         print(f"   Log Level: {args.log_level}")
@@ -43,9 +43,9 @@ class HydraRouterCLI:
             await self.router.start()
             self.running = True
 
-            print(f"✅ HydraRouter started successfully!")
+            print("✅ HydraRouter started successfully!")
             print(f"   Listening on: tcp://{args.address}:{args.port}")
-            print(f"   Press Ctrl+C to stop")
+            print("   Press Ctrl+C to stop")
             print()
 
             # Setup signal handlers for graceful shutdown
@@ -79,7 +79,7 @@ class HydraRouterCLI:
         Args:
             args: Parsed command line arguments
         """
-        print(f"📊 HydraRouter Status")
+        print("📊 HydraRouter Status")
         print(f"   Router Address: {args.router_address}")
         print()
 
