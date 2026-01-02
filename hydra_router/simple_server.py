@@ -13,8 +13,8 @@ import time
 from types import FrameType
 from typing import Optional
 
+from .constants.DMsgType import DMsgType
 from .constants.DHydraLog import DHydraLog
-from .constants.DMsgType import MsgType
 from .constants.DRouter import DRouter
 from .mq_client import MQClient, ZMQMessage
 from .util.HydraLog import HydraLog
@@ -60,7 +60,7 @@ class SimpleServer:
 
             # Register request handler
             self.client.register_message_handler(
-                MsgType.SQUARE_REQUEST, self._handle_square_request
+                DMsgType.SQUARE_REQUEST, self._handle_square_request
             )
 
             # Start heartbeat
@@ -109,7 +109,7 @@ class SimpleServer:
 
             # Send response
             response = ZMQMessage(
-                message_type=MsgType.SQUARE_RESPONSE,
+                message_type=DMsgType.SQUARE_RESPONSE,
                 timestamp=time.time(),
                 client_id=self.server_id,
                 request_id=request_id,
@@ -127,7 +127,7 @@ class SimpleServer:
         """Send periodic heartbeat to router."""
         try:
             heartbeat = ZMQMessage(
-                message_type=MsgType.HEARTBEAT,
+                message_type=DMsgType.HEARTBEAT,
                 timestamp=time.time(),
                 client_id=self.server_id,
                 data={"status": "alive", "requests_processed": self.request_count},

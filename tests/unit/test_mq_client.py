@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from hydra_router.constants.DMsgType import MsgType
+from hydra_router.constants.DMsgType import DMsgType
 from hydra_router.constants.DRouter import DRouter
 from hydra_router.exceptions import ConnectionError, MessageFormatError
 from hydra_router.mq_client import MQClient, ZMQMessage
@@ -23,14 +23,14 @@ class TestZMQMessage:
         """Test creating ZMQMessage instance."""
         timestamp = time.time()
         message = ZMQMessage(
-            message_type=MsgType.SQUARE_REQUEST,
+            message_type=DMsgType.SQUARE_REQUEST,
             timestamp=timestamp,
             data={"number": 5},
             client_id="client-123",
             request_id="req-456",
         )
 
-        assert message.message_type == MsgType.SQUARE_REQUEST
+        assert message.message_type == DMsgType.SQUARE_REQUEST
         assert message.data == {"number": 5}
         assert message.client_id == "client-123"
         assert message.request_id == "req-456"
@@ -40,42 +40,42 @@ class TestZMQMessage:
         """Test that ZMQMessage requires timestamp parameter."""
         # ZMQMessage requires timestamp as a required parameter
         timestamp = time.time()
-        message = ZMQMessage(MsgType.HEARTBEAT, timestamp=timestamp)
+        message = ZMQMessage(DMsgType.HEARTBEAT, timestamp=timestamp)
 
         assert message.timestamp == timestamp
 
     def test_zmq_message_custom_timestamp(self):
         """Test ZMQMessage with custom timestamp."""
         custom_timestamp = 1234567890.0
-        message = ZMQMessage(MsgType.HEARTBEAT, timestamp=custom_timestamp)
+        message = ZMQMessage(DMsgType.HEARTBEAT, timestamp=custom_timestamp)
 
         assert message.timestamp == custom_timestamp
 
     def test_zmq_message_optional_fields(self):
         """Test ZMQMessage with optional fields."""
         timestamp = time.time()
-        message = ZMQMessage(MsgType.HEARTBEAT, timestamp=timestamp)
+        message = ZMQMessage(DMsgType.HEARTBEAT, timestamp=timestamp)
 
         assert message.data is None
         assert message.client_id is None
         assert message.request_id is None
 
 
-class TestMsgType:
-    """Test MsgType enum."""
+class TestDMsgType:
+    """Test DMsgType enum."""
 
     def test_message_type_enum_values(self):
-        """Test that MsgType enum has expected values."""
-        assert hasattr(MsgType, "HEARTBEAT")
-        assert hasattr(MsgType, "SQUARE_REQUEST")
-        assert hasattr(MsgType, "SQUARE_RESPONSE")
-        assert hasattr(MsgType, "ERROR")
-        assert hasattr(MsgType, "CLIENT_REGISTRY_REQUEST")
-        assert hasattr(MsgType, "CLIENT_REGISTRY_RESPONSE")
+        """Test that DMsgType enum has expected values."""
+        assert hasattr(DMsgType, "HEARTBEAT")
+        assert hasattr(DMsgType, "SQUARE_REQUEST")
+        assert hasattr(DMsgType, "SQUARE_RESPONSE")
+        assert hasattr(DMsgType, "ERROR")
+        assert hasattr(DMsgType, "CLIENT_REGISTRY_REQUEST")
+        assert hasattr(DMsgType, "CLIENT_REGISTRY_RESPONSE")
 
     def test_message_type_string_values(self):
-        """Test that MsgType enum values are strings."""
-        for message_type in MsgType:
+        """Test that DMsgType enum values are strings."""
+        for message_type in DMsgType:
             assert isinstance(message_type.value, str)
             assert len(message_type.value) > 0
 
@@ -189,7 +189,7 @@ class TestMQClient:
         )
 
         zmq_message = ZMQMessage(
-            message_type=MsgType.SQUARE_REQUEST,
+            message_type=DMsgType.SQUARE_REQUEST,
             data={"number": 5},
             client_id="client-123",
             request_id="req-456",
@@ -199,7 +199,7 @@ class TestMQClient:
         router_message = client._convert_to_router_format(zmq_message)
 
         assert router_message[DRouter.SENDER] == self.client_type
-        assert router_message[DRouter.ELEM] == MsgType.SQUARE_REQUEST.value
+        assert router_message[DRouter.ELEM] == DMsgType.SQUARE_REQUEST.value
         assert router_message[DRouter.DATA] == {"number": 5}
         assert router_message[DRouter.CLIENT_ID] == "client-123"
         assert router_message[DRouter.REQUEST_ID] == "req-456"
@@ -213,11 +213,11 @@ class TestMQClient:
             client_id=self.client_id,
         )
 
-        zmq_message = ZMQMessage(MsgType.HEARTBEAT)
+        zmq_message = ZMQMessage(DMsgType.HEARTBEAT)
         router_message = client._convert_to_router_format(zmq_message)
 
         assert router_message[DRouter.SENDER] == self.client_type
-        assert router_message[DRouter.ELEM] == MsgType.HEARTBEAT.value
+        assert router_message[DRouter.ELEM] == DMsgType.HEARTBEAT.value
         assert DRouter.TIMESTAMP in router_message
 
         # Optional fields should not be present if None
@@ -235,7 +235,7 @@ class TestMQClient:
 
         router_message = {
             DRouter.SENDER: DRouter.HYDRA_SERVER,
-            DRouter.ELEM: MsgType.SQUARE_RESPONSE.value,
+            DRouter.ELEM: DMsgType.SQUARE_RESPONSE.value,
             DRouter.DATA: {"result": 25},
             DRouter.CLIENT_ID: "server-123",
             DRouter.REQUEST_ID: "req-456",
@@ -244,7 +244,7 @@ class TestMQClient:
 
         zmq_message = client._convert_from_router_format(router_message)
 
-        assert zmq_message.message_type == MsgType.SQUARE_RESPONSE
+        assert zmq_message.message_type == DMsgType.SQUARE_RESPONSE
         assert zmq_message.data == {"result": 25}
         assert zmq_message.client_id == "server-123"
         assert zmq_message.request_id == "req-456"
@@ -260,13 +260,13 @@ class TestMQClient:
 
         router_message = {
             DRouter.SENDER: DRouter.HYDRA_SERVER,
-            DRouter.ELEM: MsgType.HEARTBEAT.value,
+            DRouter.ELEM: DMsgType.HEARTBEAT.value,
             DRouter.TIMESTAMP: 1234567890.0,
         }
 
         zmq_message = client._convert_from_router_format(router_message)
 
-        assert zmq_message.message_type == MsgType.HEARTBEAT
+        assert zmq_message.message_type == DMsgType.HEARTBEAT
         assert zmq_message.data is None
         assert zmq_message.client_id is None
         assert zmq_message.request_id is None
@@ -282,7 +282,7 @@ class TestMQClient:
 
         router_message = {
             DRouter.SENDER: DRouter.HYDRA_SERVER,
-            DRouter.ELEM: "UnknownMsgType",
+            DRouter.ELEM: "UnknownDMsgType",
             DRouter.TIMESTAMP: 1234567890.0,
         }
 
@@ -298,7 +298,7 @@ class TestMQClient:
             client_id=self.client_id,
         )
 
-        message = ZMQMessage(MsgType.HEARTBEAT, timestamp=time.time())
+        message = ZMQMessage(DMsgType.HEARTBEAT, timestamp=time.time())
 
         with pytest.raises(ConnectionError):
             await client.send_message(message)
@@ -313,10 +313,10 @@ class TestMQClient:
         )
 
         handler = AsyncMock()
-        client.register_message_handler(MsgType.SQUARE_RESPONSE, handler)
+        client.register_message_handler(DMsgType.SQUARE_RESPONSE, handler)
 
-        assert MsgType.SQUARE_RESPONSE in client.message_handlers
-        assert client.message_handlers[MsgType.SQUARE_RESPONSE] == handler
+        assert DMsgType.SQUARE_RESPONSE in client.message_handlers
+        assert client.message_handlers[DMsgType.SQUARE_RESPONSE] == handler
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
     async def test_unregister_message_handler(self, mock_context):
@@ -328,10 +328,10 @@ class TestMQClient:
         )
 
         handler = AsyncMock()
-        client.register_message_handler(MsgType.SQUARE_RESPONSE, handler)
-        client.unregister_message_handler(MsgType.SQUARE_RESPONSE)
+        client.register_message_handler(DMsgType.SQUARE_RESPONSE, handler)
+        client.unregister_message_handler(DMsgType.SQUARE_RESPONSE)
 
-        assert MsgType.SQUARE_RESPONSE not in client.message_handlers
+        assert DMsgType.SQUARE_RESPONSE not in client.message_handlers
 
     def test_create_heartbeat_message(self):
         """Test creating heartbeat message."""
@@ -343,7 +343,7 @@ class TestMQClient:
 
         heartbeat = client._create_heartbeat_message()
 
-        assert heartbeat.message_type == MsgType.HEARTBEAT
+        assert heartbeat.message_type == DMsgType.HEARTBEAT
         assert heartbeat.client_id == self.client_id
         assert heartbeat.data is None
         assert heartbeat.request_id is None

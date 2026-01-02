@@ -11,8 +11,8 @@ import sys
 import time
 from typing import Optional
 
+from .constants.DMsgType import DMsgType
 from .constants.DHydraLog import DHydraLog
-from .constants.DMsgType import MsgType
 from .constants.DRouter import DRouter
 from .mq_client import MQClient, ZMQMessage
 from .util.HydraLog import HydraLog
@@ -56,7 +56,7 @@ class SimpleClient:
 
             # Register response handler
             self.client.register_message_handler(
-                MsgType.SQUARE_RESPONSE, self._handle_square_response
+                DMsgType.SQUARE_RESPONSE, self._handle_square_response
             )
 
         except Exception as e:
@@ -85,7 +85,7 @@ class SimpleClient:
         try:
             request_id = f"req-{int(time.time() * 1000)}"
             message = ZMQMessage(
-                message_type=MsgType.SQUARE_REQUEST,
+                message_type=DMsgType.SQUARE_REQUEST,
                 timestamp=time.time(),
                 client_id=self.client_id,
                 request_id=request_id,

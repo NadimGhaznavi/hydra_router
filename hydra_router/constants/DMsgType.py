@@ -1,14 +1,14 @@
 """
 Message type definitions for the Hydra Router system.
 
-This module defines the MsgType enumeration used throughout the system
+This module defines the DMsgType enumeration used throughout the system
 for consistent message type identification and routing.
 """
 
 from enum import Enum
 
 
-class MsgType(Enum):
+class DMsgType(Enum):
     """Enumeration of message types for internal application use."""
 
     HEARTBEAT = "heartbeat"

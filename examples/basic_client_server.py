@@ -13,7 +13,7 @@ Usage:
 import asyncio
 import time
 
-from hydra_router.constants.DMsgType import MsgType
+from hydra_router.constants.DMsgType import DMsgType
 from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.router_constants import RouterConstants
 
@@ -38,7 +38,7 @@ async def run_server():
 
         # Send response
         response = ZMQMessage(
-            message_type=MsgType.SQUARE_RESPONSE,
+            message_type=DMsgType.SQUARE_RESPONSE,
             timestamp=time.time(),
             client_id="example-server",
             request_id=message.request_id,
@@ -49,7 +49,7 @@ async def run_server():
 
     try:
         await server.connect()
-        server.register_message_handler(MsgType.SQUARE_REQUEST, handle_square_request)
+        server.register_message_handler(DMsgType.SQUARE_REQUEST, handle_square_request)
         print("✅ Server connected and ready")
 
         # Keep server running
@@ -81,7 +81,9 @@ async def run_client():
 
     try:
         await client.connect()
-        client.register_message_handler(MsgType.SQUARE_RESPONSE, handle_square_response)
+        client.register_message_handler(
+            DMsgType.SQUARE_RESPONSE, handle_square_response
+        )
         print("✅ Client connected")
 
         # Send some requests
@@ -89,7 +91,7 @@ async def run_client():
             print(f"📤 Client: Sending request to calculate {i}²")
 
             message = ZMQMessage(
-                message_type=MsgType.SQUARE_REQUEST,
+                message_type=DMsgType.SQUARE_REQUEST,
                 timestamp=time.time(),
                 client_id="example-client",
                 request_id=f"req-{i}",
