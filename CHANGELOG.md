@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Communication**: Fix MQClient heartbeat timing issue by sending immediate heartbeat in background loop
 - **Router**: Fix server recognition to include both HYDRA_SERVER and SIMPLE_SERVER types
 - **Examples**: Implement actual MQClient creation in basic usage example to fix integration test failure
+- **Examples**: Add expected output and type annotations for test compatibility in simple square demo
 
 ### Changed
 - **Specs**: Comprehensive requirements for test failure fixes with systematic approach to fix 12 failing tests
