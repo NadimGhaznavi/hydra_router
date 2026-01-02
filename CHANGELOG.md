@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Specs**: Add requirements document for CLI router parameter fix
+- **Specs**: Mark CLI parameter fix task as completed
 
 ## [Release 0.3.6] - 2026-01-02 13:17
 
