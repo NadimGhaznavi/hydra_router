@@ -251,7 +251,9 @@ class MQClient:
 
             # Send the message
             await self.socket.send_json(router_message)
-            self.logger.debug(f"Sent message: {message.message_type.value}")
+            self.logger.debug(
+                f"Sent message: {message.message_type.value} -> {router_message}"
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to send message: {e}")
@@ -272,7 +274,9 @@ class MQClient:
         try:
             # Non-blocking receive
             message = await self.socket.recv_json(zmq.NOBLOCK)
-            self.logger.debug(f"Received message: {message.get('elem', 'unknown')}")
+            self.logger.debug(
+                f"Received message: {message.get('elem', 'unknown')} -> {message}"
+            )
             return message  # type: ignore[no-any-return]
         except zmq.Again:
             # No message available
