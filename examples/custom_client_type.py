@@ -151,8 +151,8 @@ class CustomMathClient:
                 print(f"📤 Operation #{self.operation_count}: {a} × {b}")
             elif operation == MathOperation.DIVIDE:
                 print(f"📤 Operation #{self.operation_count}: {a} ÷ {b}")
-            else:
-                print(f"📤 Operation #{self.operation_count}: {operation.value}({a})")
+            elif operation == MathOperation.POWER:
+                print(f"📤 Operation #{self.operation_count}: {a} ^ {b}")
 
             self.logger.info(f"Sent {operation.value} operation: {operation_data}")
 

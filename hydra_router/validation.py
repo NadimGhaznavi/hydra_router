@@ -21,7 +21,7 @@ class MessageValidator:
     def __init__(self) -> None:
         """Initialize the message validator."""
 
-    def validate_router_message(self, message: Dict[str, Any]) -> Tuple[bool, str]:
+    def validate_router_message(self, message: Any) -> Tuple[bool, str]:
         """
         Validate a message against DRouter format requirements.
 
@@ -183,7 +183,7 @@ class MessageValidator:
 
         return True, ""
 
-    def validate_field_types(self, message: Dict[str, Any]) -> Tuple[bool, str]:
+    def validate_field_types(self, message: Any) -> Tuple[bool, str]:
         """
         Validate field types without checking required fields.
 
