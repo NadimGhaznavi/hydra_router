@@ -5,7 +5,7 @@ This package provides a standalone message router that enables reliable communic
 between multiple clients and a single server through a centralized routing pattern.
 """
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 __author__ = "Nadim-Daniel Ghaznavi"
 __email__ = "nghaznavi@gmail.com"
 
