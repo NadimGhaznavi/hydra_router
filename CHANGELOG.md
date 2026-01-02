@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.3.0] - 2026-01-02 07:27
+
+
 ### Added
 - **Simple Client**: Complete interactive client implementation with async communication and CLI interface
   - Full SimpleClient class with MQClient integration for HydraRouter communication

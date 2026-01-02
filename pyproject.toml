@@ -1,6 +1,6 @@
 [project]
 name = "hydra-router"
-version = "0.2.6"
+version = "0.3.0"
 description = "A ZeroMQ messaging router and client"
 authors = [{ name = "Nadim-Daniel Ghaznavi", email = "nghaznavi@gmail.com" }]
 license = { text = "GPL-3.0" }
@@ -104,6 +104,7 @@ markers = [
     "timeout: Tests with custom timeout limits",
     "asyncio: Async tests",
 ]
+asyncio_mode = "auto"
 
 [tool.black]
 line-length = 88
