@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.2.4] - 2026-01-01 19:43
+
+
 ### Added
 - **Router Constants**: Comprehensive RouterConstants module with message format definitions, client/server types, and validation helpers
   - Complete client/server type definitions (HydraClient, HydraServer, SimpleClient, SimpleServer)
