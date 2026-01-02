@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.3.5] - 2026-01-02 12:58
+
+
 ### Added
 - **Tests**: Comprehensive unit tests for DHydraLog module with 100% coverage
 - **CLI**: Import version from package init for dynamic version display
