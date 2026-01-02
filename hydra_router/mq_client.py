@@ -249,10 +249,14 @@ class MQClient:
             if not is_valid:
                 raise MessageValidationError(f"Invalid router message format: {error}")
 
+            # Debug: Log the message being sent
+            self.logger.debug(f"SENDING MESSAGE: {message.message_type.value}")
+            self.logger.debug(f"ROUTER FORMAT: {router_message}")
+
             # Send the message
             await self.socket.send_json(router_message)
             self.logger.debug(
-                f"Sent message: {message.message_type.value} -> {router_message}"
+                f"SUCCESSFULLY SENT: {message.message_type.value} -> {router_message}"
             )
 
         except Exception as e:

@@ -199,7 +199,8 @@ class MessageRouter:
         sender_type = message.get(DRouter.SENDER)
         elem = message.get(DRouter.ELEM)
 
-        self.logger.debug(f"Routing message from {sender_id} ({sender_type}): {elem}")
+        self.logger.debug(f"ROUTING MESSAGE from {sender_id} ({sender_type}): {elem}")
+        self.logger.debug(f"FULL MESSAGE CONTENT: {message}")
 
         # Handle different routing scenarios
         if sender_type == DRouter.HYDRA_CLIENT or sender_type == DRouter.SIMPLE_CLIENT:
@@ -217,6 +218,9 @@ class MessageRouter:
         """Route a message from a client."""
         elem = message.get(DRouter.ELEM)
 
+        self.logger.debug(f"ROUTING CLIENT MESSAGE from {sender_id}: {elem}")
+        self.logger.debug(f"CLIENT MESSAGE CONTENT: {message}")
+
         # Handle client registry requests
         if elem == DRouter.CLIENT_REGISTRY_REQUEST:
             await self._handle_client_registry_request(sender_id, message)
@@ -229,8 +233,12 @@ class MessageRouter:
 
         # Forward other client messages to server
         if await self.client_registry.has_server():
+            self.logger.debug(f"FORWARDING CLIENT MESSAGE TO SERVER: {message}")
             await self._forward_to_server(message)
         else:
+            self.logger.debug(
+                f"NO SERVER AVAILABLE - SENDING ERROR TO CLIENT {sender_id}"
+            )
             await self._send_no_server_error(sender_id, message)
 
     async def _route_server_message(
@@ -239,12 +247,16 @@ class MessageRouter:
         """Route a message from a server."""
         elem = message.get(DRouter.ELEM)
 
+        self.logger.debug(f"ROUTING SERVER MESSAGE from {sender_id}: {elem}")
+        self.logger.debug(f"SERVER MESSAGE CONTENT: {message}")
+
         # Handle heartbeat messages (no forwarding needed)
         if elem == DRouter.HEARTBEAT:
             await self.client_registry.update_heartbeat(sender_id)
             return
 
         # Broadcast server messages to all clients (except the server itself)
+        self.logger.debug(f"BROADCASTING SERVER MESSAGE TO ALL CLIENTS: {message}")
         await self._broadcast_to_clients(message, exclude_sender=sender_id)
 
     async def _forward_to_server(self, message: Dict[str, Any]) -> None:
@@ -255,10 +267,13 @@ class MessageRouter:
         server_id = self.client_registry.server_id
         if server_id:
             try:
+                self.logger.debug(f"SENDING TO SERVER {server_id}: {message}")
                 await self.socket.send_multipart(
                     [server_id.encode(), zmq.utils.jsonapi.dumps(message)]
                 )
-                self.logger.debug(f"Forwarded message to server {server_id}")
+                self.logger.debug(
+                    f"SUCCESSFULLY FORWARDED MESSAGE TO SERVER {server_id}"
+                )
             except Exception as e:
                 self.logger.error(f"Failed to forward message to server: {e}")
                 raise MessageRoutingError(
@@ -273,21 +288,31 @@ class MessageRouter:
         """Broadcast a message to all connected clients."""
         registry_data = await self.client_registry.get_registry_data()
 
+        self.logger.debug(
+            f"BROADCASTING TO CLIENTS (excluding {exclude_sender}): {message}"
+        )
+        self.logger.debug(f"AVAILABLE CLIENTS: {list(registry_data.keys())}")
+
         for client_id, client_info in registry_data.items():
             # Skip the sender and servers
             if client_id == exclude_sender:
+                self.logger.debug(f"SKIPPING SENDER: {client_id}")
                 continue
             if client_info["client_type"] in [
                 DRouter.HYDRA_SERVER,
                 DRouter.SIMPLE_SERVER,
             ]:
+                self.logger.debug(f"SKIPPING SERVER: {client_id}")
                 continue
 
             try:
+                self.logger.debug(f"SENDING TO CLIENT {client_id}: {message}")
                 await self.socket.send_multipart(
                     [client_id.encode(), zmq.utils.jsonapi.dumps(message)]
                 )
-                self.logger.debug(f"Broadcast message to client {client_id}")
+                self.logger.debug(
+                    f"SUCCESSFULLY BROADCAST MESSAGE TO CLIENT {client_id}"
+                )
             except Exception as e:
                 self.logger.error(f"Failed to broadcast to client {client_id}: {e}")
 
@@ -473,6 +498,9 @@ class HydraRouter:
                 except (ValueError, TypeError) as e:
                     self._log_json_parse_error(msg_bytes, e, identity_str)
                     continue
+
+                # Debug: Log received message with full contents
+                self.logger.debug(f"ROUTER RECEIVED from {identity_str}: {message}")
 
                 # Validate message format
                 is_valid, error = self.validator.validate_router_message(message)

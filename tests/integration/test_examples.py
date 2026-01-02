@@ -5,12 +5,10 @@ These tests run the actual example files to ensure they work correctly
 and don't have import or runtime errors.
 """
 
-import asyncio
 import subprocess
 import sys
-import time
 from pathlib import Path
-from typing import List
+from typing import AsyncGenerator, List
 
 import pytest
 
@@ -20,8 +18,8 @@ from hydra_router.router import HydraRouter
 class TestExamples:
     """Test that example files run without errors."""
 
-    @pytest.fixture
-    async def test_router(self) -> HydraRouter:
+    @pytest.fixture  # type: ignore[misc]
+    async def test_router(self) -> AsyncGenerator[HydraRouter, None]:
         """Start a test router for examples."""
         router = HydraRouter(
             router_address="127.0.0.1",
@@ -170,6 +168,14 @@ import asyncio
 import time
 import sys
 import os
+import logging
+
+# Set up debug logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -198,6 +204,7 @@ async def test_client_server():
     responses_received = []
 
     def handle_square_request(message):
+        print(f"SERVER RECEIVED REQUEST: {message}")
         data = message.data or {}
         number = data.get("number", 0)
         result = number * number
@@ -210,9 +217,11 @@ async def test_client_server():
             data={"number": number, "result": result},
         )
 
+        print(f"SERVER SENDING RESPONSE: {response}")
         asyncio.create_task(server.send_message(response))
 
     def handle_square_response(message):
+        print(f"CLIENT RECEIVED RESPONSE: {message}")
         responses_received.append(message)
 
     try:
@@ -234,8 +243,13 @@ async def test_client_server():
             data={"number": 7},
         )
 
+        print(f"CLIENT SENDING REQUEST: {request}")
         await client.send_message(request)
         await asyncio.sleep(1)  # Wait for response
+
+        print(f"RESPONSES RECEIVED: {len(responses_received)}")
+        for i, resp in enumerate(responses_received):
+            print(f"Response {i}: {resp}")
 
         # Check results
         assert len(responses_received) == 1
