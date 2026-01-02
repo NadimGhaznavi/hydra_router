@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Examples**: Resolve error_handling.py timeout issue in integration tests with connection timeouts and graceful handling
 - **Examples**: Improve error handling and test reliability with timeout handling, simulation mode, and better type safety
 
+### Changed
+- **Examples**: Remove unreachable else clause in operation printing for improved code clarity
+
 ## [Release 0.3.11] - 2026-01-02 17:18
 
 
