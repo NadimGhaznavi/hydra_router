@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Tests**: Comprehensive unit tests for DHydraLog module with 100% coverage
 
 ### Changed
+- **CLI**: Migrated to HydraLog system for improved logging structure and consistency
 - **Constants**: Updated DHydraLog class and project references for consistency with Hydra Router naming
 - **Logging**: Updated HydraLog class name and added comprehensive documentation for consistency with project naming
 
