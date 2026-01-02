@@ -112,8 +112,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Specs**: Update task 1.1 status to completed
 - **Specs**: Mark Task 6.4 simple client/server implementation as completed
 
-## [Release 0.2.6] - 2026-01-01 21:28
 
+## [Release 0.2.6] - 2026-01-01 21:28
 
 ### Added
 - **HydraRouter Core**: Complete Phase 4 implementation of central message routing system
@@ -132,8 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CHANGELOG.md now updates automatically as part of every commit workflow
   - Eliminated duplicate hook execution and potential race conditions
 
-## [Release 0.2.5] - 2026-01-01 20:07
 
+## [Release 0.2.5] - 2026-01-01 20:07
 
 ### Added
 - **MQ Client**: Complete ZeroMQ client library implementation with comprehensive async communication capabilities
@@ -145,8 +145,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Support for both client and server application types with comprehensive validation
   - MessageType enum and ZMQMessage dataclass for type-safe internal message handling
 
-## [Release 0.2.4] - 2026-01-01 19:43
 
+## [Release 0.2.4] - 2026-01-01 19:43
 
 ### Added
 - **Router Constants**: Comprehensive RouterConstants module with message format definitions, client/server types, and validation helpers
@@ -176,8 +176,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - ServerNotAvailableError for missing server scenarios
   - Convenience functions for common exception creation
 
-## [Release 0.2.3] - 2026-01-01 17:57
 
+## [Release 0.2.3] - 2026-01-01 17:57
 
 ### Changed
 - **CI**: Updated GitHub Actions upload-artifact action from v3 to v4 for improved compatibility
@@ -185,20 +185,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Logging**: Added type safety checks for handler list operations to prevent AttributeError exceptions
 
-## [Release 0.2.2] - 2026-01-01 17:45
 
+## [Release 0.2.2] - 2026-01-01 17:45
 
 ### Changed
 - **Logging**: Fixed code formatting and removed unused import for better code quality
 
-## [Release 0.2.1] - 2026-01-01 17:37
 
+## [Release 0.2.1] - 2026-01-01 17:37
 
 ### Changed
 - **Scripts**: Enhanced version update script to include test file version synchronization
 
-## [Release 0.2.0] - 2026-01-01 17:33
 
+## [Release 0.2.0] - 2026-01-01 17:33
 
 ### Added
 - **Development Environment**: Complete development environment setup with pre-commit hooks, CI/CD pipeline, and logging system
