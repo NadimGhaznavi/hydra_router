@@ -143,6 +143,10 @@ Examples:
   # Check router status
   hydra-router status --router-address tcp://localhost:5556
 
+  # Show version
+  hydra-router --version
+  hydra-router -v
+
   # Show help
   hydra-router --help
         """,
