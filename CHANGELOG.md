@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Logging**: Updated HydraLog class name and added comprehensive documentation for consistency with project naming
+
 ## [Release 0.3.4] - 2026-01-02 12:12
 
 
