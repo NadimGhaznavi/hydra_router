@@ -10,8 +10,9 @@ import signal
 import sys
 from typing import Optional
 
-from .logging_config import setup_logging
+from .constants.DHydraLog import DHydraLog
 from .router import HydraRouter
+from .util.HydraLog import HydraLog
 
 
 class HydraRouterCLI:
@@ -21,6 +22,7 @@ class HydraRouterCLI:
         """Initialize the CLI."""
         self.router: Optional[HydraRouter] = None
         self.running = False
+        self.logger: Optional[HydraLog] = None
 
     async def start_router(self, args) -> None:
         """Start the HydraRouter with specified configuration.
@@ -28,14 +30,22 @@ class HydraRouterCLI:
         Args:
             args: Parsed command line arguments
         """
-        # Setup logging
-        setup_logging(log_level=args.log_level)
+        # Setup logging with HydraLog
+        self.logger = HydraLog("hydra-router-cli", to_console=True)
 
-        print("🚀 Starting HydraRouter...")
-        print(f"   Address: {args.address}")
-        print(f"   Port: {args.port}")
-        print(f"   Log Level: {args.log_level}")
-        print()
+        # Convert CLI log level to DHydraLog format
+        log_level_map = {
+            "DEBUG": DHydraLog.DEBUG,
+            "INFO": DHydraLog.INFO,
+            "WARNING": DHydraLog.WARNING,
+            "ERROR": DHydraLog.ERROR,
+        }
+        self.logger.loglevel(log_level_map.get(args.log_level, DHydraLog.INFO))
+
+        self.logger.info("🚀 Starting HydraRouter...")
+        self.logger.info(f"   Address: {args.address}")
+        self.logger.info(f"   Port: {args.port}")
+        self.logger.info(f"   Log Level: {args.log_level}")
 
         try:
             # Create and start router
@@ -43,14 +53,13 @@ class HydraRouterCLI:
             await self.router.start()
             self.running = True
 
-            print("✅ HydraRouter started successfully!")
-            print(f"   Listening on: tcp://{args.address}:{args.port}")
-            print("   Press Ctrl+C to stop")
-            print()
+            self.logger.info("✅ HydraRouter started successfully!")
+            self.logger.info(f"   Listening on: tcp://{args.address}:{args.port}")
+            self.logger.info("   Press Ctrl+C to stop")
 
             # Setup signal handlers for graceful shutdown
             def signal_handler(signum, frame):
-                print(f"\n🛑 Received signal {signum}, shutting down...")
+                self.logger.info(f"🛑 Received signal {signum}, shutting down...")
                 self.running = False
 
             signal.signal(signal.SIGINT, signal_handler)
@@ -61,7 +70,7 @@ class HydraRouterCLI:
                 await asyncio.sleep(1)
 
         except Exception as e:
-            print(f"❌ Failed to start router: {e}")
+            self.logger.error(f"❌ Failed to start router: {e}")
             sys.exit(1)
         finally:
             await self.stop_router()
@@ -69,9 +78,12 @@ class HydraRouterCLI:
     async def stop_router(self) -> None:
         """Stop the router gracefully."""
         if self.router and self.router.running:
-            print("🛑 Stopping HydraRouter...")
+            if self.logger:
+                self.logger.info("🛑 Stopping HydraRouter...")
             await self.router.stop()
-            print("👋 HydraRouter stopped")
+            if self.logger:
+                self.logger.info("👋 HydraRouter stopped")
+                self.logger.shutdown()
 
     async def show_status(self, args) -> None:
         """Show router status information.
@@ -79,24 +91,31 @@ class HydraRouterCLI:
         Args:
             args: Parsed command line arguments
         """
-        print("📊 HydraRouter Status")
-        print(f"   Router Address: {args.router_address}")
-        print()
+        # Setup logging for status command
+        if not self.logger:
+            self.logger = HydraLog("hydra-router-status", to_console=True)
+            self.logger.loglevel(DHydraLog.INFO)
+
+        self.logger.info("📊 HydraRouter Status")
+        self.logger.info(f"   Router Address: {args.router_address}")
 
         # For now, just show connection attempt
         # In a full implementation, this would connect and query status
         try:
-            print("🔍 Attempting to connect to router...")
-            print("ℹ️  Status monitoring not yet implemented")
-            print("   This would show:")
-            print("   - Connected clients count")
-            print("   - Message throughput")
-            print("   - Uptime")
-            print("   - Memory usage")
+            self.logger.info("🔍 Attempting to connect to router...")
+            self.logger.info("ℹ️  Status monitoring not yet implemented")
+            self.logger.info("   This would show:")
+            self.logger.info("   - Connected clients count")
+            self.logger.info("   - Message throughput")
+            self.logger.info("   - Uptime")
+            self.logger.info("   - Memory usage")
 
         except Exception as e:
-            print(f"❌ Failed to connect to router: {e}")
+            self.logger.error(f"❌ Failed to connect to router: {e}")
             sys.exit(1)
+        finally:
+            if self.logger:
+                self.logger.shutdown()
 
 
 def create_parser() -> argparse.ArgumentParser:
