@@ -194,7 +194,7 @@ Windows
 
 3. **Install HydraRouter**:
 
-   .. code-block:: cmd
+   .. code-block:: bash
 
       pip install hydra-router
 

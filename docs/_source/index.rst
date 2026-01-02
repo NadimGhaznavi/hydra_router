@@ -8,6 +8,7 @@ Welcome to HydraRouter, a high-performance ZeroMQ-based message routing system d
    :caption: Contents:
 
    getting_started
+   installation
    architecture
    deployment
    configuration
