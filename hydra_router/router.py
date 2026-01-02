@@ -27,11 +27,11 @@ class ClientRegistry:
     efficient lookup and pruning operations.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the client registry."""
-        self.clients: Dict[str, Tuple[str, float]] = (
-            {}
-        )  # client_id -> (client_type, last_heartbeat)
+        self.clients: Dict[
+            str, Tuple[str, float]
+        ] = {}  # client_id -> (client_type, last_heartbeat)
         self.server_id: Optional[str] = None
         self.lock = asyncio.Lock()
         self.logger = logging.getLogger("hydra_router.client_registry")
@@ -447,6 +447,11 @@ class HydraRouter:
         """Main request handling loop."""
         while self.running and not self.shutdown_event.is_set():
             try:
+                # Check if socket is available
+                if not self.socket:
+                    self.logger.error("Socket not available")
+                    break
+
                 # Receive message with timeout
                 frames = await asyncio.wait_for(
                     self.socket.recv_multipart(), timeout=1.0
@@ -463,6 +468,12 @@ class HydraRouter:
                 # Parse JSON message
                 try:
                     message = zmq.utils.jsonapi.loads(msg_bytes)
+                    # Ensure message is a dictionary
+                    if not isinstance(message, dict):
+                        self.logger.error(
+                            f"Message is not a dictionary: {type(message)}"
+                        )
+                        continue
                 except (ValueError, TypeError) as e:
                     self._log_json_parse_error(msg_bytes, e, identity_str)
                     continue
@@ -660,7 +671,7 @@ async def run_router(
     router = HydraRouter(router_address=address, router_port=port, log_level=log_level)
 
     # Set up signal handlers for graceful shutdown
-    def signal_handler():
+    def signal_handler() -> None:
         logging.getLogger("hydra_router").info("Received shutdown signal")
         asyncio.create_task(router.shutdown())
 
