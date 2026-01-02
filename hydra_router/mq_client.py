@@ -34,6 +34,7 @@ class MessageType(Enum):
     HEARTBEAT = "heartbeat"
     SQUARE_REQUEST = "square_request"
     SQUARE_RESPONSE = "square_response"
+    ERROR = "error"
     CLIENT_REGISTRY_REQUEST = "client_registry_request"
     CLIENT_REGISTRY_RESPONSE = "client_registry_response"
     START_SIMULATION = "start_simulation"
@@ -48,7 +49,6 @@ class MessageType(Enum):
     SIMULATION_PAUSED = "simulation_paused"
     SIMULATION_RESUMED = "simulation_resumed"
     SIMULATION_RESET = "simulation_reset"
-    ERROR_OCCURRED = "error"
 
 
 @dataclass
@@ -61,10 +61,15 @@ class ZMQMessage:
     """
 
     message_type: MessageType
-    timestamp: float
+    timestamp: float = None
     client_id: Optional[str] = None
     request_id: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
+
+    def __post_init__(self):
+        """Set default timestamp if not provided."""
+        if self.timestamp is None:
+            self.timestamp = time.time()
 
 
 class MQClient:
@@ -153,7 +158,7 @@ class MQClient:
             MessageType.SIMULATION_PAUSED.value: RouterConstants.SIMULATION_PAUSED,
             MessageType.SIMULATION_RESUMED.value: RouterConstants.SIMULATION_RESUMED,
             MessageType.SIMULATION_RESET.value: RouterConstants.SIMULATION_RESET,
-            MessageType.ERROR_OCCURRED.value: RouterConstants.ERROR,
+            MessageType.ERROR.value: RouterConstants.ERROR,
         }
 
     async def connect(self) -> bool:
@@ -404,12 +409,16 @@ class MQClient:
             router_message = {
                 RouterConstants.SENDER: self.client_type,
                 RouterConstants.ELEM: elem,
-                RouterConstants.DATA: message.data,
-                RouterConstants.CLIENT_ID: message.client_id or self.client_id,
                 RouterConstants.TIMESTAMP: message.timestamp,
             }
 
-            # Add request ID if present
+            # Add optional fields only if they have values
+            if message.data is not None:
+                router_message[RouterConstants.DATA] = message.data
+
+            if message.client_id is not None:
+                router_message[RouterConstants.CLIENT_ID] = message.client_id
+
             if message.request_id:
                 router_message[RouterConstants.REQUEST_ID] = message.request_id
 
@@ -477,9 +486,14 @@ class MQClient:
         try:
             return MessageType(elem)
         except ValueError:
-            # Default to ERROR for unknown message types
-            self.logger.warning(f"Unknown message type '{elem}', defaulting to ERROR")
-            return MessageType.ERROR_OCCURRED
+            # For completely unknown message types, raise an exception
+            raise MessageFormatError(
+                f"Unknown message type '{elem}' cannot be converted to MessageType",
+                source_format="RouterConstants",
+                target_format="ZMQMessage",
+                conversion_step="elem_to_message_type_mapping",
+                original_message={"elem": elem},
+            )
 
     def _validate_router_message(
         self, message: Dict[str, Any]
@@ -604,3 +618,17 @@ class MQClient:
             "pending_requests": len(self.pending_requests),
             "registered_handlers": list(self.message_handlers.keys()),
         }
+
+    async def __aenter__(self):
+        """Async context manager entry."""
+        await self.connect()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.disconnect()
+        return False
+
+    def _create_heartbeat_message(self) -> ZMQMessage:
+        """Create a heartbeat message."""
+        return ZMQMessage(message_type=MessageType.HEARTBEAT, client_id=self.client_id)

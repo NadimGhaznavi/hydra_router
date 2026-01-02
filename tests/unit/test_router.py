@@ -7,15 +7,11 @@ and their core functionality.
 
 import asyncio
 import time
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from hydra_router.exceptions import (
-    ConnectionError,
-    MessageRoutingError,
-    ServerNotAvailableError,
-)
+from hydra_router.exceptions import ConnectionError
 from hydra_router.router import ClientRegistry, HydraRouter, MessageRouter
 from hydra_router.router_constants import RouterConstants
 
@@ -143,6 +139,9 @@ class TestClientRegistry:
 
         await self.registry.register_client(client_id, client_type)
 
+        # Wait a bit to ensure client becomes inactive
+        await asyncio.sleep(0.01)
+
         # Prune with very short timeout
         removed_clients = await self.registry.prune_inactive_clients(0.001)
 
@@ -157,6 +156,9 @@ class TestClientRegistry:
 
         await self.registry.register_client(server_id, server_type)
         assert self.registry.server_id == server_id
+
+        # Wait a bit to ensure server becomes inactive
+        await asyncio.sleep(0.01)
 
         # Prune with very short timeout
         removed_clients = await self.registry.prune_inactive_clients(0.001)
@@ -462,10 +464,10 @@ class TestHydraRouter:
 
         status = await router.get_status()
 
-        assert status["running"] == True
+        assert status["running"] is True
         assert status["address"] == f"tcp://{self.router_address}:{self.router_port}"
         assert status["client_count"] == 0
-        assert status["has_server"] == False
+        assert status["has_server"] is False
         assert status["server_id"] is None
         assert status["max_clients"] == 50
         assert status["client_timeout"] == 30.0

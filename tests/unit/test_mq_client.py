@@ -5,11 +5,8 @@ Tests the MQClient class, message format conversion,
 and communication functionality.
 """
 
-import asyncio
 import time
-from dataclasses import dataclass
-from enum import Enum
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -308,7 +305,11 @@ class TestMQClient:
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
     async def test_register_message_handler(self, mock_context):
         """Test registering message handler."""
-        client = MQClient(client_id=self.client_id, client_type=self.client_type)
+        client = MQClient(
+            router_address="tcp://localhost:5556",
+            client_id=self.client_id,
+            client_type=self.client_type,
+        )
 
         handler = AsyncMock()
         client.register_message_handler(MessageType.SQUARE_RESPONSE, handler)
@@ -319,7 +320,11 @@ class TestMQClient:
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
     async def test_unregister_message_handler(self, mock_context):
         """Test unregistering message handler."""
-        client = MQClient(client_id=self.client_id, client_type=self.client_type)
+        client = MQClient(
+            router_address="tcp://localhost:5556",
+            client_id=self.client_id,
+            client_type=self.client_type,
+        )
 
         handler = AsyncMock()
         client.register_message_handler(MessageType.SQUARE_RESPONSE, handler)
@@ -329,7 +334,11 @@ class TestMQClient:
 
     def test_create_heartbeat_message(self):
         """Test creating heartbeat message."""
-        client = MQClient(client_id=self.client_id, client_type=self.client_type)
+        client = MQClient(
+            router_address="tcp://localhost:5556",
+            client_id=self.client_id,
+            client_type=self.client_type,
+        )
 
         heartbeat = client._create_heartbeat_message()
 
@@ -347,7 +356,9 @@ class TestMQClient:
         mock_context_instance.socket.return_value = mock_socket_instance
 
         async with MQClient(
-            self.client_id, self.client_type, self.router_address
+            router_address=self.router_address,
+            client_type=self.client_type,
+            client_id=self.client_id,
         ) as client:
             assert client.connected
 
