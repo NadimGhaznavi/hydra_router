@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Constants**: Resolve DMsgType import and naming inconsistencies across codebase
+
 ### Changed
 - **Constants**: Rename RouterConstants class to DRouter for consistency and improved naming conventions
 - **Constants**: Centralize message type definitions in DMsgType.py with MsgType enum
