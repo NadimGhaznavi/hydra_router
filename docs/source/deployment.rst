@@ -36,11 +36,11 @@ Create a Dockerfile for containerized deployment:
 .. code-block:: dockerfile
 
     FROM python:3.11-slim
-    
+
     RUN pip install hydra-router
-    
+
     EXPOSE 5556
-    
+
     CMD ["hydra-router", "start", "--address", "0.0.0.0", "--port", "5556"]
 
 Build and run:
@@ -62,7 +62,7 @@ For simple applications, deploy HydraRouter on a single node:
 
     # Start the router
     hydra-router start --address 0.0.0.0 --port 5556 --log-level INFO
-    
+
     # In separate terminals, start your applications
     python your_server.py
     python your_client.py
@@ -113,7 +113,7 @@ When using load balancers, ensure TCP load balancing is configured:
             server router1.example.com:5556;
             server router2.example.com:5556;
         }
-        
+
         server {
             listen 5556;
             proxy_pass hydra_router;
@@ -138,7 +138,7 @@ AWS Deployment
     sudo yum update -y
     sudo yum install python3-pip -y
     pip3 install hydra-router
-    
+
     # Start router
     hydra-router start --address 0.0.0.0 --port 5556
 
@@ -225,7 +225,7 @@ HydraRouter supports configuration via environment variables:
     export HYDRA_ROUTER_ADDRESS=0.0.0.0
     export HYDRA_ROUTER_PORT=5556
     export HYDRA_ROUTER_LOG_LEVEL=INFO
-    
+
     hydra-router start
 
 Configuration Files
@@ -242,7 +242,7 @@ Create a configuration file for complex deployments:
       log_level: "INFO"
       heartbeat_interval: 30
       client_timeout: 60
-    
+
     logging:
       format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
       file: "/var/log/hydra-router.log"
@@ -265,18 +265,18 @@ Implement health checks for deployment monitoring:
 
     import zmq
     import json
-    
+
     def health_check(router_address="tcp://localhost:5556"):
         """Simple health check for HydraRouter"""
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.setsockopt(zmq.LINGER, 1000)
-        
+
         try:
             socket.connect(router_address)
             # Send a simple ping message
             socket.send_json({"type": "ping"})
-            
+
             # Wait for response with timeout
             if socket.poll(5000):  # 5 second timeout
                 response = socket.recv_json()
@@ -297,7 +297,7 @@ Configure structured logging for production:
 
     import logging
     import json
-    
+
     class JSONFormatter(logging.Formatter):
         def format(self, record):
             log_entry = {
@@ -343,7 +343,7 @@ While HydraRouter doesn't include built-in authentication, implement it at the a
         def __init__(self, client_type, router_address, auth_token):
             super().__init__(client_type, router_address)
             self.auth_token = auth_token
-        
+
         def send_message(self, message):
             # Add authentication to all messages
             message["auth_token"] = self.auth_token
@@ -357,12 +357,12 @@ For sensitive data, implement message-level encryption:
 .. code-block:: python
 
     import cryptography.fernet
-    
+
     class EncryptedMQClient(MQClient):
         def __init__(self, client_type, router_address, encryption_key):
             super().__init__(client_type, router_address)
             self.cipher = Fernet(encryption_key)
-        
+
         def send_message(self, message):
             # Encrypt message payload
             if "data" in message:
@@ -400,7 +400,7 @@ System Tuning
     # Increase file descriptor limits
     echo "* soft nofile 65536" >> /etc/security/limits.conf
     echo "* hard nofile 65536" >> /etc/security/limits.conf
-    
+
     # Increase network buffer sizes
     echo "net.core.rmem_max = 16777216" >> /etc/sysctl.conf
     echo "net.core.wmem_max = 16777216" >> /etc/sysctl.conf
@@ -445,7 +445,7 @@ Since HydraRouter doesn't persist messages, implement application-level message 
         def __init__(self, client_type, router_address, backup_store):
             super().__init__(client_type, router_address)
             self.backup_store = backup_store
-        
+
         def send_message(self, message):
             # Backup message before sending
             self.backup_store.store(message)
@@ -469,7 +469,7 @@ Common Issues
 
     # Check if router is running
     netstat -tlnp | grep 5556
-    
+
     # Check firewall rules
     iptables -L | grep 5556
 
@@ -479,7 +479,7 @@ Common Issues
 
     # Monitor router process
     ps aux | grep hydra-router
-    
+
     # Check for memory leaks
     valgrind --tool=memcheck hydra-router start
 
