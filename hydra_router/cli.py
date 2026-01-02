@@ -40,7 +40,7 @@ class HydraRouterCLI:
             "WARNING": DHydraLog.WARNING,
             "ERROR": DHydraLog.ERROR,
         }
-        self.logger.loglevel(log_level_map.get(args.log_level, DHydraLog.INFO))
+        self.logger.loglevel(log_level_map.get(args.log_level, DHydraLog.WARNING))
 
         self.logger.info("🚀 Starting HydraRouter...")
         self.logger.info(f"   Address: {args.address}")
