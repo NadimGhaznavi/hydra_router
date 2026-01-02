@@ -14,8 +14,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import zmq
 import zmq.asyncio
 
+from .constants.DRouter import DRouter
 from .exceptions import ConnectionError, MessageRoutingError, ServerNotAvailableError
-from .router_constants import RouterConstants
 from .validation import MessageValidator
 
 
@@ -647,7 +647,7 @@ class HydraRouter:
 
 async def run_router(
     address: str = DRouter.DEFAULT_ROUTER_ADDRESS,
-    port: int = RouterConstants.DEFAULT_ROUTER_PORT,
+    port: int = DRouter.DEFAULT_ROUTER_PORT,
     log_level: str = "INFO",
 ) -> None:
     """
@@ -696,14 +696,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Hydra Router - ZeroMQ Message Router")
     parser.add_argument(
         "--address",
-        default=RouterConstants.DEFAULT_ROUTER_ADDRESS,
-        help=f"Router bind address (default: {RouterConstants.DEFAULT_ROUTER_ADDRESS})",
+        default=DRouter.DEFAULT_ROUTER_ADDRESS,
+        help=f"Router bind address (default: {DRouter.DEFAULT_ROUTER_ADDRESS})",
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=RouterConstants.DEFAULT_ROUTER_PORT,
-        help=f"Router bind port (default: {RouterConstants.DEFAULT_ROUTER_PORT})",
+        default=DRouter.DEFAULT_ROUTER_PORT,
+        help=f"Router bind port (default: {DRouter.DEFAULT_ROUTER_PORT})",
     )
     parser.add_argument(
         "--log-level",

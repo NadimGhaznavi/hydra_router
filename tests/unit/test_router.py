@@ -11,9 +11,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
+from hydra_router.constants.DRouter import DRouter
 from hydra_router.exceptions import ConnectionError
 from hydra_router.router import ClientRegistry, HydraRouter, MessageRouter
-from hydra_router.router_constants import RouterConstants
 
 
 class TestClientRegistry:
@@ -26,7 +26,7 @@ class TestClientRegistry:
     async def test_register_client(self):
         """Test registering a client."""
         client_id = "client-123"
-        client_type = RouterConstants.HYDRA_CLIENT
+        client_type = DRouter.HYDRA_CLIENT
 
         await self.registry.register_client(client_id, client_type)
 
@@ -38,7 +38,7 @@ class TestClientRegistry:
     async def test_register_server(self):
         """Test registering a server."""
         server_id = "server-123"
-        server_type = RouterConstants.HYDRA_SERVER
+        server_type = DRouter.HYDRA_SERVER
 
         await self.registry.register_client(server_id, server_type)
 
@@ -52,7 +52,7 @@ class TestClientRegistry:
         """Test that registering multiple servers replaces the previous one."""
         server1_id = "server-1"
         server2_id = "server-2"
-        server_type = RouterConstants.HYDRA_SERVER
+        server_type = DRouter.HYDRA_SERVER
 
         await self.registry.register_client(server1_id, server_type)
         assert self.registry.server_id == server1_id
@@ -63,7 +63,7 @@ class TestClientRegistry:
     async def test_update_heartbeat(self):
         """Test updating client heartbeat."""
         client_id = "client-123"
-        client_type = RouterConstants.HYDRA_CLIENT
+        client_type = DRouter.HYDRA_CLIENT
 
         await self.registry.register_client(client_id, client_type)
 
@@ -88,7 +88,7 @@ class TestClientRegistry:
     async def test_remove_client(self):
         """Test removing a client."""
         client_id = "client-123"
-        client_type = RouterConstants.HYDRA_CLIENT
+        client_type = DRouter.HYDRA_CLIENT
 
         await self.registry.register_client(client_id, client_type)
         await self.registry.remove_client(client_id)
@@ -99,7 +99,7 @@ class TestClientRegistry:
     async def test_remove_server_clears_server_id(self):
         """Test that removing a server clears the server_id."""
         server_id = "server-123"
-        server_type = RouterConstants.HYDRA_SERVER
+        server_type = DRouter.HYDRA_SERVER
 
         await self.registry.register_client(server_id, server_type)
         assert self.registry.server_id == server_id
@@ -113,17 +113,13 @@ class TestClientRegistry:
         client2_id = "client-2"
         server_id = "server-1"
 
-        await self.registry.register_client(client1_id, RouterConstants.HYDRA_CLIENT)
-        await self.registry.register_client(client2_id, RouterConstants.SIMPLE_CLIENT)
-        await self.registry.register_client(server_id, RouterConstants.HYDRA_SERVER)
+        await self.registry.register_client(client1_id, DRouter.HYDRA_CLIENT)
+        await self.registry.register_client(client2_id, DRouter.SIMPLE_CLIENT)
+        await self.registry.register_client(server_id, DRouter.HYDRA_SERVER)
 
-        hydra_clients = await self.registry.get_clients_by_type(
-            RouterConstants.HYDRA_CLIENT
-        )
-        simple_clients = await self.registry.get_clients_by_type(
-            RouterConstants.SIMPLE_CLIENT
-        )
-        servers = await self.registry.get_clients_by_type(RouterConstants.HYDRA_SERVER)
+        hydra_clients = await self.registry.get_clients_by_type(DRouter.HYDRA_CLIENT)
+        simple_clients = await self.registry.get_clients_by_type(DRouter.SIMPLE_CLIENT)
+        servers = await self.registry.get_clients_by_type(DRouter.HYDRA_SERVER)
 
         assert client1_id in hydra_clients
         assert client2_id in simple_clients
@@ -135,7 +131,7 @@ class TestClientRegistry:
     async def test_prune_inactive_clients(self):
         """Test pruning inactive clients."""
         client_id = "client-123"
-        client_type = RouterConstants.HYDRA_CLIENT
+        client_type = DRouter.HYDRA_CLIENT
 
         await self.registry.register_client(client_id, client_type)
 
@@ -152,7 +148,7 @@ class TestClientRegistry:
     async def test_prune_inactive_server_clears_server_id(self):
         """Test that pruning inactive server clears server_id."""
         server_id = "server-123"
-        server_type = RouterConstants.HYDRA_SERVER
+        server_type = DRouter.HYDRA_SERVER
 
         await self.registry.register_client(server_id, server_type)
         assert self.registry.server_id == server_id
@@ -171,7 +167,7 @@ class TestClientRegistry:
         assert not await self.registry.has_server()
 
         server_id = "server-123"
-        await self.registry.register_client(server_id, RouterConstants.HYDRA_SERVER)
+        await self.registry.register_client(server_id, DRouter.HYDRA_SERVER)
 
         assert await self.registry.has_server()
 
@@ -183,10 +179,10 @@ class TestClientRegistry:
         """Test getting client count."""
         assert await self.registry.get_client_count() == 0
 
-        await self.registry.register_client("client-1", RouterConstants.HYDRA_CLIENT)
+        await self.registry.register_client("client-1", DRouter.HYDRA_CLIENT)
         assert await self.registry.get_client_count() == 1
 
-        await self.registry.register_client("client-2", RouterConstants.SIMPLE_CLIENT)
+        await self.registry.register_client("client-2", DRouter.SIMPLE_CLIENT)
         assert await self.registry.get_client_count() == 2
 
         await self.registry.remove_client("client-1")
@@ -205,13 +201,13 @@ class TestMessageRouter:
     async def test_route_client_heartbeat(self):
         """Test routing client heartbeat message."""
         client_id = "client-123"
-        await self.registry.register_client(client_id, RouterConstants.HYDRA_CLIENT)
+        await self.registry.register_client(client_id, DRouter.HYDRA_CLIENT)
 
         message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_CLIENT,
-            RouterConstants.ELEM: RouterConstants.HEARTBEAT,
-            RouterConstants.CLIENT_ID: client_id,
-            RouterConstants.TIMESTAMP: time.time(),
+            DRouter.SENDER: DRouter.HYDRA_CLIENT,
+            DRouter.ELEM: DRouter.HEARTBEAT,
+            DRouter.CLIENT_ID: client_id,
+            DRouter.TIMESTAMP: time.time(),
         }
 
         await self.router.route_message(client_id, message)
@@ -224,15 +220,15 @@ class TestMessageRouter:
         client_id = "client-123"
         server_id = "server-456"
 
-        await self.registry.register_client(client_id, RouterConstants.HYDRA_CLIENT)
-        await self.registry.register_client(server_id, RouterConstants.HYDRA_SERVER)
+        await self.registry.register_client(client_id, DRouter.HYDRA_CLIENT)
+        await self.registry.register_client(server_id, DRouter.HYDRA_SERVER)
 
         message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_CLIENT,
-            RouterConstants.ELEM: RouterConstants.SQUARE_REQUEST,
-            RouterConstants.DATA: {"number": 5},
-            RouterConstants.CLIENT_ID: client_id,
-            RouterConstants.TIMESTAMP: time.time(),
+            DRouter.SENDER: DRouter.HYDRA_CLIENT,
+            DRouter.ELEM: DRouter.SQUARE_REQUEST,
+            DRouter.DATA: {"number": 5},
+            DRouter.CLIENT_ID: client_id,
+            DRouter.TIMESTAMP: time.time(),
         }
 
         await self.router.route_message(client_id, message)
@@ -246,14 +242,14 @@ class TestMessageRouter:
         """Test routing client message when no server is connected."""
         client_id = "client-123"
 
-        await self.registry.register_client(client_id, RouterConstants.HYDRA_CLIENT)
+        await self.registry.register_client(client_id, DRouter.HYDRA_CLIENT)
 
         message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_CLIENT,
-            RouterConstants.ELEM: RouterConstants.SQUARE_REQUEST,
-            RouterConstants.DATA: {"number": 5},
-            RouterConstants.CLIENT_ID: client_id,
-            RouterConstants.TIMESTAMP: time.time(),
+            DRouter.SENDER: DRouter.HYDRA_CLIENT,
+            DRouter.ELEM: DRouter.SQUARE_REQUEST,
+            DRouter.DATA: {"number": 5},
+            DRouter.CLIENT_ID: client_id,
+            DRouter.TIMESTAMP: time.time(),
         }
 
         await self.router.route_message(client_id, message)
@@ -269,16 +265,16 @@ class TestMessageRouter:
         client2_id = "client-2"
         server_id = "server-123"
 
-        await self.registry.register_client(client1_id, RouterConstants.HYDRA_CLIENT)
-        await self.registry.register_client(client2_id, RouterConstants.SIMPLE_CLIENT)
-        await self.registry.register_client(server_id, RouterConstants.HYDRA_SERVER)
+        await self.registry.register_client(client1_id, DRouter.HYDRA_CLIENT)
+        await self.registry.register_client(client2_id, DRouter.SIMPLE_CLIENT)
+        await self.registry.register_client(server_id, DRouter.HYDRA_SERVER)
 
         message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_SERVER,
-            RouterConstants.ELEM: RouterConstants.SQUARE_RESPONSE,
-            RouterConstants.DATA: {"result": 25},
-            RouterConstants.CLIENT_ID: server_id,
-            RouterConstants.TIMESTAMP: time.time(),
+            DRouter.SENDER: DRouter.HYDRA_SERVER,
+            DRouter.ELEM: DRouter.SQUARE_RESPONSE,
+            DRouter.DATA: {"result": 25},
+            DRouter.CLIENT_ID: server_id,
+            DRouter.TIMESTAMP: time.time(),
         }
 
         await self.router.route_message(server_id, message)
@@ -289,14 +285,14 @@ class TestMessageRouter:
     async def test_route_client_registry_request(self):
         """Test routing client registry request."""
         client_id = "client-123"
-        await self.registry.register_client(client_id, RouterConstants.HYDRA_CLIENT)
+        await self.registry.register_client(client_id, DRouter.HYDRA_CLIENT)
 
         message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_CLIENT,
-            RouterConstants.ELEM: RouterConstants.CLIENT_REGISTRY_REQUEST,
-            RouterConstants.CLIENT_ID: client_id,
-            RouterConstants.REQUEST_ID: "req-456",
-            RouterConstants.TIMESTAMP: time.time(),
+            DRouter.SENDER: DRouter.HYDRA_CLIENT,
+            DRouter.ELEM: DRouter.CLIENT_REGISTRY_REQUEST,
+            DRouter.CLIENT_ID: client_id,
+            DRouter.REQUEST_ID: "req-456",
+            DRouter.TIMESTAMP: time.time(),
         }
 
         await self.router.route_message(client_id, message)
@@ -311,10 +307,10 @@ class TestMessageRouter:
         client_id = "client-123"
 
         message = {
-            RouterConstants.SENDER: "UnknownSender",
-            RouterConstants.ELEM: RouterConstants.SQUARE_REQUEST,
-            RouterConstants.CLIENT_ID: client_id,
-            RouterConstants.TIMESTAMP: time.time(),
+            DRouter.SENDER: "UnknownSender",
+            DRouter.ELEM: DRouter.SQUARE_REQUEST,
+            DRouter.CLIENT_ID: client_id,
+            DRouter.TIMESTAMP: time.time(),
         }
 
         # Should not raise exception, just log warning
@@ -356,9 +352,9 @@ class TestHydraRouter:
         """Test HydraRouter with default values."""
         router = HydraRouter()
 
-        assert router.router_address == RouterConstants.DEFAULT_ROUTER_ADDRESS
-        assert router.router_port == RouterConstants.DEFAULT_ROUTER_PORT
-        assert router.client_timeout == RouterConstants.DEFAULT_CLIENT_TIMEOUT
+        assert router.router_address == DRouter.DEFAULT_ROUTER_ADDRESS
+        assert router.router_port == DRouter.DEFAULT_ROUTER_PORT
+        assert router.client_timeout == DRouter.DEFAULT_CLIENT_TIMEOUT
         assert router.max_clients == 100
 
     @patch("hydra_router.router.zmq.asyncio.Context")
@@ -489,15 +485,15 @@ class TestHydraRouter:
 
         client_id = "client-123"
         message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_CLIENT,
-            RouterConstants.ELEM: RouterConstants.HEARTBEAT,
+            DRouter.SENDER: DRouter.HYDRA_CLIENT,
+            DRouter.ELEM: DRouter.HEARTBEAT,
         }
 
         await router._ensure_client_registered(client_id, message)
 
         registry_data = await router.client_registry.get_registry_data()
         assert client_id in registry_data
-        assert registry_data[client_id]["client_type"] == RouterConstants.HYDRA_CLIENT
+        assert registry_data[client_id]["client_type"] == DRouter.HYDRA_CLIENT
 
         # Clean up
         await router.shutdown()

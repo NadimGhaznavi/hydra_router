@@ -10,9 +10,9 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
+from hydra_router.constants.DRouter import DRouter
 from hydra_router.exceptions import ConnectionError, MessageFormatError
 from hydra_router.mq_client import MessageType, MQClient, ZMQMessage
-from hydra_router.router_constants import RouterConstants
 
 
 class TestZMQMessage:
@@ -85,7 +85,7 @@ class TestMQClient:
     def setup_method(self):
         """Set up test fixtures."""
         self.client_id = "test-client-123"
-        self.client_type = RouterConstants.HYDRA_CLIENT
+        self.client_type = DRouter.HYDRA_CLIENT
         self.router_address = "tcp://localhost:5556"
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
@@ -180,7 +180,7 @@ class TestMQClient:
         mock_context_instance.term.assert_called_once()
 
     def test_convert_to_router_format(self):
-        """Test converting ZMQMessage to RouterConstants format."""
+        """Test converting ZMQMessage to DRouter format."""
         client = MQClient(
             router_address=self.router_address,
             client_type=self.client_type,
@@ -197,15 +197,15 @@ class TestMQClient:
 
         router_message = client._convert_to_router_format(zmq_message)
 
-        assert router_message[RouterConstants.SENDER] == self.client_type
-        assert router_message[RouterConstants.ELEM] == MessageType.SQUARE_REQUEST.value
-        assert router_message[RouterConstants.DATA] == {"number": 5}
-        assert router_message[RouterConstants.CLIENT_ID] == "client-123"
-        assert router_message[RouterConstants.REQUEST_ID] == "req-456"
-        assert router_message[RouterConstants.TIMESTAMP] == 1234567890.0
+        assert router_message[DRouter.SENDER] == self.client_type
+        assert router_message[DRouter.ELEM] == MessageType.SQUARE_REQUEST.value
+        assert router_message[DRouter.DATA] == {"number": 5}
+        assert router_message[DRouter.CLIENT_ID] == "client-123"
+        assert router_message[DRouter.REQUEST_ID] == "req-456"
+        assert router_message[DRouter.TIMESTAMP] == 1234567890.0
 
     def test_convert_to_router_format_minimal(self):
-        """Test converting minimal ZMQMessage to RouterConstants format."""
+        """Test converting minimal ZMQMessage to DRouter format."""
         client = MQClient(
             router_address=self.router_address,
             client_type=self.client_type,
@@ -215,17 +215,17 @@ class TestMQClient:
         zmq_message = ZMQMessage(MessageType.HEARTBEAT)
         router_message = client._convert_to_router_format(zmq_message)
 
-        assert router_message[RouterConstants.SENDER] == self.client_type
-        assert router_message[RouterConstants.ELEM] == MessageType.HEARTBEAT.value
-        assert RouterConstants.TIMESTAMP in router_message
+        assert router_message[DRouter.SENDER] == self.client_type
+        assert router_message[DRouter.ELEM] == MessageType.HEARTBEAT.value
+        assert DRouter.TIMESTAMP in router_message
 
         # Optional fields should not be present if None
-        assert RouterConstants.DATA not in router_message
-        assert RouterConstants.CLIENT_ID not in router_message
-        assert RouterConstants.REQUEST_ID not in router_message
+        assert DRouter.DATA not in router_message
+        assert DRouter.CLIENT_ID not in router_message
+        assert DRouter.REQUEST_ID not in router_message
 
     def test_convert_from_router_format(self):
-        """Test converting RouterConstants format to ZMQMessage."""
+        """Test converting DRouter format to ZMQMessage."""
         client = MQClient(
             router_address=self.router_address,
             client_type=self.client_type,
@@ -233,12 +233,12 @@ class TestMQClient:
         )
 
         router_message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_SERVER,
-            RouterConstants.ELEM: MessageType.SQUARE_RESPONSE.value,
-            RouterConstants.DATA: {"result": 25},
-            RouterConstants.CLIENT_ID: "server-123",
-            RouterConstants.REQUEST_ID: "req-456",
-            RouterConstants.TIMESTAMP: 1234567890.0,
+            DRouter.SENDER: DRouter.HYDRA_SERVER,
+            DRouter.ELEM: MessageType.SQUARE_RESPONSE.value,
+            DRouter.DATA: {"result": 25},
+            DRouter.CLIENT_ID: "server-123",
+            DRouter.REQUEST_ID: "req-456",
+            DRouter.TIMESTAMP: 1234567890.0,
         }
 
         zmq_message = client._convert_from_router_format(router_message)
@@ -250,7 +250,7 @@ class TestMQClient:
         assert zmq_message.timestamp == 1234567890.0
 
     def test_convert_from_router_format_minimal(self):
-        """Test converting minimal RouterConstants format to ZMQMessage."""
+        """Test converting minimal DRouter format to ZMQMessage."""
         client = MQClient(
             router_address=self.router_address,
             client_type=self.client_type,
@@ -258,9 +258,9 @@ class TestMQClient:
         )
 
         router_message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_SERVER,
-            RouterConstants.ELEM: MessageType.HEARTBEAT.value,
-            RouterConstants.TIMESTAMP: 1234567890.0,
+            DRouter.SENDER: DRouter.HYDRA_SERVER,
+            DRouter.ELEM: MessageType.HEARTBEAT.value,
+            DRouter.TIMESTAMP: 1234567890.0,
         }
 
         zmq_message = client._convert_from_router_format(router_message)
@@ -272,7 +272,7 @@ class TestMQClient:
         assert zmq_message.timestamp == 1234567890.0
 
     def test_convert_from_router_format_unknown_message_type(self):
-        """Test converting RouterConstants with unknown message type."""
+        """Test converting DRouter with unknown message type."""
         client = MQClient(
             router_address=self.router_address,
             client_type=self.client_type,
@@ -280,9 +280,9 @@ class TestMQClient:
         )
 
         router_message = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_SERVER,
-            RouterConstants.ELEM: "UnknownMessageType",
-            RouterConstants.TIMESTAMP: 1234567890.0,
+            DRouter.SENDER: DRouter.HYDRA_SERVER,
+            DRouter.ELEM: "UnknownMessageType",
+            DRouter.TIMESTAMP: 1234567890.0,
         }
 
         with pytest.raises(MessageFormatError):

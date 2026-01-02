@@ -191,8 +191,8 @@ class TestMessageFormatError:
 
     def test_format_error_with_target_format(self):
         """Test creating format error with target format."""
-        error = MessageFormatError("Conversion failed", target_format="RouterConstants")
-        assert error.target_format == "RouterConstants"
+        error = MessageFormatError("Conversion failed", target_format="DRouter")
+        assert error.target_format == "DRouter"
 
 
 class TestServerNotAvailableError:

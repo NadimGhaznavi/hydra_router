@@ -16,10 +16,10 @@ class TestPackageStructure:
 
     def test_main_components_importable(self) -> None:
         """Test that main components can be imported."""
-        from hydra_router import HydraRouter, MQClient, RouterConstants
+        from hydra_router import DRouter, HydraRouter, MQClient
 
         # These are placeholder classes for now
-        assert RouterConstants is not None
+        assert DRouter is not None
         assert MQClient is not None
         assert HydraRouter is not None
 
