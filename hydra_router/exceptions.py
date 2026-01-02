@@ -16,6 +16,10 @@ class HydraRouterError(Exception):
     for comprehensive error handling at different levels of granularity.
     """
 
+    # Type annotations for instance attributes
+    message: str
+    context: Dict[str, Any]
+
     def __init__(self, message: str, context: Optional[Dict[str, Any]] = None):
         """
         Initialize the base Hydra Router error.
@@ -63,6 +67,13 @@ class MessageValidationError(HydraRouterError):
     RouterConstants format or contain invalid field values.
     """
 
+    # Type annotations for instance attributes
+    invalid_message: Optional[Dict[str, Any]]
+    validation_details: Optional[str]
+    field_name: Optional[str]
+    expected_type: Optional[str]
+    actual_type: Optional[str]
+
     def __init__(
         self,
         message: str,
@@ -83,7 +94,7 @@ class MessageValidationError(HydraRouterError):
             expected_type: Expected type/format for the field
             actual_type: Actual type/format found
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if invalid_message is not None:
             context["invalid_message"] = invalid_message
         if validation_details:
@@ -111,6 +122,13 @@ class ConnectionError(HydraRouterError):
     connection failures, timeouts, and network communication errors.
     """
 
+    # Type annotations for instance attributes
+    address: Optional[str]
+    port: Optional[int]
+    timeout: Optional[float]
+    retry_count: Optional[int]
+    underlying_error: Optional[Exception]
+
     def __init__(
         self,
         message: str,
@@ -131,7 +149,7 @@ class ConnectionError(HydraRouterError):
             retry_count: Number of retries attempted
             underlying_error: The underlying exception that caused this error
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if address:
             context["address"] = address
         if port:
@@ -159,6 +177,12 @@ class ClientRegistrationError(HydraRouterError):
     heartbeat management, or client lifecycle operations.
     """
 
+    # Type annotations for instance attributes
+    client_id: Optional[str]
+    client_type: Optional[str]
+    operation: Optional[str]
+    registry_state: Optional[Dict[str, Any]]
+
     def __init__(
         self,
         message: str,
@@ -177,7 +201,7 @@ class ClientRegistrationError(HydraRouterError):
             operation: The operation that failed (register, unregister, heartbeat, etc.)
             registry_state: Current state of the client registry
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if client_id:
             context["client_id"] = client_id
         if client_type:
@@ -202,6 +226,13 @@ class MessageRoutingError(HydraRouterError):
     between clients and servers.
     """
 
+    # Type annotations for instance attributes
+    source_client: Optional[str]
+    target_client: Optional[str]
+    message_type: Optional[str]
+    routing_rule: Optional[str]
+    available_clients: Optional[list]
+
     def __init__(
         self,
         message: str,
@@ -222,7 +253,7 @@ class MessageRoutingError(HydraRouterError):
             routing_rule: The routing rule that was applied
             available_clients: List of currently available clients
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if source_client:
             context["source_client"] = source_client
         if target_client:
@@ -250,6 +281,11 @@ class TimeoutError(HydraRouterError):
     message timeouts, connection timeouts, and operation timeouts.
     """
 
+    # Type annotations for instance attributes
+    timeout_duration: Optional[float]
+    operation: Optional[str]
+    elapsed_time: Optional[float]
+
     def __init__(
         self,
         message: str,
@@ -266,7 +302,7 @@ class TimeoutError(HydraRouterError):
             operation: The operation that timed out
             elapsed_time: How long the operation actually took
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if timeout_duration:
             context["timeout_duration"] = timeout_duration
         if operation:
@@ -288,6 +324,12 @@ class ConfigurationError(HydraRouterError):
     configuration, invalid settings, or missing configuration values.
     """
 
+    # Type annotations for instance attributes
+    config_key: Optional[str]
+    config_value: Optional[Any]
+    expected_type: Optional[str]
+    valid_values: Optional[list]
+
     def __init__(
         self,
         message: str,
@@ -306,7 +348,7 @@ class ConfigurationError(HydraRouterError):
             expected_type: Expected type for the configuration value
             valid_values: List of valid values for the configuration
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if config_key:
             context["config_key"] = config_key
         if config_value is not None:
@@ -332,6 +374,11 @@ class MessageFormatError(MessageValidationError):
     and RouterConstants formats.
     """
 
+    # Type annotations for instance attributes
+    source_format: Optional[str]
+    target_format: Optional[str]
+    conversion_step: Optional[str]
+
     def __init__(
         self,
         message: str,
@@ -350,7 +397,7 @@ class MessageFormatError(MessageValidationError):
             conversion_step: The step in conversion that failed
             original_message: The original message before conversion
         """
-        context = {}
+        context: Dict[str, Any] = {}
         if source_format:
             context["source_format"] = source_format
         if target_format:
@@ -372,6 +419,9 @@ class ServerNotAvailableError(MessageRoutingError):
     This exception is raised when clients send messages that require
     server processing, but no server is currently connected to the router.
     """
+
+    # Type annotations for instance attributes
+    server_required: bool
 
     def __init__(
         self,
