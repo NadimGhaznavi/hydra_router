@@ -61,7 +61,7 @@ class ZMQMessage:
     """
 
     message_type: MessageType
-    timestamp: float = None
+    timestamp: Optional[float] = None
     client_id: Optional[str] = None
     request_id: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
