@@ -11,7 +11,7 @@ import time
 import uuid
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import zmq
 import zmq.asyncio
@@ -67,7 +67,7 @@ class ZMQMessage:
     request_id: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Set default timestamp if not provided."""
         if self.timestamp is None:
             self.timestamp = time.time()
@@ -131,7 +131,7 @@ class MQClient:
 
         # Message handling
         self.pending_requests: Dict[str, asyncio.Future] = {}
-        self.message_handlers: Dict[MessageType, callable] = {}
+        self.message_handlers: Dict[MessageType, Callable] = {}
 
         # Logging
         self.logger = HydraLog(f"mq_client_{self.client_id}", to_console=True)
@@ -297,7 +297,7 @@ class MQClient:
             # Non-blocking receive
             message = await self.socket.recv_json(zmq.NOBLOCK)
             self.logger.debug(f"Received message: {message.get('elem', 'unknown')}")
-            return message
+            return message  # type: ignore[no-any-return]
         except zmq.Again:
             # No message available
             return None
@@ -342,7 +342,7 @@ class MQClient:
         )
 
         # Create future for response
-        response_future = asyncio.Future()
+        response_future: asyncio.Future[Dict[str, Any]] = asyncio.Future()
         self.pending_requests[request_id] = response_future
 
         try:
@@ -383,7 +383,7 @@ class MQClient:
                 response
                 and response.get("elem") == RouterConstants.CLIENT_REGISTRY_RESPONSE
             ):
-                return response.get("data", {})
+                return response.get("data", {})  # type: ignore[no-any-return]
 
             return None
 
@@ -408,7 +408,7 @@ class MQClient:
             # Map message type to router element
             elem = self._map_message_type_to_elem(message.message_type.value)
 
-            router_message = {
+            router_message: Dict[str, Any] = {
                 RouterConstants.SENDER: self.client_type,
                 RouterConstants.ELEM: elem,
                 RouterConstants.TIMESTAMP: message.timestamp,
@@ -576,7 +576,7 @@ class MQClient:
             self.logger.error(f"Failed to process received message: {e}")
 
     def register_message_handler(
-        self, message_type: MessageType, handler: callable
+        self, message_type: MessageType, handler: Callable
     ) -> None:
         """
         Register a handler for a specific message type.
@@ -621,12 +621,17 @@ class MQClient:
             "registered_handlers": list(self.message_handlers.keys()),
         }
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "MQClient":
         """Async context manager entry."""
         await self.connect()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(
+        self,
+        exc_type: Optional[type],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[Any],
+    ) -> bool:
         """Async context manager exit."""
         await self.disconnect()
         return False
