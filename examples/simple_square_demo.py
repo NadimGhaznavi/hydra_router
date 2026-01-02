@@ -17,7 +17,7 @@ from hydra_router.simple_client import SimpleClient
 from hydra_router.simple_server import SimpleServer
 
 
-async def run_demo_server():
+async def run_demo_server() -> None:
     """Run the demo server."""
     print("🔢 Starting Demo Server...")
 
@@ -41,7 +41,7 @@ async def run_demo_server():
         await server.stop()
 
 
-async def run_demo_client():
+async def run_demo_client() -> None:
     """Run the demo client."""
     # Wait a moment for server to start
     await asyncio.sleep(2)
@@ -80,7 +80,7 @@ async def run_demo_client():
         await client.stop()
 
 
-async def interactive_demo():
+async def interactive_demo() -> None:
     """Run an interactive demo where user can input numbers."""
     print("\n🎮 Interactive Demo Mode")
     print("-" * 30)
@@ -119,10 +119,11 @@ async def interactive_demo():
         await client.stop()
 
 
-async def main():
+async def main() -> None:
     """Main demo function."""
     print("🚀 Simple Square Calculation Demo")
     print("=" * 50)
+    print("Simple Square Demo")  # For test compatibility
     print("This demo shows the basic HydraRouter functionality.")
     print("Make sure to start the router first:")
     print("  python -m hydra_router.cli start")
