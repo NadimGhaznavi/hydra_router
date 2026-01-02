@@ -11,8 +11,8 @@ import sys
 import time
 from typing import Optional
 
-from .constants.DMsgType import DMsgType
 from .constants.DHydraLog import DHydraLog
+from .constants.DMsgType import DMsgType
 from .constants.DRouter import DRouter
 from .mq_client import MQClient, ZMQMessage
 from .util.HydraLog import HydraLog

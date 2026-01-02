@@ -18,7 +18,7 @@ from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.router_constants import RouterConstants
 
 
-async def run_server():
+async def run_server() -> None:
     """Run a simple server that calculates squares."""
     print("🔢 Starting Simple Server...")
 
@@ -29,7 +29,7 @@ async def run_server():
     )
 
     # Handler for square requests
-    def handle_square_request(message: ZMQMessage):
+    def handle_square_request(message: ZMQMessage) -> None:
         data = message.data or {}
         number = data.get("number", 0)
         result = number * number
@@ -62,7 +62,7 @@ async def run_server():
         await server.disconnect()
 
 
-async def run_client():
+async def run_client() -> None:
     """Run a simple client that sends square requests."""
     print("📱 Starting Simple Client...")
 
@@ -73,7 +73,7 @@ async def run_client():
     )
 
     # Handler for square responses
-    def handle_square_response(message: ZMQMessage):
+    def handle_square_response(message: ZMQMessage) -> None:
         data = message.data or {}
         number = data.get("number")
         result = data.get("result")
@@ -110,7 +110,7 @@ async def run_client():
         await client.disconnect()
 
 
-async def main():
+async def main() -> None:
     """Main example function."""
     print("🚀 Basic Client-Server Example")
     print("=" * 40)

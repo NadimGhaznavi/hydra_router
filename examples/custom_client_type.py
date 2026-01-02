@@ -14,7 +14,7 @@ Usage:
 import asyncio
 import time
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from hydra_router.constants.DHydraLog import DHydraLog
 from hydra_router.constants.DMsgType import DMsgType
@@ -101,7 +101,7 @@ class CustomMathClient:
             )
 
     async def perform_operation(
-        self, operation: MathOperation, a: float, b: float = None
+        self, operation: MathOperation, a: float, b: Optional[float] = None
     ) -> None:
         """Perform a mathematical operation.
 
@@ -298,10 +298,14 @@ class CustomMathServer:
 
             # Check if this is a custom math operation
             if data.get("client_type") == "MATH_CLIENT":
-                self._process_custom_operation(data, client_id, request_id)
+                self._process_custom_operation(
+                    data, client_id or "unknown", request_id or "unknown"
+                )
             else:
                 # Handle standard square operations
-                self._process_square_operation(data, client_id, request_id)
+                self._process_square_operation(
+                    data, client_id or "unknown", request_id or "unknown"
+                )
 
         except Exception as e:
             self.logger.error(f"Error handling operation: {e}")
@@ -319,22 +323,31 @@ class CustomMathServer:
         self.operations_processed += 1
 
         try:
-            # Perform the calculation
-            if operation == "add":
-                result = operand_a + operand_b
-            elif operation == "subtract":
-                result = operand_a - operand_b
-            elif operation == "multiply":
-                result = operand_a * operand_b
-            elif operation == "divide":
-                if operand_b == 0:
-                    result = "Error: Division by zero"
-                else:
-                    result = operand_a / operand_b
-            elif operation == "power":
-                result = operand_a**operand_b
+            # Validate operands
+            result: Union[str, float, int]
+            if operand_a is None or operand_b is None:
+                result = "Error: Missing operands"
+            elif not isinstance(operand_a, (int, float)) or not isinstance(
+                operand_b, (int, float)
+            ):
+                result = "Error: Invalid operand types"
             else:
-                result = f"Error: Unknown operation '{operation}'"
+                # Perform the calculation
+                if operation == "add":
+                    result = operand_a + operand_b
+                elif operation == "subtract":
+                    result = operand_a - operand_b
+                elif operation == "multiply":
+                    result = operand_a * operand_b
+                elif operation == "divide":
+                    if operand_b == 0:
+                        result = "Error: Division by zero"
+                    else:
+                        result = operand_a / operand_b
+                elif operation == "power":
+                    result = operand_a**operand_b
+                else:
+                    result = f"Error: Unknown operation '{operation}'"
 
             print(
                 f"📥 Custom Operation #{self.operations_processed}: {operation}({operand_a}, {operand_b}) = {result}"
@@ -393,7 +406,7 @@ class CustomMathServer:
         print(f"📤 Response sent: {number}² = {result}")
 
 
-async def run_custom_server():
+async def run_custom_server() -> None:
     """Run the custom math server."""
     server = CustomMathServer()
 
@@ -410,7 +423,7 @@ async def run_custom_server():
         await server.stop()
 
 
-async def run_custom_client():
+async def run_custom_client() -> None:
     """Run the custom math client with demonstration operations."""
     # Wait for server to start
     await asyncio.sleep(2)
@@ -448,7 +461,7 @@ async def run_custom_client():
         await client.stop()
 
 
-async def main():
+async def main() -> None:
     """Main example function."""
     print("🚀 Custom Client Type Example")
     print("=" * 50)

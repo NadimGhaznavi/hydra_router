@@ -19,7 +19,7 @@ from hydra_router.mq_client import MQClient, ZMQMessage
 class TestZMQMessage:
     """Test ZMQMessage dataclass."""
 
-    def test_zmq_message_creation(self):
+    def test_zmq_message_creation(self) -> None:
         """Test creating ZMQMessage instance."""
         timestamp = time.time()
         message = ZMQMessage(
@@ -36,7 +36,7 @@ class TestZMQMessage:
         assert message.request_id == "req-456"
         assert message.timestamp == timestamp
 
-    def test_zmq_message_default_timestamp(self):
+    def test_zmq_message_default_timestamp(self) -> None:
         """Test that ZMQMessage requires timestamp parameter."""
         # ZMQMessage requires timestamp as a required parameter
         timestamp = time.time()
@@ -44,14 +44,14 @@ class TestZMQMessage:
 
         assert message.timestamp == timestamp
 
-    def test_zmq_message_custom_timestamp(self):
+    def test_zmq_message_custom_timestamp(self) -> None:
         """Test ZMQMessage with custom timestamp."""
         custom_timestamp = 1234567890.0
         message = ZMQMessage(DMsgType.HEARTBEAT, timestamp=custom_timestamp)
 
         assert message.timestamp == custom_timestamp
 
-    def test_zmq_message_optional_fields(self):
+    def test_zmq_message_optional_fields(self) -> None:
         """Test ZMQMessage with optional fields."""
         timestamp = time.time()
         message = ZMQMessage(DMsgType.HEARTBEAT, timestamp=timestamp)
@@ -64,7 +64,7 @@ class TestZMQMessage:
 class TestDMsgType:
     """Test DMsgType enum."""
 
-    def test_message_type_enum_values(self):
+    def test_message_type_enum_values(self) -> None:
         """Test that DMsgType enum has expected values."""
         assert hasattr(DMsgType, "HEARTBEAT")
         assert hasattr(DMsgType, "SQUARE_REQUEST")
@@ -73,7 +73,7 @@ class TestDMsgType:
         assert hasattr(DMsgType, "CLIENT_REGISTRY_REQUEST")
         assert hasattr(DMsgType, "CLIENT_REGISTRY_RESPONSE")
 
-    def test_message_type_string_values(self):
+    def test_message_type_string_values(self) -> None:
         """Test that DMsgType enum values are strings."""
         for message_type in DMsgType:
             assert isinstance(message_type.value, str)
@@ -83,14 +83,14 @@ class TestDMsgType:
 class TestMQClient:
     """Test MQClient class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         self.client_id = "test-client-123"
         self.client_type = DRouter.HYDRA_CLIENT
         self.router_address = "tcp://localhost:5556"
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    def test_mq_client_initialization(self, mock_context):
+    def test_mq_client_initialization(self, mock_context: Mock) -> None:
         """Test MQClient initialization."""
         client = MQClient(
             router_address=self.router_address,
@@ -106,7 +106,7 @@ class TestMQClient:
         assert client.socket is None
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    def test_mq_client_default_values(self, mock_context):
+    def test_mq_client_default_values(self, mock_context: Mock) -> None:
         """Test MQClient with default values."""
         # MQClient requires router_address as first parameter
         client = MQClient(
@@ -119,7 +119,7 @@ class TestMQClient:
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
     @patch("hydra_router.mq_client.zmq.asyncio.Socket")
-    async def test_connect_success(self, mock_socket, mock_context):
+    async def test_connect_success(self, mock_socket: Mock, mock_context: Mock) -> None:
         """Test successful connection."""
         mock_context_instance = Mock()
         mock_socket_instance = Mock()
@@ -140,7 +140,7 @@ class TestMQClient:
         mock_socket_instance.connect.assert_called_once_with(self.router_address)
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    async def test_connect_failure(self, mock_context):
+    async def test_connect_failure(self, mock_context: Mock) -> None:
         """Test connection failure."""
         mock_context_instance = Mock()
         mock_socket_instance = Mock()
@@ -160,7 +160,7 @@ class TestMQClient:
         assert not client.connected
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    async def test_disconnect(self, mock_context):
+    async def test_disconnect(self, mock_context: Mock) -> None:
         """Test disconnection."""
         mock_context_instance = Mock()
         mock_socket_instance = Mock()
@@ -180,7 +180,7 @@ class TestMQClient:
         mock_socket_instance.close.assert_called_once()
         mock_context_instance.term.assert_called_once()
 
-    def test_convert_to_router_format(self):
+    def test_convert_to_router_format(self) -> None:
         """Test converting ZMQMessage to DRouter format."""
         client = MQClient(
             router_address=self.router_address,
@@ -205,7 +205,7 @@ class TestMQClient:
         assert router_message[DRouter.REQUEST_ID] == "req-456"
         assert router_message[DRouter.TIMESTAMP] == 1234567890.0
 
-    def test_convert_to_router_format_minimal(self):
+    def test_convert_to_router_format_minimal(self) -> None:
         """Test converting minimal ZMQMessage to DRouter format."""
         client = MQClient(
             router_address=self.router_address,
@@ -225,7 +225,7 @@ class TestMQClient:
         assert DRouter.CLIENT_ID not in router_message
         assert DRouter.REQUEST_ID not in router_message
 
-    def test_convert_from_router_format(self):
+    def test_convert_from_router_format(self) -> None:
         """Test converting DRouter format to ZMQMessage."""
         client = MQClient(
             router_address=self.router_address,
@@ -250,7 +250,7 @@ class TestMQClient:
         assert zmq_message.request_id == "req-456"
         assert zmq_message.timestamp == 1234567890.0
 
-    def test_convert_from_router_format_minimal(self):
+    def test_convert_from_router_format_minimal(self) -> None:
         """Test converting minimal DRouter format to ZMQMessage."""
         client = MQClient(
             router_address=self.router_address,
@@ -272,7 +272,7 @@ class TestMQClient:
         assert zmq_message.request_id is None
         assert zmq_message.timestamp == 1234567890.0
 
-    def test_convert_from_router_format_unknown_message_type(self):
+    def test_convert_from_router_format_unknown_message_type(self) -> None:
         """Test converting DRouter with unknown message type."""
         client = MQClient(
             router_address=self.router_address,
@@ -290,7 +290,7 @@ class TestMQClient:
             client._convert_from_router_format(router_message)
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    async def test_send_message_not_connected(self, mock_context):
+    async def test_send_message_not_connected(self, mock_context: Mock) -> None:
         """Test sending message when not connected."""
         client = MQClient(
             router_address=self.router_address,
@@ -304,7 +304,7 @@ class TestMQClient:
             await client.send_message(message)
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    async def test_register_message_handler(self, mock_context):
+    async def test_register_message_handler(self, mock_context: Mock) -> None:
         """Test registering message handler."""
         client = MQClient(
             router_address="tcp://localhost:5556",
@@ -319,7 +319,7 @@ class TestMQClient:
         assert client.message_handlers[DMsgType.SQUARE_RESPONSE] == handler
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    async def test_unregister_message_handler(self, mock_context):
+    async def test_unregister_message_handler(self, mock_context: Mock) -> None:
         """Test unregistering message handler."""
         client = MQClient(
             router_address="tcp://localhost:5556",
@@ -333,7 +333,7 @@ class TestMQClient:
 
         assert DMsgType.SQUARE_RESPONSE not in client.message_handlers
 
-    def test_create_heartbeat_message(self):
+    def test_create_heartbeat_message(self) -> None:
         """Test creating heartbeat message."""
         client = MQClient(
             router_address="tcp://localhost:5556",
@@ -349,7 +349,7 @@ class TestMQClient:
         assert heartbeat.request_id is None
 
     @patch("hydra_router.mq_client.zmq.asyncio.Context")
-    async def test_context_manager(self, mock_context):
+    async def test_context_manager(self, mock_context: Mock) -> None:
         """Test using MQClient as context manager."""
         mock_context_instance = Mock()
         mock_socket_instance = Mock()

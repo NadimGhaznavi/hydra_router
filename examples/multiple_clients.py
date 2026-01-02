@@ -23,7 +23,7 @@ from hydra_router.router_constants import RouterConstants
 class MultiClientServer:
     """Server that handles requests from multiple clients."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the multi-client server."""
         self.client = MQClient(
             router_address="tcp://localhost:5556",
@@ -32,7 +32,7 @@ class MultiClientServer:
         )
         self.request_count = 0
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the server."""
         await self.client.connect()
         self.client.register_message_handler(
@@ -40,12 +40,12 @@ class MultiClientServer:
         )
         print("🔢 Multi-Client Server started")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the server."""
         await self.client.disconnect()
         print(f"🛑 Server stopped (processed {self.request_count} requests)")
 
-    def _handle_request(self, message: ZMQMessage):
+    def _handle_request(self, message: ZMQMessage) -> None:
         """Handle square calculation request."""
         self.request_count += 1
         data = message.data or {}
@@ -77,7 +77,7 @@ class MultiClientServer:
 class TestClient:
     """Individual test client."""
 
-    def __init__(self, client_id: str, request_count: int = 5):
+    def __init__(self, client_id: str, request_count: int = 5) -> None:
         """Initialize the test client."""
         self.client_id = client_id
         self.request_count = request_count
@@ -88,7 +88,7 @@ class TestClient:
         )
         self.responses_received = 0
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the client."""
         await self.client.connect()
         self.client.register_message_handler(
@@ -96,14 +96,14 @@ class TestClient:
         )
         print(f"📱 Client {self.client_id} connected")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the client."""
         await self.client.disconnect()
         print(
             f"👋 Client {self.client_id} disconnected ({self.responses_received} responses)"
         )
 
-    def _handle_response(self, message: ZMQMessage):
+    def _handle_response(self, message: ZMQMessage) -> None:
         """Handle square calculation response."""
         self.responses_received += 1
         data = message.data or {}
@@ -113,7 +113,7 @@ class TestClient:
 
         print(f"📥 {self.client_id}: Response #{request_number}: {number}² = {result}")
 
-    async def send_requests(self):
+    async def send_requests(self) -> None:
         """Send multiple square requests."""
         for i in range(self.request_count):
             # Random number between 1 and 20
@@ -136,7 +136,7 @@ class TestClient:
             await asyncio.sleep(random.uniform(0.5, 2.0))
 
 
-async def run_server(server: MultiClientServer):
+async def run_server(server: MultiClientServer) -> None:
     """Run the server task."""
     await server.start()
 
@@ -150,7 +150,7 @@ async def run_server(server: MultiClientServer):
         await server.stop()
 
 
-async def run_client(client: TestClient):
+async def run_client(client: TestClient) -> None:
     """Run a client task."""
     await client.start()
 
@@ -162,7 +162,7 @@ async def run_client(client: TestClient):
         await client.stop()
 
 
-async def main():
+async def main() -> None:
     """Main example function."""
     print("🚀 Multiple Clients Example")
     print("=" * 50)

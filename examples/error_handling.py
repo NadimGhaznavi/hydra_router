@@ -19,7 +19,7 @@ from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.router_constants import RouterConstants
 
 
-async def test_connection_failure():
+async def test_connection_failure() -> None:
     """Test connection to non-existent router."""
     print("🔍 Testing connection failure...")
 
@@ -39,7 +39,7 @@ async def test_connection_failure():
             await client.disconnect()
 
 
-async def test_invalid_messages():
+async def test_invalid_messages() -> None:
     """Test sending invalid messages."""
     print("\n🔍 Testing invalid message handling...")
 
@@ -87,7 +87,7 @@ async def test_invalid_messages():
         await client.disconnect()
 
 
-async def test_client_reconnection():
+async def test_client_reconnection() -> None:
     """Test client reconnection after disconnection."""
     print("\n🔍 Testing client reconnection...")
 
@@ -141,7 +141,7 @@ async def test_client_reconnection():
             await client.disconnect()
 
 
-async def test_server_error_handling():
+async def test_server_error_handling() -> None:
     """Test server error handling with a mock server."""
     print("\n🔍 Testing server error handling...")
 
@@ -151,7 +151,7 @@ async def test_server_error_handling():
         client_id="error-handling-server",
     )
 
-    def handle_request_with_errors(message: ZMQMessage):
+    def handle_request_with_errors(message: ZMQMessage) -> None:
         """Handle requests with intentional error scenarios."""
         try:
             data = message.data or {}
@@ -227,7 +227,7 @@ async def test_server_error_handling():
                 timestamp=time.time(),
                 client_id="error-test-client",
                 request_id=f"error-test-{i+1}",
-                data=test_data,
+                data=test_data if isinstance(test_data, dict) else {"data": test_data},
             )
 
             await client.send_message(message)
@@ -244,7 +244,7 @@ async def test_server_error_handling():
         await server.disconnect()
 
 
-async def test_timeout_scenarios():
+async def test_timeout_scenarios() -> None:
     """Test timeout and recovery scenarios."""
     print("\n🔍 Testing timeout scenarios...")
 
@@ -284,7 +284,7 @@ async def test_timeout_scenarios():
         await client.disconnect()
 
 
-async def main():
+async def main() -> None:
     """Main error handling example."""
     print("🚀 Error Handling Example")
     print("=" * 40)

@@ -15,8 +15,8 @@ from typing import Any, Callable, Dict, Optional
 import zmq
 import zmq.asyncio
 
-from .constants.DMsgType import DMsgType
 from .constants.DHydraLog import DHydraLog
+from .constants.DMsgType import DMsgType
 from .constants.DRouter import DRouter
 from .exceptions import (
     ConnectionError,
