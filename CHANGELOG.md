@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.3.1] - 2026-01-02 08:41
+
+
 ### Fixed
 - **Tests**: Resolved failing unit tests and enabled asyncio auto mode for improved test execution
   - Added missing ERROR message type to MessageType enum
