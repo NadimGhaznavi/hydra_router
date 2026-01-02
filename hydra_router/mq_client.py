@@ -166,17 +166,13 @@ class MQClient:
             # Connect to router
             self.socket.connect(self.router_address)
 
-            # Give ZeroMQ time to establish connection
-            await asyncio.sleep(0.1)
+            # Set connected flag
+            self.connected = True
 
-            # Send initial heartbeat to establish connection
-            await self._send_heartbeat()
-
-            # Start background tasks
+            # Start background tasks (heartbeat loop will send first heartbeat)
             self.heartbeat_task = asyncio.create_task(self._heartbeat_loop())
             self.receive_task = asyncio.create_task(self._receive_loop())
 
-            self.connected = True
             self.logger.info(
                 f"Successfully connected to router as {self.client_type} ({self.client_id})"
             )
@@ -498,6 +494,14 @@ class MQClient:
 
     async def _heartbeat_loop(self) -> None:
         """Background task for sending periodic heartbeats."""
+        # Send immediate heartbeat on start
+        try:
+            if self.connected:
+                await self._send_heartbeat()
+        except Exception as e:
+            self.logger.error(f"Initial heartbeat error: {e}")
+
+        # Then send periodic heartbeats
         while self.connected:
             try:
                 await asyncio.sleep(self.heartbeat_interval)

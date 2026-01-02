@@ -48,7 +48,7 @@ class ClientRegistry:
             self.clients[client_id] = (client_type, time.time())
 
             # Track server separately
-            if client_type == DRouter.HYDRA_SERVER:
+            if client_type in [DRouter.HYDRA_SERVER, DRouter.SIMPLE_SERVER]:
                 if self.server_id and self.server_id != client_id:
                     self.logger.warning(
                         f"Replacing existing server {self.server_id} with {client_id}"
