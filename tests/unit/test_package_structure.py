@@ -8,7 +8,7 @@ class TestPackageStructure:
 
     def test_package_version(self) -> None:
         """Test that package has correct version."""
-        assert hydra_router.__version__ == "0.3.7"
+        assert hydra_router.__version__ == "0.3.8"
 
     def test_package_author(self) -> None:
         """Test that package has correct author."""
