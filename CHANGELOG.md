@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.2.6] - 2026-01-01 21:28
+
+
 ### Added
 - **HydraRouter Core**: Complete Phase 4 implementation of central message routing system
   - Implemented ClientRegistry for thread-safe client tracking with heartbeat monitoring
