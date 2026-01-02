@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [Release 0.3.11] - 2026-01-02 17:18
+
+
 ### Added
 - **Constants**: Add constants package __init__.py with proper exports for clean package imports
 - **Integration Tests**: Add comprehensive real communication tests with end-to-end ZeroMQ testing
