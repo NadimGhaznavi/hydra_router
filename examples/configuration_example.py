@@ -23,13 +23,13 @@ async def example_basic_configuration():
 
     # Basic router with default settings
     router = HydraRouter()
-    print(f"Default address: {router.address}")
-    print(f"Default port: {router.port}")
+    print(f"Default address: {router.router_address}")
+    print(f"Default port: {router.router_port}")
 
     # Custom configuration
-    custom_router = HydraRouter(address="0.0.0.0", port=5557)
-    print(f"Custom address: {custom_router.address}")
-    print(f"Custom port: {custom_router.port}")
+    custom_router = HydraRouter(router_address="0.0.0.0", router_port=5557)
+    print(f"Custom address: {custom_router.router_address}")
+    print(f"Custom port: {custom_router.router_port}")
 
 
 async def example_client_configuration():

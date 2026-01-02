@@ -195,7 +195,7 @@ Deployment Patterns
        logger = HydraLog("production_router", to_console=True)
        logger.loglevel(DHydraLog.INFO)
 
-       router = HydraRouter(address="0.0.0.0", port=5556)
+       router = HydraRouter(router_address="0.0.0.0", router_port=5556)
 
        # Graceful shutdown handling
        def signal_handler(signum, frame):
@@ -331,7 +331,7 @@ Integration Testing
    @pytest.mark.asyncio
    async def test_full_system():
        # Start router
-       router = HydraRouter(address="127.0.0.1", port=5557)
+       router = HydraRouter(router_address="127.0.0.1", router_port=5557)
        await router.start()
 
        try:

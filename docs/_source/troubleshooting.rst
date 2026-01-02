@@ -292,7 +292,7 @@ Router Optimization
 .. code-block:: python
 
    # Adjust client pruning interval
-   router = HydraRouter(address="0.0.0.0", port=5556)
+   router = HydraRouter(router_address="0.0.0.0", router_port=5556)
 
    # Prune inactive clients more frequently
    async def custom_pruning():

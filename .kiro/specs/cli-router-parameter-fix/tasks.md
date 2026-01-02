@@ -6,7 +6,7 @@ This implementation plan addresses the parameter mismatch between the CLI and Hy
 
 ## Tasks
 
-- [-] 1. Fix CLI parameter mapping
+- [x] 1. Fix CLI parameter mapping
   - Update the HydraRouter constructor call in cli.py to use correct parameter names
   - Change `address=args.address, port=args.port` to `router_address=args.address, router_port=args.port`
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
@@ -21,18 +21,18 @@ This implementation plan addresses the parameter mismatch between the CLI and Hy
   - Verify router starts successfully with specified address and port
   - _Requirements: 1.3, 1.5_
 
-- [ ] 4. Verify existing tests still pass
+- [x] 4. Verify existing tests still pass
   - Run existing test suite to ensure no regressions
   - Confirm all router functionality works after the parameter fix
   - _Requirements: 1.5, 3.1_
 
-- [ ] 5. Test CLI functionality manually
+- [x] 5. Test CLI functionality manually
   - Test `hydra-router start --address 127.0.0.1 --port 5556` command
   - Verify router starts without TypeError
   - Confirm router binds to correct address and port
   - _Requirements: 1.1, 1.3, 3.2_
 
-- [ ] 6. Checkpoint - Ensure all tests pass
+- [x] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
