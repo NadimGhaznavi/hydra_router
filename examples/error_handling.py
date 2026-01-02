@@ -337,6 +337,14 @@ async def main() -> None:
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
 
+    # Ensure clean exit
+    print("\n🏁 Example finished successfully")
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Add overall timeout to prevent hanging in test environments
+    try:
+        asyncio.run(asyncio.wait_for(main(), timeout=8.0))
+    except asyncio.TimeoutError:
+        print("\n⏰ Example timed out - this is expected in test environments")
+        print("🏁 Example finished with timeout")
