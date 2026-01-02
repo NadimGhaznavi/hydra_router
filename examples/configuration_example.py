@@ -12,7 +12,6 @@ Usage:
 
 import asyncio
 
-from hydra_router.mq_client import MQClient
 from hydra_router.router import HydraRouter
 from hydra_router.router_constants import RouterConstants
 

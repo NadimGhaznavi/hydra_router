@@ -18,7 +18,6 @@ from typing import Any, Dict, Optional
 
 from hydra_router.logging_config import setup_logging
 from hydra_router.mq_client import MessageType, MQClient, ZMQMessage
-from hydra_router.router_constants import RouterConstants
 
 
 class CustomMessageType(Enum):
@@ -76,7 +75,7 @@ class CustomMathClient:
             self.logger.info(f"Custom math client {self.client_id} connected")
             print(f"🧮 Custom Math Client connected to {self.router_address}")
             print(f"Client ID: {self.client_id}")
-            print(f"Client Type: MATH_CLIENT")
+            print("Client Type: MATH_CLIENT")
 
             # Register custom message handlers
             self.client.register_message_handler(
@@ -259,7 +258,7 @@ class CustomMathServer:
             self.logger.info(f"Custom math server {self.server_id} connected")
             print(f"🧮 Custom Math Server connected to {self.router_address}")
             print(f"Server ID: {self.server_id}")
-            print(f"Server Type: MATH_SERVER")
+            print("Server Type: MATH_SERVER")
             print("Ready to process mathematical operations...")
 
             # Register message handlers
