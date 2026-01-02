@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **CLI**: Correct setup_logging function call signature
+
 ## [Release 0.3.3] - 2026-01-02 12:03
 
 
