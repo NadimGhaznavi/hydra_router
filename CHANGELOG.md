@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Constants**: Add constants package __init__.py with proper exports for clean package imports
 - **Integration Tests**: Add comprehensive real communication tests with end-to-end ZeroMQ testing
 
+### Fixed
+- **Tests**: Resolve type annotations and improve test reliability in integration tests
+
 ### Changed
 - **Examples**: Migrate RouterConstants to DRouter across all example files for consistency
 - **Validation**: Remove redundant variable assignment in MessageValidator initialization
