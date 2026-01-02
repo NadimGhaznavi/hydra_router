@@ -20,7 +20,6 @@ class MessageValidator:
 
     def __init__(self) -> None:
         """Initialize the message validator."""
-        self.router_constants = DRouter
 
     def validate_router_message(self, message: Dict[str, Any]) -> Tuple[bool, str]:
         """
@@ -40,7 +39,7 @@ class MessageValidator:
 
         # 2. Required field validation
         missing_fields = []
-        for field in self.router_constants.REQUIRED_FIELDS:
+        for field in DRouter.REQUIRED_FIELDS:
             if field not in message:
                 missing_fields.append(field)
 
@@ -70,7 +69,7 @@ class MessageValidator:
 
     def _validate_sender_field(self, message: Dict[str, Any]) -> Tuple[bool, str]:
         """Validate the sender field."""
-        sender = message.get(self.router_constants.SENDER)
+        sender = message.get(DRouter.SENDER)
 
         if not isinstance(sender, str):
             return False, f"Field 'sender' must be string, got {type(sender).__name__}"
@@ -81,8 +80,8 @@ class MessageValidator:
                 f"Field 'sender' must be non-empty string, got: {repr(sender)}",
             )
 
-        if not self.router_constants.is_valid_client_type(sender):
-            valid_types = ", ".join(self.router_constants.VALID_CLIENT_TYPES)
+        if not DRouter.is_valid_client_type(sender):
+            valid_types = ", ".join(DRouter.VALID_CLIENT_TYPES)
             return (
                 False,
                 f"Invalid sender type '{sender}', expected one of: {valid_types}",
@@ -92,7 +91,7 @@ class MessageValidator:
 
     def _validate_elem_field(self, message: Dict[str, Any]) -> Tuple[bool, str]:
         """Validate the elem field."""
-        elem = message.get(self.router_constants.ELEM)
+        elem = message.get(DRouter.ELEM)
 
         if not isinstance(elem, str):
             return False, f"Field 'elem' must be string, got {type(elem).__name__}"
@@ -105,8 +104,8 @@ class MessageValidator:
     def _validate_optional_fields(self, message: Dict[str, Any]) -> Tuple[bool, str]:
         """Validate optional fields if present."""
         # Validate data field
-        if self.router_constants.DATA in message:
-            data = message[self.router_constants.DATA]
+        if DRouter.DATA in message:
+            data = message[DRouter.DATA]
             if data is not None and not isinstance(data, dict):
                 return (
                     False,
@@ -114,8 +113,8 @@ class MessageValidator:
                 )
 
         # Validate client_id field
-        if self.router_constants.CLIENT_ID in message:
-            client_id = message[self.router_constants.CLIENT_ID]
+        if DRouter.CLIENT_ID in message:
+            client_id = message[DRouter.CLIENT_ID]
             if not isinstance(client_id, str):
                 return (
                     False,
@@ -128,8 +127,8 @@ class MessageValidator:
                 )
 
         # Validate timestamp field
-        if self.router_constants.TIMESTAMP in message:
-            timestamp = message[self.router_constants.TIMESTAMP]
+        if DRouter.TIMESTAMP in message:
+            timestamp = message[DRouter.TIMESTAMP]
             if not isinstance(timestamp, (int, float)):
                 return (
                     False,
@@ -142,8 +141,8 @@ class MessageValidator:
                 )
 
         # Validate request_id field
-        if self.router_constants.REQUEST_ID in message:
-            request_id = message[self.router_constants.REQUEST_ID]
+        if DRouter.REQUEST_ID in message:
+            request_id = message[DRouter.REQUEST_ID]
             if not isinstance(request_id, str):
                 return (
                     False,
@@ -164,24 +163,19 @@ class MessageValidator:
 
             message_size = len(json.dumps(message).encode("utf-8"))
 
-            if message_size > self.router_constants.MAX_MESSAGE_SIZE:
+            if message_size > DRouter.MAX_MESSAGE_SIZE:
                 return (
                     False,
-                    f"Message size {message_size} bytes exceeds maximum {self.router_constants.MAX_MESSAGE_SIZE} bytes",
+                    f"Message size {message_size} bytes exceeds maximum {DRouter.MAX_MESSAGE_SIZE} bytes",
                 )
 
             # Validate data field size if present
-            if (
-                self.router_constants.DATA in message
-                and message[self.router_constants.DATA] is not None
-            ):
-                data_size = len(
-                    json.dumps(message[self.router_constants.DATA]).encode("utf-8")
-                )
-                if data_size > self.router_constants.MAX_DATA_SIZE:
+            if DRouter.DATA in message and message[DRouter.DATA] is not None:
+                data_size = len(json.dumps(message[DRouter.DATA]).encode("utf-8"))
+                if data_size > DRouter.MAX_DATA_SIZE:
                     return (
                         False,
-                        f"Data field size {data_size} bytes exceeds maximum {self.router_constants.MAX_DATA_SIZE} bytes",
+                        f"Data field size {data_size} bytes exceeds maximum {DRouter.MAX_DATA_SIZE} bytes",
                     )
 
         except (TypeError, ValueError) as e:
@@ -205,37 +199,37 @@ class MessageValidator:
             return False, f"Message must be dictionary, got {type(message).__name__}"
 
         for field_name, field_value in message.items():
-            if field_name == self.router_constants.SENDER:
+            if field_name == DRouter.SENDER:
                 if not isinstance(field_value, str):
                     return (
                         False,
                         f"Field 'sender' must be string, got {type(field_value).__name__}",
                     )
-            elif field_name == self.router_constants.ELEM:
+            elif field_name == DRouter.ELEM:
                 if not isinstance(field_value, str):
                     return (
                         False,
                         f"Field 'elem' must be string, got {type(field_value).__name__}",
                     )
-            elif field_name == self.router_constants.DATA:
+            elif field_name == DRouter.DATA:
                 if field_value is not None and not isinstance(field_value, dict):
                     return (
                         False,
                         f"Field 'data' must be dict or None, got {type(field_value).__name__}",
                     )
-            elif field_name == self.router_constants.CLIENT_ID:
+            elif field_name == DRouter.CLIENT_ID:
                 if not isinstance(field_value, str):
                     return (
                         False,
                         f"Field 'client_id' must be string, got {type(field_value).__name__}",
                     )
-            elif field_name == self.router_constants.TIMESTAMP:
+            elif field_name == DRouter.TIMESTAMP:
                 if not isinstance(field_value, (int, float)):
                     return (
                         False,
                         f"Field 'timestamp' must be number, got {type(field_value).__name__}",
                     )
-            elif field_name == self.router_constants.REQUEST_ID:
+            elif field_name == DRouter.REQUEST_ID:
                 if not isinstance(field_value, str):
                     return (
                         False,
@@ -254,7 +248,7 @@ class MessageValidator:
         Returns:
             True if valid, False otherwise
         """
-        return self.router_constants.is_valid_client_type(sender)
+        return DRouter.is_valid_client_type(sender)
 
     def get_validation_error_details(self, message: Dict[str, Any]) -> str:
         """
@@ -280,15 +274,15 @@ class MessageValidator:
         # Expected format
         details.append("\n=== Expected DRouter Format ===")
         expected_format = {
-            self.router_constants.SENDER: f"string (one of: {', '.join(self.router_constants.VALID_CLIENT_TYPES)})",
-            self.router_constants.ELEM: "string (message type)",
-            self.router_constants.DATA: "dict (optional)",
-            self.router_constants.CLIENT_ID: "string (optional)",
-            self.router_constants.TIMESTAMP: "number (optional)",
-            self.router_constants.REQUEST_ID: "string (optional)",
+            DRouter.SENDER: f"string (one of: {', '.join(DRouter.VALID_CLIENT_TYPES)})",
+            DRouter.ELEM: "string (message type)",
+            DRouter.DATA: "dict (optional)",
+            DRouter.CLIENT_ID: "string (optional)",
+            DRouter.TIMESTAMP: "number (optional)",
+            DRouter.REQUEST_ID: "string (optional)",
         }
         for field, description in expected_format.items():
-            required = field in self.router_constants.REQUIRED_FIELDS
+            required = field in DRouter.REQUIRED_FIELDS
             status = "REQUIRED" if required else "OPTIONAL"
             details.append(f"  {field}: {description} [{status}]")
 
@@ -303,20 +297,16 @@ class MessageValidator:
         details.append("\n=== Debugging Hints ===")
         if isinstance(message, dict):
             # Check for common issues
-            if "message_type" in message and self.router_constants.ELEM not in message:
+            if "message_type" in message and DRouter.ELEM not in message:
                 details.append(
                     "- Detected 'message_type' field instead of 'elem' - this suggests ZMQMessage format instead of DRouter format"
                 )
 
-            missing_required = [
-                f for f in self.router_constants.REQUIRED_FIELDS if f not in message
-            ]
+            missing_required = [f for f in DRouter.REQUIRED_FIELDS if f not in message]
             if missing_required:
                 details.append(f"- Missing required fields: {missing_required}")
 
-            invalid_fields = [
-                f for f in message.keys() if f not in self.router_constants.ALL_FIELDS
-            ]
+            invalid_fields = [f for f in message.keys() if f not in DRouter.ALL_FIELDS]
             if invalid_fields:
                 details.append(
                     f"- Unknown fields (not in DRouter format): {invalid_fields}"
@@ -344,18 +334,18 @@ class MessageValidator:
             ValueError: If sender type is invalid
         """
         if not self.validate_sender_type(sender):
-            valid_types = ", ".join(self.router_constants.VALID_CLIENT_TYPES)
+            valid_types = ", ".join(DRouter.VALID_CLIENT_TYPES)
             raise ValueError(
                 f"Invalid sender type '{sender}', must be one of: {valid_types}"
             )
 
         return {
-            self.router_constants.SENDER: sender,
-            self.router_constants.ELEM: elem,
-            self.router_constants.DATA: None,
-            self.router_constants.CLIENT_ID: "",
-            self.router_constants.TIMESTAMP: 0.0,
-            self.router_constants.REQUEST_ID: "",
+            DRouter.SENDER: sender,
+            DRouter.ELEM: elem,
+            DRouter.DATA: None,
+            DRouter.CLIENT_ID: "",
+            DRouter.TIMESTAMP: 0.0,
+            DRouter.REQUEST_ID: "",
         }
 
 
