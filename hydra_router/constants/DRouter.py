@@ -1,5 +1,5 @@
 """
-RouterConstants - Message format definitions and constants for the Hydra Router system.
+DRouter - Message format definitions and constants for the Hydra Router system.
 
 This module provides centralized constants and message format definitions for all
 components of the Hydra Router system, ensuring consistent communication between
@@ -7,7 +7,7 @@ clients, servers, and the router.
 """
 
 
-class RouterConstants:
+class DRouter:
     """
     Centralized constants and message format definitions for the Hydra Router system.
 
@@ -219,6 +219,6 @@ class RouterConstants:
 
 
 # Convenience constants for backward compatibility and ease of use
-HEARTBEAT_INTERVAL = RouterConstants.HEARTBEAT_INTERVAL
-DEFAULT_ROUTER_PORT = RouterConstants.DEFAULT_ROUTER_PORT
-DEFAULT_ROUTER_ADDRESS = RouterConstants.DEFAULT_ROUTER_ADDRESS
+HEARTBEAT_INTERVAL = DRouter.HEARTBEAT_INTERVAL
+DEFAULT_ROUTER_PORT = DRouter.DEFAULT_ROUTER_PORT
+DEFAULT_ROUTER_ADDRESS = DRouter.DEFAULT_ROUTER_ADDRESS

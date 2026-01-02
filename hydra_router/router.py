@@ -42,13 +42,13 @@ class ClientRegistry:
 
         Args:
             client_id: Unique client identifier
-            client_type: Type of client (must be valid RouterConstants type)
+            client_type: Type of client (must be valid DRouter type)
         """
         async with self.lock:
             self.clients[client_id] = (client_type, time.time())
 
             # Track server separately
-            if client_type == RouterConstants.HYDRA_SERVER:
+            if client_type == DRouter.HYDRA_SERVER:
                 if self.server_id and self.server_id != client_id:
                     self.logger.warning(
                         f"Replacing existing server {self.server_id} with {client_id}"
@@ -196,20 +196,16 @@ class MessageRouter:
             sender_id: ID of the client that sent the message
             message: The message to route
         """
-        sender_type = message.get(RouterConstants.SENDER)
-        elem = message.get(RouterConstants.ELEM)
+        sender_type = message.get(DRouter.SENDER)
+        elem = message.get(DRouter.ELEM)
 
         self.logger.debug(f"Routing message from {sender_id} ({sender_type}): {elem}")
 
         # Handle different routing scenarios
-        if (
-            sender_type == RouterConstants.HYDRA_CLIENT
-            or sender_type == RouterConstants.SIMPLE_CLIENT
-        ):
+        if sender_type == DRouter.HYDRA_CLIENT or sender_type == DRouter.SIMPLE_CLIENT:
             await self._route_client_message(sender_id, message)
         elif (
-            sender_type == RouterConstants.HYDRA_SERVER
-            or sender_type == RouterConstants.SIMPLE_SERVER
+            sender_type == DRouter.HYDRA_SERVER or sender_type == DRouter.SIMPLE_SERVER
         ):
             await self._route_server_message(sender_id, message)
         else:
@@ -219,15 +215,15 @@ class MessageRouter:
         self, sender_id: str, message: Dict[str, Any]
     ) -> None:
         """Route a message from a client."""
-        elem = message.get(RouterConstants.ELEM)
+        elem = message.get(DRouter.ELEM)
 
         # Handle client registry requests
-        if elem == RouterConstants.CLIENT_REGISTRY_REQUEST:
+        if elem == DRouter.CLIENT_REGISTRY_REQUEST:
             await self._handle_client_registry_request(sender_id, message)
             return
 
         # Handle heartbeat messages (no forwarding needed)
-        if elem == RouterConstants.HEARTBEAT:
+        if elem == DRouter.HEARTBEAT:
             await self.client_registry.update_heartbeat(sender_id)
             return
 
@@ -241,10 +237,10 @@ class MessageRouter:
         self, sender_id: str, message: Dict[str, Any]
     ) -> None:
         """Route a message from a server."""
-        elem = message.get(RouterConstants.ELEM)
+        elem = message.get(DRouter.ELEM)
 
         # Handle heartbeat messages (no forwarding needed)
-        if elem == RouterConstants.HEARTBEAT:
+        if elem == DRouter.HEARTBEAT:
             await self.client_registry.update_heartbeat(sender_id)
             return
 
@@ -268,7 +264,7 @@ class MessageRouter:
                 raise MessageRoutingError(
                     f"Failed to forward message to server {server_id}",
                     target_client=server_id,
-                    message_type=message.get(RouterConstants.ELEM),
+                    message_type=message.get(DRouter.ELEM),
                 )
 
     async def _broadcast_to_clients(
@@ -282,8 +278,8 @@ class MessageRouter:
             if client_id == exclude_sender:
                 continue
             if client_info["client_type"] in [
-                RouterConstants.HYDRA_SERVER,
-                RouterConstants.SIMPLE_SERVER,
+                DRouter.HYDRA_SERVER,
+                DRouter.SIMPLE_SERVER,
             ]:
                 continue
 
@@ -303,12 +299,12 @@ class MessageRouter:
             registry_data = await self.client_registry.get_registry_data()
 
             response = {
-                RouterConstants.SENDER: RouterConstants.HYDRA_ROUTER,
-                RouterConstants.ELEM: RouterConstants.CLIENT_REGISTRY_RESPONSE,
-                RouterConstants.DATA: registry_data,
-                RouterConstants.CLIENT_ID: RouterConstants.HYDRA_ROUTER,
-                RouterConstants.TIMESTAMP: time.time(),
-                RouterConstants.REQUEST_ID: message.get(RouterConstants.REQUEST_ID),
+                DRouter.SENDER: DRouter.HYDRA_ROUTER,
+                DRouter.ELEM: DRouter.CLIENT_REGISTRY_RESPONSE,
+                DRouter.DATA: registry_data,
+                DRouter.CLIENT_ID: DRouter.HYDRA_ROUTER,
+                DRouter.TIMESTAMP: time.time(),
+                DRouter.REQUEST_ID: message.get(DRouter.REQUEST_ID),
             }
 
             await self.socket.send_multipart(
@@ -325,16 +321,16 @@ class MessageRouter:
     ) -> None:
         """Send a 'no server connected' error response to a client."""
         error_response = {
-            RouterConstants.SENDER: RouterConstants.HYDRA_ROUTER,
-            RouterConstants.ELEM: RouterConstants.ERROR,
-            RouterConstants.DATA: {
-                "error": RouterConstants.NO_SERVER_CONNECTED,
+            DRouter.SENDER: DRouter.HYDRA_ROUTER,
+            DRouter.ELEM: DRouter.ERROR,
+            DRouter.DATA: {
+                "error": DRouter.NO_SERVER_CONNECTED,
                 "message": "No server connected to handle client request",
-                "original_request": message.get(RouterConstants.ELEM),
+                "original_request": message.get(DRouter.ELEM),
             },
-            RouterConstants.CLIENT_ID: RouterConstants.HYDRA_ROUTER,
-            RouterConstants.TIMESTAMP: time.time(),
-            RouterConstants.REQUEST_ID: message.get(RouterConstants.REQUEST_ID),
+            DRouter.CLIENT_ID: DRouter.HYDRA_ROUTER,
+            DRouter.TIMESTAMP: time.time(),
+            DRouter.REQUEST_ID: message.get(DRouter.REQUEST_ID),
         }
 
         try:
@@ -357,10 +353,10 @@ class HydraRouter:
 
     def __init__(
         self,
-        router_address: str = RouterConstants.DEFAULT_ROUTER_ADDRESS,
-        router_port: int = RouterConstants.DEFAULT_ROUTER_PORT,
+        router_address: str = DRouter.DEFAULT_ROUTER_ADDRESS,
+        router_port: int = DRouter.DEFAULT_ROUTER_PORT,
         log_level: str = "INFO",
-        client_timeout: float = RouterConstants.DEFAULT_CLIENT_TIMEOUT,
+        client_timeout: float = DRouter.DEFAULT_CLIENT_TIMEOUT,
         max_clients: int = 100,
     ):
         """
@@ -507,7 +503,7 @@ class HydraRouter:
         registry_data = await self.client_registry.get_registry_data()
 
         if client_id not in registry_data:
-            client_type = message.get(RouterConstants.SENDER)
+            client_type = message.get(DRouter.SENDER)
             if client_type:
                 await self.client_registry.register_client(client_id, client_type)
 
@@ -585,12 +581,12 @@ class HydraRouter:
 
         # Log expected vs actual format
         expected_format = {
-            RouterConstants.SENDER: "string (HydraClient|HydraServer|CustomApp)",
-            RouterConstants.ELEM: "string (message type)",
-            RouterConstants.DATA: "dict (optional)",
-            RouterConstants.CLIENT_ID: "string (optional)",
-            RouterConstants.TIMESTAMP: "float (optional)",
-            RouterConstants.REQUEST_ID: "string (optional)",
+            DRouter.SENDER: "string (HydraClient|HydraServer|CustomApp)",
+            DRouter.ELEM: "string (message type)",
+            DRouter.DATA: "dict (optional)",
+            DRouter.CLIENT_ID: "string (optional)",
+            DRouter.TIMESTAMP: "float (optional)",
+            DRouter.REQUEST_ID: "string (optional)",
         }
         self.logger.error(f"Expected format: {expected_format}")
 
@@ -650,7 +646,7 @@ class HydraRouter:
 
 
 async def run_router(
-    address: str = RouterConstants.DEFAULT_ROUTER_ADDRESS,
+    address: str = DRouter.DEFAULT_ROUTER_ADDRESS,
     port: int = RouterConstants.DEFAULT_ROUTER_PORT,
     log_level: str = "INFO",
 ) -> None:

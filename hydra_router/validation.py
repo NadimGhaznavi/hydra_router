@@ -2,17 +2,17 @@
 Message validation framework for the Hydra Router system.
 
 This module provides comprehensive message validation with detailed error reporting
-for RouterConstants format messages and other validation needs.
+for DRouter format messages and other validation needs.
 """
 
 from typing import Any, Dict, Tuple
 
-from .router_constants import RouterConstants
+from .constants.DRouter import DRouter
 
 
 class MessageValidator:
     """
-    Comprehensive message validator for RouterConstants format messages.
+    Comprehensive message validator for DRouter format messages.
 
     Provides detailed validation with specific error reporting to help
     identify and resolve message format issues.
@@ -20,11 +20,11 @@ class MessageValidator:
 
     def __init__(self) -> None:
         """Initialize the message validator."""
-        self.router_constants = RouterConstants
+        self.router_constants = DRouter
 
     def validate_router_message(self, message: Dict[str, Any]) -> Tuple[bool, str]:
         """
-        Validate a message against RouterConstants format requirements.
+        Validate a message against DRouter format requirements.
 
         Args:
             message: The message dictionary to validate
@@ -278,7 +278,7 @@ class MessageValidator:
             details.append(f"Field types: {field_types}")
 
         # Expected format
-        details.append("\n=== Expected RouterConstants Format ===")
+        details.append("\n=== Expected DRouter Format ===")
         expected_format = {
             self.router_constants.SENDER: f"string (one of: {', '.join(self.router_constants.VALID_CLIENT_TYPES)})",
             self.router_constants.ELEM: "string (message type)",
@@ -305,7 +305,7 @@ class MessageValidator:
             # Check for common issues
             if "message_type" in message and self.router_constants.ELEM not in message:
                 details.append(
-                    "- Detected 'message_type' field instead of 'elem' - this suggests ZMQMessage format instead of RouterConstants format"
+                    "- Detected 'message_type' field instead of 'elem' - this suggests ZMQMessage format instead of DRouter format"
                 )
 
             missing_required = [
@@ -319,12 +319,12 @@ class MessageValidator:
             ]
             if invalid_fields:
                 details.append(
-                    f"- Unknown fields (not in RouterConstants format): {invalid_fields}"
+                    f"- Unknown fields (not in DRouter format): {invalid_fields}"
                 )
 
         details.append("- Ensure MQClient format conversion is working correctly")
         details.append(
-            "- Check that client is using RouterConstants format for router communication"
+            "- Check that client is using DRouter format for router communication"
         )
 
         return "\n".join(details)
@@ -362,7 +362,7 @@ class MessageValidator:
 # Convenience functions for common validation tasks
 def validate_message(message: Dict[str, Any]) -> Tuple[bool, str]:
     """
-    Convenience function to validate a RouterConstants format message.
+    Convenience function to validate a DRouter format message.
 
     Args:
         message: The message to validate
@@ -384,7 +384,7 @@ def is_valid_client_type(client_type: str) -> bool:
     Returns:
         True if valid, False otherwise
     """
-    return RouterConstants.is_valid_client_type(client_type)
+    return DRouter.is_valid_client_type(client_type)
 
 
 def get_validation_details(message: Dict[str, Any]) -> str:

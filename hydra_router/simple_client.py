@@ -12,8 +12,8 @@ import time
 from typing import Optional
 
 from .constants.DHydraLog import DHydraLog
+from .constants.DRouter import DRouter
 from .mq_client import MessageType, MQClient, ZMQMessage
-from .router_constants import RouterConstants
 from .util.HydraLog import HydraLog
 
 
@@ -35,7 +35,7 @@ class SimpleClient:
         self.client_id = client_id or f"simple-client-{int(time.time())}"
         self.client = MQClient(
             router_address=router_address,
-            client_type=RouterConstants.SIMPLE_CLIENT,
+            client_type=DRouter.SIMPLE_CLIENT,
             client_id=self.client_id,
         )
         self.running = False

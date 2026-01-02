@@ -9,13 +9,13 @@ __version__ = "0.3.9"
 __author__ = "Nadim-Daniel Ghaznavi"
 __email__ = "nghaznavi@gmail.com"
 
+from .constants.DRouter import DRouter
 from .mq_client import MQClient
 from .router import HydraRouter
-from .router_constants import RouterConstants
 from .util.HydraLog import HydraLog
 
 __all__ = [
-    "RouterConstants",
+    "DRouter",
     "MQClient",
     "HydraRouter",
     "HydraLog",

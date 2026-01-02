@@ -14,8 +14,8 @@ from types import FrameType
 from typing import Optional
 
 from .constants.DHydraLog import DHydraLog
+from .constants.DRouter import DRouter
 from .mq_client import MessageType, MQClient, ZMQMessage
-from .router_constants import RouterConstants
 from .util.HydraLog import HydraLog
 
 
@@ -37,7 +37,7 @@ class SimpleServer:
         self.server_id = server_id or f"simple-server-{int(time.time())}"
         self.client = MQClient(
             router_address=router_address,
-            client_type=RouterConstants.SIMPLE_SERVER,
+            client_type=DRouter.SIMPLE_SERVER,
             client_id=self.server_id,
         )
         self.running = False

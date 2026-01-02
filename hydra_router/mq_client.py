@@ -17,6 +17,7 @@ import zmq
 import zmq.asyncio
 
 from .constants.DHydraLog import DHydraLog
+from .constants.DRouter import DRouter
 from .exceptions import (
     ConnectionError,
     MessageFormatError,
@@ -24,7 +25,6 @@ from .exceptions import (
     create_connection_error,
     create_timeout_error,
 )
-from .router_constants import RouterConstants
 from .util.HydraLog import HydraLog
 from .validation import MessageValidator
 
@@ -58,7 +58,7 @@ class ZMQMessage:
     Internal message format used by client applications.
 
     This format is used internally by applications and is automatically
-    converted to/from RouterConstants format by the MQClient.
+    converted to/from DRouter format by the MQClient.
     """
 
     message_type: MessageType
@@ -78,7 +78,7 @@ class MQClient:
     Generic ZeroMQ client library for communicating with the Hydra Router.
 
     Provides a unified interface for both client and server applications with:
-    - Automatic message format conversion between ZMQMessage and RouterConstants
+    - Automatic message format conversion between ZMQMessage and DRouter
     - Connection lifecycle management including heartbeat sending
     - Both synchronous and asynchronous communication patterns
     - Comprehensive error handling and validation
@@ -89,17 +89,17 @@ class MQClient:
         self,
         router_address: str,
         client_type: str,
-        heartbeat_interval: float = RouterConstants.HEARTBEAT_INTERVAL,
+        heartbeat_interval: float = DRouter.HEARTBEAT_INTERVAL,
         client_id: Optional[str] = None,
-        connection_timeout: float = RouterConstants.DEFAULT_CLIENT_TIMEOUT,
-        message_timeout: float = RouterConstants.DEFAULT_MESSAGE_TIMEOUT,
+        connection_timeout: float = DRouter.DEFAULT_CLIENT_TIMEOUT,
+        message_timeout: float = DRouter.DEFAULT_MESSAGE_TIMEOUT,
     ):
         """
         Initialize the MQClient.
 
         Args:
             router_address: Address of the Hydra Router (e.g., "tcp://localhost:5556")
-            client_type: Type of client (must be valid RouterConstants client type)
+            client_type: Type of client (must be valid DRouter client type)
             heartbeat_interval: Interval between heartbeat messages in seconds
             client_id: Unique client identifier (auto-generated if None)
             connection_timeout: Timeout for connection operations in seconds
@@ -115,7 +115,7 @@ class MQClient:
         # Validation
         self.validator = MessageValidator()
         if not self.validator.validate_sender_type(client_type):
-            valid_types = ", ".join(RouterConstants.VALID_CLIENT_TYPES)
+            valid_types = ", ".join(DRouter.VALID_CLIENT_TYPES)
             raise ValueError(
                 f"Invalid client type '{client_type}', must be one of: {valid_types}"
             )
@@ -141,26 +141,26 @@ class MQClient:
         self.message_type_mapping = self._create_message_type_mapping()
 
     def _create_message_type_mapping(self) -> Dict[str, str]:
-        """Create mapping between MessageType enum and RouterConstants."""
+        """Create mapping between MessageType enum and DRouter."""
         return {
-            MessageType.HEARTBEAT.value: RouterConstants.HEARTBEAT,
-            MessageType.SQUARE_REQUEST.value: RouterConstants.SQUARE_REQUEST,
-            MessageType.SQUARE_RESPONSE.value: RouterConstants.SQUARE_RESPONSE,
-            MessageType.CLIENT_REGISTRY_REQUEST.value: RouterConstants.CLIENT_REGISTRY_REQUEST,
-            MessageType.CLIENT_REGISTRY_RESPONSE.value: RouterConstants.CLIENT_REGISTRY_RESPONSE,
-            MessageType.START_SIMULATION.value: RouterConstants.START_SIMULATION,
-            MessageType.STOP_SIMULATION.value: RouterConstants.STOP_SIMULATION,
-            MessageType.PAUSE_SIMULATION.value: RouterConstants.PAUSE_SIMULATION,
-            MessageType.RESUME_SIMULATION.value: RouterConstants.RESUME_SIMULATION,
-            MessageType.RESET_SIMULATION.value: RouterConstants.RESET_SIMULATION,
-            MessageType.GET_SIMULATION_STATUS.value: RouterConstants.GET_SIMULATION_STATUS,
-            MessageType.STATUS_UPDATE.value: RouterConstants.STATUS_UPDATE,
-            MessageType.SIMULATION_STARTED.value: RouterConstants.SIMULATION_STARTED,
-            MessageType.SIMULATION_STOPPED.value: RouterConstants.SIMULATION_STOPPED,
-            MessageType.SIMULATION_PAUSED.value: RouterConstants.SIMULATION_PAUSED,
-            MessageType.SIMULATION_RESUMED.value: RouterConstants.SIMULATION_RESUMED,
-            MessageType.SIMULATION_RESET.value: RouterConstants.SIMULATION_RESET,
-            MessageType.ERROR.value: RouterConstants.ERROR,
+            MessageType.HEARTBEAT.value: DRouter.HEARTBEAT,
+            MessageType.SQUARE_REQUEST.value: DRouter.SQUARE_REQUEST,
+            MessageType.SQUARE_RESPONSE.value: DRouter.SQUARE_RESPONSE,
+            MessageType.CLIENT_REGISTRY_REQUEST.value: DRouter.CLIENT_REGISTRY_REQUEST,
+            MessageType.CLIENT_REGISTRY_RESPONSE.value: DRouter.CLIENT_REGISTRY_RESPONSE,
+            MessageType.START_SIMULATION.value: DRouter.START_SIMULATION,
+            MessageType.STOP_SIMULATION.value: DRouter.STOP_SIMULATION,
+            MessageType.PAUSE_SIMULATION.value: DRouter.PAUSE_SIMULATION,
+            MessageType.RESUME_SIMULATION.value: DRouter.RESUME_SIMULATION,
+            MessageType.RESET_SIMULATION.value: DRouter.RESET_SIMULATION,
+            MessageType.GET_SIMULATION_STATUS.value: DRouter.GET_SIMULATION_STATUS,
+            MessageType.STATUS_UPDATE.value: DRouter.STATUS_UPDATE,
+            MessageType.SIMULATION_STARTED.value: DRouter.SIMULATION_STARTED,
+            MessageType.SIMULATION_STOPPED.value: DRouter.SIMULATION_STOPPED,
+            MessageType.SIMULATION_PAUSED.value: DRouter.SIMULATION_PAUSED,
+            MessageType.SIMULATION_RESUMED.value: DRouter.SIMULATION_RESUMED,
+            MessageType.SIMULATION_RESET.value: DRouter.SIMULATION_RESET,
+            MessageType.ERROR.value: DRouter.ERROR,
         }
 
     async def connect(self) -> bool:
@@ -379,10 +379,7 @@ class MQClient:
                 MessageType.CLIENT_REGISTRY_REQUEST, {}, timeout=timeout
             )
 
-            if (
-                response
-                and response.get("elem") == RouterConstants.CLIENT_REGISTRY_RESPONSE
-            ):
+            if response and response.get("elem") == DRouter.CLIENT_REGISTRY_RESPONSE:
                 return response.get("data", {})  # type: ignore[no-any-return]
 
             return None
@@ -393,13 +390,13 @@ class MQClient:
 
     def _convert_to_router_format(self, message: ZMQMessage) -> Dict[str, Any]:
         """
-        Convert ZMQMessage to RouterConstants format.
+        Convert ZMQMessage to DRouter format.
 
         Args:
             message: ZMQMessage to convert
 
         Returns:
-            RouterConstants format dictionary
+            DRouter format dictionary
 
         Raises:
             MessageFormatError: If conversion fails
@@ -409,38 +406,38 @@ class MQClient:
             elem = self._map_message_type_to_elem(message.message_type.value)
 
             router_message: Dict[str, Any] = {
-                RouterConstants.SENDER: self.client_type,
-                RouterConstants.ELEM: elem,
-                RouterConstants.TIMESTAMP: message.timestamp,
+                DRouter.SENDER: self.client_type,
+                DRouter.ELEM: elem,
+                DRouter.TIMESTAMP: message.timestamp,
             }
 
             # Add optional fields only if they have values
             if message.data is not None:
-                router_message[RouterConstants.DATA] = message.data
+                router_message[DRouter.DATA] = message.data
 
             if message.client_id is not None:
-                router_message[RouterConstants.CLIENT_ID] = message.client_id
+                router_message[DRouter.CLIENT_ID] = message.client_id
 
             if message.request_id:
-                router_message[RouterConstants.REQUEST_ID] = message.request_id
+                router_message[DRouter.REQUEST_ID] = message.request_id
 
             return router_message
 
         except Exception as e:
             raise MessageFormatError(
-                f"Failed to convert ZMQMessage to RouterConstants format: {e}",
+                f"Failed to convert ZMQMessage to DRouter format: {e}",
                 source_format="ZMQMessage",
-                target_format="RouterConstants",
+                target_format="DRouter",
                 conversion_step="message_type_mapping",
                 original_message=message.__dict__,
             )
 
     def _convert_from_router_format(self, router_message: Dict[str, Any]) -> ZMQMessage:
         """
-        Convert RouterConstants format to ZMQMessage.
+        Convert DRouter format to ZMQMessage.
 
         Args:
-            router_message: RouterConstants format dictionary
+            router_message: DRouter format dictionary
 
         Returns:
             ZMQMessage instance
@@ -450,32 +447,32 @@ class MQClient:
         """
         try:
             # Map router element to message type
-            elem = router_message.get(RouterConstants.ELEM, "")
+            elem = router_message.get(DRouter.ELEM, "")
             message_type = self._map_elem_to_message_type(elem)
 
             return ZMQMessage(
                 message_type=message_type,
-                timestamp=router_message.get(RouterConstants.TIMESTAMP, time.time()),
-                client_id=router_message.get(RouterConstants.CLIENT_ID),
-                request_id=router_message.get(RouterConstants.REQUEST_ID),
-                data=router_message.get(RouterConstants.DATA),
+                timestamp=router_message.get(DRouter.TIMESTAMP, time.time()),
+                client_id=router_message.get(DRouter.CLIENT_ID),
+                request_id=router_message.get(DRouter.REQUEST_ID),
+                data=router_message.get(DRouter.DATA),
             )
 
         except Exception as e:
             raise MessageFormatError(
-                f"Failed to convert RouterConstants to ZMQMessage format: {e}",
-                source_format="RouterConstants",
+                f"Failed to convert DRouter to ZMQMessage format: {e}",
+                source_format="DRouter",
                 target_format="ZMQMessage",
                 conversion_step="elem_to_message_type_mapping",
                 original_message=router_message,
             )
 
     def _map_message_type_to_elem(self, message_type: str) -> str:
-        """Map MessageType to RouterConstants elem."""
+        """Map MessageType to DRouter elem."""
         return self.message_type_mapping.get(message_type, message_type)
 
     def _map_elem_to_message_type(self, elem: str) -> MessageType:
-        """Map RouterConstants elem to MessageType."""
+        """Map DRouter elem to MessageType."""
         # Reverse lookup in mapping
         for msg_type, router_elem in self.message_type_mapping.items():
             if router_elem == elem:
@@ -491,7 +488,7 @@ class MQClient:
             # For completely unknown message types, raise an exception
             raise MessageFormatError(
                 f"Unknown message type '{elem}' cannot be converted to MessageType",
-                source_format="RouterConstants",
+                source_format="DRouter",
                 target_format="ZMQMessage",
                 conversion_step="elem_to_message_type_mapping",
                 original_message={"elem": elem},
@@ -500,7 +497,7 @@ class MQClient:
     def _validate_router_message(
         self, message: Dict[str, Any]
     ) -> tuple[bool, Optional[str]]:
-        """Validate a RouterConstants format message."""
+        """Validate a DRouter format message."""
         return self.validator.validate_router_message(message)
 
     async def _send_heartbeat(self) -> None:
@@ -550,7 +547,7 @@ class MQClient:
         """Process a received message from the router."""
         try:
             # Check if this is a response to a pending request
-            request_id = message.get(RouterConstants.REQUEST_ID)
+            request_id = message.get(DRouter.REQUEST_ID)
             if request_id and request_id in self.pending_requests:
                 future = self.pending_requests.pop(request_id)
                 if not future.done():

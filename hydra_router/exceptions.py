@@ -64,7 +64,7 @@ class MessageValidationError(HydraRouterError):
     Exception raised when message format validation fails.
 
     This exception is raised when messages don't conform to the expected
-    RouterConstants format or contain invalid field values.
+    DRouter format or contain invalid field values.
     """
 
     # Type annotations for instance attributes
@@ -371,7 +371,7 @@ class MessageFormatError(MessageValidationError):
 
     This exception is a specialized form of MessageValidationError
     specifically for format conversion problems between ZMQMessage
-    and RouterConstants formats.
+    and DRouter formats.
     """
 
     # Type annotations for instance attributes
