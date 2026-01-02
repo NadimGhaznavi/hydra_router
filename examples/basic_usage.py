@@ -7,7 +7,8 @@ This example will be expanded as components are implemented.
 
 import asyncio
 
-from hydra_router import HydraRouter, MQClient
+from hydra_router.mq_client import MQClient
+from hydra_router.router import HydraRouter
 
 
 async def main() -> None:

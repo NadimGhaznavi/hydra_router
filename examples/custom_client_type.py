@@ -141,9 +141,7 @@ class CustomMathClient:
             await self.client.send_message(message)
 
             # Display operation
-            if operation == MathOperation.POWER:
-                print(f"📤 Operation #{self.operation_count}: {a} ^ {b}")
-            elif operation == MathOperation.ADD:
+            if operation == MathOperation.ADD:
                 print(f"📤 Operation #{self.operation_count}: {a} + {b}")
             elif operation == MathOperation.SUBTRACT:
                 print(f"📤 Operation #{self.operation_count}: {a} - {b}")

@@ -12,6 +12,7 @@ Usage:
 """
 
 import asyncio
+import os
 
 from hydra_router.simple_client import SimpleClient
 from hydra_router.simple_server import SimpleServer
@@ -150,32 +151,34 @@ async def main() -> None:
         print("\n" + "=" * 50)
         print("🎉 Automated demo completed!")
 
-        # Ask if user wants interactive mode
-        try:
-            response = (
-                input("\nWould you like to try interactive mode? (y/n): ")
-                .strip()
-                .lower()
-            )
-            if response in ["y", "yes"]:
-                # Start server for interactive mode
-                server_task = asyncio.create_task(run_demo_server())
+        # Only ask for interactive mode if not in test environment
+        if not os.environ.get("PYTEST_CURRENT_TEST"):
+            # Ask if user wants interactive mode
+            try:
+                response = (
+                    input("\nWould you like to try interactive mode? (y/n): ")
+                    .strip()
+                    .lower()
+                )
+                if response in ["y", "yes"]:
+                    # Start server for interactive mode
+                    server_task = asyncio.create_task(run_demo_server())
 
-                # Wait a moment for server to start
-                await asyncio.sleep(1)
+                    # Wait a moment for server to start
+                    await asyncio.sleep(1)
 
-                # Run interactive demo
-                await interactive_demo()
+                    # Run interactive demo
+                    await interactive_demo()
 
-                # Stop server
-                server_task.cancel()
-                try:
-                    await server_task
-                except asyncio.CancelledError:
-                    pass
+                    # Stop server
+                    server_task.cancel()
+                    try:
+                        await server_task
+                    except asyncio.CancelledError:
+                        pass
 
-        except (KeyboardInterrupt, EOFError):
-            print("\n🛑 Demo ended")
+            except (KeyboardInterrupt, EOFError):
+                print("\n🛑 Demo ended")
 
         print("\n👋 Demo finished. Thank you for trying HydraRouter!")
 
