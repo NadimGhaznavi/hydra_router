@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Simple Client**: Complete interactive client implementation with async communication and CLI interface
+  - Full SimpleClient class with MQClient integration for HydraRouter communication
+  - Interactive CLI with square calculation requests and real-time response handling
+  - Command-line argument parsing for router address, client ID, and logging configuration
+  - Both single-request mode and interactive session support with help system
+  - Comprehensive error handling and user-friendly status messages with emoji indicators
+  - Automatic client ID generation and connection lifecycle management
 - **Router Constants Tests**: Comprehensive unit tests for RouterConstants module with complete test coverage for all class methods, client type validation, message classification, constant definitions, and field getter methods
 
 ### Changed
