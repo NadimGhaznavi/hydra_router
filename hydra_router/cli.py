@@ -211,8 +211,10 @@ async def async_main() -> None:
             parser.print_help()
 
     except KeyboardInterrupt:
+        # Use basic print for interrupt as logger may not be initialized
         print("\n🛑 Interrupted by user")
     except Exception as e:
+        # Use basic print for unexpected errors as logger may not be initialized
         print(f"❌ Error: {e}")
         sys.exit(1)
 
@@ -222,8 +224,10 @@ def main() -> None:
     try:
         asyncio.run(async_main())
     except KeyboardInterrupt:
+        # Use basic print for interrupt as logger may not be initialized
         print("\n🛑 Interrupted")
     except Exception as e:
+        # Use basic print for unexpected errors as logger may not be initialized
         print(f"❌ Error: {e}")
         sys.exit(1)
 
