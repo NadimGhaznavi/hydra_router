@@ -5,13 +5,18 @@ These tests run the actual example files to ensure they work correctly
 and don't have import or runtime errors.
 """
 
+import asyncio
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import AsyncGenerator, List
 
 import pytest
 
+from hydra_router.constants.DMsgType import DMsgType
+from hydra_router.constants.DRouter import DRouter
+from hydra_router.mq_client import MQClient, ZMQMessage
 from hydra_router.router import HydraRouter
 
 
@@ -162,133 +167,95 @@ class TestExamples:
         self, test_router: HydraRouter
     ) -> None:
         """Test basic_client_server.py with a running router."""
-        # Modify the example to use our test router port
-        example_code = """
-import asyncio
-import time
-import sys
-import os
-import logging
+        print("Testing basic client-server communication...")
 
-# Set up debug logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from hydra_router.constants.DMsgType import DMsgType
-from hydra_router.constants.DRouter import DRouter
-from hydra_router.mq_client import MQClient, ZMQMessage
-
-async def test_client_server():
-    print("Testing basic client-server communication...")
-
-    # Create server
-    server = MQClient(
-        router_address="tcp://127.0.0.1:5559",
-        client_type=DRouter.SIMPLE_SERVER,
-        client_id="test-server",
-    )
-
-    # Create client
-    client = MQClient(
-        router_address="tcp://127.0.0.1:5559",
-        client_type=DRouter.SIMPLE_CLIENT,
-        client_id="test-client",
-    )
-
-    responses_received = []
-
-    def handle_square_request(message):
-        print(f"SERVER RECEIVED REQUEST: {message}")
-        data = message.data or {}
-        number = data.get("number", 0)
-        result = number * number
-
-        response = ZMQMessage(
-            message_type=DMsgType.SQUARE_RESPONSE,
-            timestamp=time.time(),
+        # Create server
+        server = MQClient(
+            router_address="tcp://127.0.0.1:5559",
+            client_type=DRouter.SIMPLE_SERVER,
             client_id="test-server",
-            request_id=message.request_id,
-            data={"number": number, "result": result},
         )
 
-        print(f"SERVER SENDING RESPONSE: {response}")
-        asyncio.create_task(server.send_message(response))
-
-    def handle_square_response(message):
-        print(f"CLIENT RECEIVED RESPONSE: {message}")
-        responses_received.append(message)
-
-    try:
-        await server.connect()
-        await client.connect()
-
-        server.register_message_handler(DMsgType.SQUARE_REQUEST, handle_square_request)
-        client.register_message_handler(DMsgType.SQUARE_RESPONSE, handle_square_response)
-
-        # Start listening
-        await asyncio.sleep(0.2)  # Let connections stabilize
-
-        # Send request
-        request = ZMQMessage(
-            message_type=DMsgType.SQUARE_REQUEST,
-            timestamp=time.time(),
+        # Create client
+        client = MQClient(
+            router_address="tcp://127.0.0.1:5559",
+            client_type=DRouter.SIMPLE_CLIENT,
             client_id="test-client",
-            request_id="test-1",
-            data={"number": 7},
         )
 
-        print(f"CLIENT SENDING REQUEST: {request}")
-        await client.send_message(request)
-        await asyncio.sleep(1)  # Wait for response
+        responses_received = []
 
-        print(f"RESPONSES RECEIVED: {len(responses_received)}")
-        for i, resp in enumerate(responses_received):
-            print(f"Response {i}: {resp}")
+        def handle_square_request(message: ZMQMessage) -> None:
+            print(f"SERVER RECEIVED REQUEST: {message}")
+            data = message.data or {}
+            number = data.get("number", 0)
+            result = number * number
 
-        # Check results
-        assert len(responses_received) == 1
-        response = responses_received[0]
-        assert response.data["number"] == 7
-        assert response.data["result"] == 49
-
-        print("✅ Basic client-server test passed!")
-
-    finally:
-        await server.disconnect()
-        await client.disconnect()
-
-if __name__ == "__main__":
-    asyncio.run(test_client_server())
-"""
-
-        # Write temporary test file
-        test_file = Path("test_basic_client_server_temp.py")
-        test_file.write_text(example_code)
-
-        try:
-            result = subprocess.run(
-                [sys.executable, str(test_file)],
-                capture_output=True,
-                text=True,
-                timeout=20,
+            response = ZMQMessage(
+                message_type=DMsgType.SQUARE_RESPONSE,
+                timestamp=time.time(),
+                client_id="test-server",
+                request_id=message.request_id,
+                data={"number": number, "result": result},
             )
 
-            # Should run without errors
-            assert (
-                result.returncode == 0
-            ), f"Basic client-server test failed:\n{result.stderr}"
-            assert "Basic client-server test passed!" in result.stdout
+            print(f"SERVER SENDING RESPONSE: {response}")
+            asyncio.create_task(server.send_message(response))
+
+        def handle_square_response(message: ZMQMessage) -> None:
+            print(f"CLIENT RECEIVED RESPONSE: {message}")
+            responses_received.append(message)
+
+        try:
+            await server.connect()
+            await client.connect()
+
+            server.register_message_handler(
+                DMsgType.SQUARE_REQUEST, handle_square_request
+            )
+            client.register_message_handler(
+                DMsgType.SQUARE_RESPONSE, handle_square_response
+            )
+
+            # Start listening
+            print("Waiting for connections to stabilize...")
+            await asyncio.sleep(0.5)  # Let connections stabilize
+            print("Connections stabilized")
+
+            # Send request
+            request = ZMQMessage(
+                message_type=DMsgType.SQUARE_REQUEST,
+                timestamp=time.time(),
+                client_id="test-client",
+                request_id="test-1",
+                data={"number": 7},
+            )
+
+            print(f"CLIENT SENDING REQUEST: {request}")
+            await client.send_message(request)
+            print("Request sent, waiting for response...")
+            await asyncio.sleep(3)  # Wait longer for response
+            print("Wait complete")
+
+            print(f"RESPONSES RECEIVED: {len(responses_received)}")
+            for i, resp in enumerate(responses_received):
+                print(f"Response {i}: {resp}")
+
+            # Check results
+            assert len(responses_received) == 1
+            response = responses_received[0]
+            assert response.data is not None
+            assert response.data["number"] == 7
+            assert response.data["result"] == 49
+
+            print("✅ Basic client-server test passed!")
 
         finally:
-            # Clean up temp file
-            if test_file.exists():
-                test_file.unlink()
+            await server.disconnect()
+            await client.disconnect()
+
+        # Add a small delay to ensure router logs are captured
+        await asyncio.sleep(0.1)
 
     async def test_all_examples_syntax_check(self) -> None:
         """Test that all examples have valid Python syntax."""

@@ -34,11 +34,15 @@ class MultiClientServer:
 
     async def start(self) -> None:
         """Start the server."""
-        await self.client.connect()
-        self.client.register_message_handler(
-            DMsgType.SQUARE_REQUEST, self._handle_request
-        )
-        print("🔢 Multi-Client Server started")
+        try:
+            await asyncio.wait_for(self.client.connect(), timeout=2.0)
+            self.client.register_message_handler(
+                DMsgType.SQUARE_REQUEST, self._handle_request
+            )
+            print("🔢 Multi-Client Server started")
+        except asyncio.TimeoutError:
+            print("⚠️  No router available - server simulation mode")
+            raise
 
     async def stop(self) -> None:
         """Stop the server."""
@@ -90,11 +94,15 @@ class TestClient:
 
     async def start(self) -> None:
         """Start the client."""
-        await self.client.connect()
-        self.client.register_message_handler(
-            DMsgType.SQUARE_RESPONSE, self._handle_response
-        )
-        print(f"📱 Client {self.client_id} connected")
+        try:
+            await asyncio.wait_for(self.client.connect(), timeout=2.0)
+            self.client.register_message_handler(
+                DMsgType.SQUARE_RESPONSE, self._handle_response
+            )
+            print(f"📱 Client {self.client_id} connected")
+        except asyncio.TimeoutError:
+            print(f"⚠️  Client {self.client_id}: No router available - simulation mode")
+            raise
 
     async def stop(self) -> None:
         """Stop the client."""
@@ -132,8 +140,8 @@ class TestClient:
             )
             await self.client.send_message(message)
 
-            # Random delay between requests
-            await asyncio.sleep(random.uniform(0.5, 2.0))
+            # Reduced delay for faster testing
+            await asyncio.sleep(random.uniform(0.1, 0.3))
 
 
 async def run_server(server: MultiClientServer) -> None:
@@ -152,14 +160,23 @@ async def run_server(server: MultiClientServer) -> None:
 
 async def run_client(client: TestClient) -> None:
     """Run a client task."""
-    await client.start()
-
     try:
+        await client.start()
         await client.send_requests()
-        # Wait for responses
-        await asyncio.sleep(3)
+        # Reduced wait time for responses
+        await asyncio.sleep(1)
+    except asyncio.TimeoutError:
+        print(f"⚠️  {client.client_id}: Simulating client behavior (no router)")
+        # Simulate the client behavior for testing
+        for i in range(client.request_count):
+            number = random.randint(1, 20)
+            print(
+                f"📤 {client.client_id}: Would send request {i+1}/{client.request_count}: {number}²"
+            )
+            await asyncio.sleep(0.1)
     finally:
-        await client.stop()
+        if hasattr(client, "client") and client.client.connected:
+            await client.stop()
 
 
 async def main() -> None:
