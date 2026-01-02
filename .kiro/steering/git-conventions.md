@@ -155,6 +155,83 @@ git log --oneline -1
 - Documentation builds must succeed
 - Code style checks must pass
 
+### Code Quality Requirements
+
+#### 1. MyPy Type Checking Compliance
+**MANDATORY**: All Python code must pass mypy type checking without errors before committing.
+
+**Type Annotation Requirements:**
+- **Function Signatures**: All functions must have complete type annotations
+  ```python
+  # Correct - with return type annotation
+  def process_data(data: dict[str, Any]) -> bool:
+      return True
+
+  # Incorrect - missing return type
+  def process_data(data: dict[str, Any]):
+      return True
+  ```
+
+- **Test Functions**: All test methods must include `-> None` return type annotation
+  ```python
+  # Correct
+  def test_feature_works(self) -> None:
+      assert True
+
+  # Incorrect
+  def test_feature_works(self):
+      assert True
+  ```
+
+- **Class Methods**: All class methods must have proper type annotations
+  ```python
+  # Correct
+  def __init__(self, name: str, age: int) -> None:
+      self.name = name
+      self.age = age
+
+  def get_info(self) -> str:
+      return f"{self.name} is {self.age}"
+  ```
+
+- **Optional Parameters**: Use proper Optional typing for nullable parameters
+  ```python
+  from typing import Optional
+
+  # Correct
+  def process(data: str, config: Optional[dict[str, Any]] = None) -> bool:
+      return True
+
+  # Incorrect - implicit Optional
+  def process(data: str, config: dict[str, Any] = None) -> bool:
+      return True
+  ```
+
+**MyPy Error Resolution Protocol:**
+1. **Before Committing**: Run `mypy .` to check for type errors
+2. **Fix All Errors**: Address every mypy error before staging files
+3. **Common Fixes**:
+   - Add missing return type annotations: `-> None`, `-> str`, `-> bool`, etc.
+   - Add parameter type hints: `param: str`, `config: dict[str, Any]`
+   - Use `Optional[Type]` for nullable parameters
+   - Import required types: `from typing import Optional, Any, Dict, List`
+
+**Bypass Policy:**
+- **NEVER** use `--no-verify` to bypass mypy checks except for:
+  - Emergency hotfixes (must be followed by immediate type fix commit)
+  - Pre-existing legacy code cleanup (must include plan to fix in commit message)
+- **ALWAYS** include mypy compliance in the same commit as the functional changes
+
+**Example Type Fix Commit:**
+```bash
+git commit -m "fix(types): add missing type annotations for mypy compliance
+
+- Added return type annotations to all test functions
+- Fixed Optional parameter types in client methods
+- Added proper type imports for Dict, List, Optional
+- Resolves all mypy type checking errors"
+```
+
 ## Git Hooks and Automation
 
 ### Pre-commit Hooks
