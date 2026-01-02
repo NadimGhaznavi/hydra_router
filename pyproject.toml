@@ -73,9 +73,9 @@ tui = [
 ]
 
 [project.scripts]
-hydra-router = "hydra_router.router:main"
-hydra-client_simple = "hydra_router.simple_client:main"
-hydra-server_simple = "hydra_router.simple_server:main"
+hydra-router = "hydra_router.cli:main"
+hydra-client-simple = "hydra_router.simple_client:sync_main"
+hydra-server-simple = "hydra_router.simple_server:sync_main"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/NadimGhaznavi/hydra_router/issues"
