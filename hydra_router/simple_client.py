@@ -25,12 +25,14 @@ class SimpleClient:
         self,
         router_address: str = "tcp://localhost:5556",
         client_id: Optional[str] = None,
+        enable_stats: bool = False,
     ):
         """Initialize the simple client.
 
         Args:
             router_address: Address of the HydraRouter
             client_id: Unique client identifier (auto-generated if None)
+            enable_stats: Whether to enable periodic statistics display
         """
         self.router_address = router_address
         self.client_id = client_id or f"simple-client-{int(time.time())}"
@@ -38,6 +40,7 @@ class SimpleClient:
             router_address=router_address,
             client_type=DRouter.SIMPLE_CLIENT,
             client_id=self.client_id,
+            enable_stats=enable_stats,
         )
         self.running = False
         self.logger = HydraLog(f"simple_client_{self.client_id}", to_console=True)
@@ -194,6 +197,9 @@ async def main() -> None:
         "--number", type=int, help="Send single square request and exit"
     )
     parser.add_argument(
+        "--stats", action="store_true", help="Display periodic statistics"
+    )
+    parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
         default="INFO",
@@ -203,7 +209,11 @@ async def main() -> None:
     args = parser.parse_args()
 
     # Create and start client
-    client = SimpleClient(router_address=args.router_address, client_id=args.client_id)
+    client = SimpleClient(
+        router_address=args.router_address,
+        client_id=args.client_id,
+        enable_stats=args.stats,
+    )
 
     try:
         await client.start()

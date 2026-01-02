@@ -70,6 +70,8 @@ class MQClient:
         client_id: Optional[str] = None,
         connection_timeout: float = DRouter.DEFAULT_CLIENT_TIMEOUT,
         message_timeout: float = DRouter.DEFAULT_MESSAGE_TIMEOUT,
+        enable_stats: bool = False,
+        stats_interval: float = 60.0,
     ):
         """
         Initialize the MQClient.
@@ -81,6 +83,8 @@ class MQClient:
             client_id: Unique client identifier (auto-generated if None)
             connection_timeout: Timeout for connection operations in seconds
             message_timeout: Default timeout for message operations in seconds
+            enable_stats: Whether to enable periodic statistics display
+            stats_interval: Interval between stats display in seconds
         """
         self.router_address = router_address
         self.client_type = client_type
@@ -88,6 +92,8 @@ class MQClient:
         self.client_id = client_id or f"{client_type}-{uuid.uuid4().hex[:8]}"
         self.connection_timeout = connection_timeout
         self.message_timeout = message_timeout
+        self.enable_stats = enable_stats
+        self.stats_interval = stats_interval
 
         # Validation
         self.validator = MessageValidator()
@@ -105,10 +111,16 @@ class MQClient:
         # Background tasks
         self.heartbeat_task: Optional[asyncio.Task] = None
         self.receive_task: Optional[asyncio.Task] = None
+        self.stats_task: Optional[asyncio.Task] = None
 
         # Message handling
         self.pending_requests: Dict[str, asyncio.Future] = {}
         self.message_handlers: Dict[DMsgType, Callable] = {}
+
+        # Statistics tracking
+        self.start_time: Optional[float] = None
+        self.message_count = 0
+        self.heartbeat_data_provider: Optional[Callable[[], Dict[str, Any]]] = None
 
         # Logging
         self.logger = HydraLog(f"mq_client_{self.client_id}", to_console=True)
@@ -170,8 +182,13 @@ class MQClient:
             self.connected = True
 
             # Start background tasks (heartbeat loop will send first heartbeat)
+            self.start_time = time.time()
             self.heartbeat_task = asyncio.create_task(self._heartbeat_loop())
             self.receive_task = asyncio.create_task(self._receive_loop())
+
+            # Start stats task if enabled
+            if self.enable_stats:
+                self.stats_task = asyncio.create_task(self._stats_loop())
 
             self.logger.info(
                 f"Successfully connected to router as {self.client_type} ({self.client_id})"
@@ -204,6 +221,13 @@ class MQClient:
             self.receive_task.cancel()
             try:
                 await self.receive_task
+            except asyncio.CancelledError:
+                pass
+
+        if self.stats_task:
+            self.stats_task.cancel()
+            try:
+                await self.stats_task
             except asyncio.CancelledError:
                 pass
 
@@ -255,6 +279,7 @@ class MQClient:
 
             # Send the message
             await self.socket.send_json(router_message)
+            self.message_count += 1
             self.logger.debug(
                 f"SUCCESSFULLY SENT: {message.message_type.value} -> {router_message}"
             )
@@ -487,11 +512,23 @@ class MQClient:
     async def _send_heartbeat(self) -> None:
         """Send a heartbeat message to the router."""
         try:
+            # Get base heartbeat data
+            heartbeat_data = {"status": "alive"}
+
+            # Add custom data if provider is set
+            if self.heartbeat_data_provider:
+                try:
+                    custom_data = self.heartbeat_data_provider()
+                    if isinstance(custom_data, dict):
+                        heartbeat_data.update(custom_data)
+                except Exception as e:
+                    self.logger.warning(f"Error getting custom heartbeat data: {e}")
+
             heartbeat_message = ZMQMessage(
                 message_type=DMsgType.HEARTBEAT,
                 timestamp=time.time(),
                 client_id=self.client_id,
-                data={"status": "alive"},
+                data=heartbeat_data,
             )
 
             await self.send_message(heartbeat_message)
@@ -564,6 +601,88 @@ class MQClient:
         except Exception as e:
             self.logger.error(f"Failed to process received message: {e}")
 
+    def set_heartbeat_data_provider(
+        self, provider: Callable[[], Dict[str, Any]]
+    ) -> None:
+        """
+        Set a function to provide custom data for heartbeat messages.
+
+        Args:
+            provider: Function that returns a dictionary of custom heartbeat data
+        """
+        self.heartbeat_data_provider = provider
+        self.logger.debug("Set custom heartbeat data provider")
+
+    def enable_statistics(self, enable: bool = True, interval: float = 60.0) -> None:
+        """
+        Enable or disable periodic statistics display.
+
+        Args:
+            enable: Whether to enable statistics
+            interval: Interval between stats display in seconds
+        """
+        self.enable_stats = enable
+        self.stats_interval = interval
+
+        if enable and self.connected and not self.stats_task:
+            self.stats_task = asyncio.create_task(self._stats_loop())
+        elif not enable and self.stats_task:
+            self.stats_task.cancel()
+            self.stats_task = None
+
+    async def _stats_loop(self) -> None:
+        """Display periodic statistics."""
+        while self.connected and self.enable_stats:
+            try:
+                await asyncio.sleep(self.stats_interval)
+
+                if self.connected and self.enable_stats:
+                    await self._display_stats()
+
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Error in stats loop: {e}")
+
+    async def _display_stats(self) -> None:
+        """Display current statistics."""
+        if not self.start_time:
+            return
+
+        uptime = time.time() - self.start_time
+        uptime_str = (
+            f"{int(uptime // 3600)}h {int((uptime % 3600) // 60)}m {int(uptime % 60)}s"
+        )
+        message_rate = self.message_count / uptime if uptime > 0 else 0
+
+        stats_msg = (
+            f"📊 {self.client_type} Stats: {self.message_count} messages sent, "
+            f"uptime: {uptime_str}, rate: {message_rate:.2f} msg/s"
+        )
+
+        print(stats_msg)
+        self.logger.info(stats_msg)
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """
+        Get current statistics.
+
+        Returns:
+            Dictionary with current statistics
+        """
+        uptime = time.time() - self.start_time if self.start_time else 0
+        message_rate = self.message_count / uptime if uptime > 0 else 0
+
+        return {
+            "client_id": self.client_id,
+            "client_type": self.client_type,
+            "uptime_seconds": uptime,
+            "message_count": self.message_count,
+            "message_rate": message_rate,
+            "connected": self.connected,
+            "pending_requests": len(self.pending_requests),
+        }
+
     def register_message_handler(
         self, message_type: DMsgType, handler: Callable
     ) -> None:
@@ -600,6 +719,9 @@ class MQClient:
         Returns:
             Dictionary with client information
         """
+        uptime = time.time() - self.start_time if self.start_time else 0
+        message_rate = self.message_count / uptime if uptime > 0 else 0
+
         return {
             "client_id": self.client_id,
             "client_type": self.client_type,
@@ -608,6 +730,10 @@ class MQClient:
             "heartbeat_interval": self.heartbeat_interval,
             "pending_requests": len(self.pending_requests),
             "registered_handlers": list(self.message_handlers.keys()),
+            "uptime_seconds": uptime,
+            "message_count": self.message_count,
+            "message_rate": message_rate,
+            "stats_enabled": self.enable_stats,
         }
 
     async def __aenter__(self) -> "MQClient":

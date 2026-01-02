@@ -11,7 +11,7 @@ import signal
 import sys
 import time
 from types import FrameType
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from .constants.DHydraLog import DHydraLog
 from .constants.DMsgType import DMsgType
@@ -27,12 +27,14 @@ class SimpleServer:
         self,
         router_address: str = "tcp://localhost:5556",
         server_id: Optional[str] = None,
+        enable_stats: bool = False,
     ):
         """Initialize the simple server.
 
         Args:
             router_address: Address of the HydraRouter
             server_id: Unique server identifier (auto-generated if None)
+            enable_stats: Whether to enable periodic statistics display
         """
         self.router_address = router_address
         self.server_id = server_id or f"simple-server-{int(time.time())}"
@@ -40,11 +42,15 @@ class SimpleServer:
             router_address=router_address,
             client_type=DRouter.SIMPLE_SERVER,
             client_id=self.server_id,
+            enable_stats=enable_stats,
         )
         self.running = False
         self.request_count = 0
         self.logger = HydraLog(f"simple_server_{self.server_id}", to_console=True)
         self.logger.loglevel(DHydraLog.INFO)
+
+        # Set up custom heartbeat data provider
+        self.client.set_heartbeat_data_provider(self._get_heartbeat_data)
 
     async def start(self) -> None:
         """Start the server and connect to router."""
@@ -63,13 +69,17 @@ class SimpleServer:
                 DMsgType.SQUARE_REQUEST, self._handle_square_request
             )
 
-            # Start heartbeat
-            await self._send_heartbeat()
-
         except Exception as e:
             self.logger.error(f"Failed to connect to router: {e}")
             print(f"❌ Failed to connect to router: {e}")
             raise
+
+    def _get_heartbeat_data(self) -> Dict[str, Any]:
+        """Provide custom data for heartbeat messages."""
+        return {
+            "requests_processed": self.request_count,
+            "server_status": "processing" if self.running else "stopped",
+        }
 
     async def stop(self) -> None:
         """Stop the server and disconnect from router."""
@@ -123,24 +133,8 @@ class SimpleServer:
             self.logger.error(f"Error handling square request: {e}")
             print(f"❌ Error processing request: {e}")
 
-    async def _send_heartbeat(self) -> None:
-        """Send periodic heartbeat to router."""
-        try:
-            heartbeat = ZMQMessage(
-                message_type=DMsgType.HEARTBEAT,
-                timestamp=time.time(),
-                client_id=self.server_id,
-                data={"status": "alive", "requests_processed": self.request_count},
-            )
-
-            await self.client.send_message(heartbeat)
-            self.logger.debug(f"Sent heartbeat from {self.server_id}")
-
-        except Exception as e:
-            self.logger.error(f"Error sending heartbeat: {e}")
-
     async def run(self) -> None:
-        """Run the server with periodic heartbeat."""
+        """Run the server and wait for shutdown signal."""
         print("\n🚀 Simple Square Calculator Server")
         print("=" * 40)
         print("Waiting for square calculation requests...")
@@ -156,12 +150,9 @@ class SimpleServer:
         signal.signal(signal.SIGTERM, signal_handler)
 
         try:
+            # Just wait for shutdown - MQClient handles heartbeats automatically
             while self.running:
-                # Send periodic heartbeat
-                await self._send_heartbeat()
-
-                # Wait before next heartbeat
-                await asyncio.sleep(30)  # Heartbeat every 30 seconds
+                await asyncio.sleep(1)
 
         except asyncio.CancelledError:
             self.logger.info("Server task cancelled")
@@ -170,36 +161,6 @@ class SimpleServer:
             print(f"❌ Server error: {e}")
         finally:
             await self.stop()
-
-    async def run_with_stats(self) -> None:
-        """Run server with periodic statistics display."""
-        stats_task = asyncio.create_task(self._stats_loop())
-        server_task = asyncio.create_task(self.run())
-
-        try:
-            await asyncio.gather(server_task, stats_task)
-        except Exception as e:
-            self.logger.error(f"Error in server with stats: {e}")
-        finally:
-            stats_task.cancel()
-            server_task.cancel()
-
-    async def _stats_loop(self) -> None:
-        """Display periodic statistics."""
-        start_time = time.time()
-
-        while self.running:
-            await asyncio.sleep(60)  # Stats every minute
-
-            if self.running:
-                uptime = time.time() - start_time
-                uptime_str = f"{int(uptime // 3600)}h {int((uptime % 3600) // 60)}m {int(uptime % 60)}s"
-                rate = self.request_count / uptime if uptime > 0 else 0
-
-                print(
-                    f"📊 Stats: {self.request_count} requests processed, "
-                    f"uptime: {uptime_str}, rate: {rate:.2f} req/s"
-                )
 
 
 async def main() -> None:
@@ -230,15 +191,15 @@ async def main() -> None:
     args = parser.parse_args()
 
     # Create and start server
-    server = SimpleServer(router_address=args.router_address, server_id=args.server_id)
+    server = SimpleServer(
+        router_address=args.router_address,
+        server_id=args.server_id,
+        enable_stats=args.stats,
+    )
 
     try:
         await server.start()
-
-        if args.stats:
-            await server.run_with_stats()
-        else:
-            await server.run()
+        await server.run()
 
     except KeyboardInterrupt:
         print("\n🛑 Interrupted by user")
