@@ -12,11 +12,11 @@ Usage:
 
 import asyncio
 
+from hydra_router.constants.DRouter import DRouter
 from hydra_router.router import HydraRouter
-from hydra_router.router_constants import RouterConstants
 
 
-async def example_basic_configuration():
+async def example_basic_configuration() -> None:
     """Example of basic router configuration."""
     print("🔧 Basic Configuration Example")
     print("-" * 40)
@@ -32,7 +32,7 @@ async def example_basic_configuration():
     print(f"Custom port: {custom_router.router_port}")
 
 
-async def example_client_configuration():
+async def example_client_configuration() -> None:
     """Example of client configuration options."""
     print("\n📱 Client Configuration Example")
     print("-" * 40)
@@ -40,22 +40,22 @@ async def example_client_configuration():
     # Different client types
     client_configs = [
         {
-            "type": RouterConstants.HYDRA_CLIENT,
+            "type": DRouter.HYDRA_CLIENT,
             "id": "hydra-client-001",
             "description": "Standard Hydra client",
         },
         {
-            "type": RouterConstants.SIMPLE_CLIENT,
+            "type": DRouter.SIMPLE_CLIENT,
             "id": "simple-client-001",
             "description": "Simple calculation client",
         },
         {
-            "type": RouterConstants.HYDRA_SERVER,
+            "type": DRouter.HYDRA_SERVER,
             "id": "hydra-server-001",
             "description": "Standard Hydra server",
         },
         {
-            "type": RouterConstants.SIMPLE_SERVER,
+            "type": DRouter.SIMPLE_SERVER,
             "id": "simple-server-001",
             "description": "Simple calculation server",
         },
@@ -68,7 +68,7 @@ async def example_client_configuration():
         print()
 
 
-async def example_network_configuration():
+async def example_network_configuration() -> None:
     """Example of network configuration options."""
     print("🌐 Network Configuration Example")
     print("-" * 40)
@@ -96,7 +96,7 @@ async def example_network_configuration():
         print()
 
 
-async def main():
+async def main() -> None:
     """Main configuration example."""
     print("🚀 HydraRouter Configuration Examples")
     print("=" * 50)

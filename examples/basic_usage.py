@@ -7,7 +7,7 @@ This example will be expanded as components are implemented.
 
 import asyncio
 
-from hydra_router import HydraRouter, MQClient, RouterConstants
+from hydra_router import HydraRouter, MQClient
 
 
 async def main() -> None:
@@ -18,12 +18,12 @@ async def main() -> None:
     # This will be implemented in later tasks
     print("Router implementation: Coming in Task 4.1")
     print("MQClient implementation: Coming in Task 3.1")
-    print("RouterConstants implementation: Coming in Task 2.1")
+    print("DRouter implementation: Coming in Task 2.1")
 
     # For now, just show that imports work
     print(f"✓ HydraRouter class: {HydraRouter}")
     print(f"✓ MQClient class: {MQClient}")
-    print(f"✓ RouterConstants class: {RouterConstants}")
+    print("✓ DRouter constants: Available via hydra_router.constants.DRouter")
 
 
 if __name__ == "__main__":

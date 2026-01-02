@@ -15,8 +15,8 @@ import asyncio
 import time
 
 from hydra_router.constants.DMsgType import DMsgType
+from hydra_router.constants.DRouter import DRouter
 from hydra_router.mq_client import MQClient, ZMQMessage
-from hydra_router.router_constants import RouterConstants
 
 
 async def test_connection_failure() -> None:
@@ -25,7 +25,7 @@ async def test_connection_failure() -> None:
 
     client = MQClient(
         router_address="tcp://localhost:9999",  # Wrong port
-        client_type=RouterConstants.SIMPLE_CLIENT,
+        client_type=DRouter.SIMPLE_CLIENT,
         client_id="error-test-client",
     )
 
@@ -45,7 +45,7 @@ async def test_invalid_messages() -> None:
 
     client = MQClient(
         router_address="tcp://localhost:5556",
-        client_type=RouterConstants.SIMPLE_CLIENT,
+        client_type=DRouter.SIMPLE_CLIENT,
         client_id="invalid-msg-client",
     )
 
@@ -93,7 +93,7 @@ async def test_client_reconnection() -> None:
 
     client = MQClient(
         router_address="tcp://localhost:5556",
-        client_type=RouterConstants.SIMPLE_CLIENT,
+        client_type=DRouter.SIMPLE_CLIENT,
         client_id="reconnect-client",
     )
 
@@ -147,7 +147,7 @@ async def test_server_error_handling() -> None:
 
     server = MQClient(
         router_address="tcp://localhost:5556",
-        client_type=RouterConstants.SIMPLE_SERVER,
+        client_type=DRouter.SIMPLE_SERVER,
         client_id="error-handling-server",
     )
 
@@ -204,7 +204,7 @@ async def test_server_error_handling() -> None:
         # Create a client to send test requests
         client = MQClient(
             router_address="tcp://localhost:5556",
-            client_type=RouterConstants.SIMPLE_CLIENT,
+            client_type=DRouter.SIMPLE_CLIENT,
             client_id="error-test-client",
         )
 
@@ -250,7 +250,7 @@ async def test_timeout_scenarios() -> None:
 
     client = MQClient(
         router_address="tcp://localhost:5556",
-        client_type=RouterConstants.SIMPLE_CLIENT,
+        client_type=DRouter.SIMPLE_CLIENT,
         client_id="timeout-client",
     )
 
