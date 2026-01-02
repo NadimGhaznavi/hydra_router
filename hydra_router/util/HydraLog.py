@@ -11,7 +11,7 @@ hydra_router/utils/HydraLog.py.
 
 import logging
 
-from ai_snake_lab.constants.DLabLogger import LOG_LEVELS, DLog
+from hydra_router.constants.DHydraLog import LOG_LEVELS, DHydraLog
 
 
 class HydraLog:
@@ -28,7 +28,7 @@ class HydraLog:
         self._logger = logging.getLogger(client_id)
 
         # The default logger log level
-        self._logger.setLevel(LOG_LEVELS[DLog.DEBUG])
+        self._logger.setLevel(LOG_LEVELS[DHydraLog.DEBUG])
 
         formatter = logging.Formatter(
             fmt="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
@@ -38,14 +38,14 @@ class HydraLog:
         # Optional file handler
         if log_file:
             fh = logging.FileHandler(log_file)
-            fh.setLevel(LOG_LEVELS[DLog.DEBUG])
+            fh.setLevel(LOG_LEVELS[DHydraLog.DEBUG])
             fh.setFormatter(formatter)
             self._logger.addHandler(fh)
 
         # Optional console handler
         if to_console:
             ch = logging.StreamHandler()
-            ch.setLevel(LOG_LEVELS[DLog.DEBUG])
+            ch.setLevel(LOG_LEVELS[DHydraLog.DEBUG])
             ch.setFormatter(formatter)
             self._logger.addHandler(ch)
 
