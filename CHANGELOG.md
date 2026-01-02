@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Documentation**: Comment out html_static_path in Sphinx config to prevent build errors when _static directory doesn't exist
+
 ### Changed
 - **Documentation**: Updated Sphinx source and build directory paths in Makefile to align with standard conventions
 - **Documentation**: Fixed RST heading underline length in architecture.rst for proper formatting
