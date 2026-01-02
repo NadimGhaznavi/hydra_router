@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Tests**: Resolved failing unit tests and enabled asyncio auto mode for improved test execution
+  - Added missing ERROR message type to MessageType enum
+  - Fixed ZMQMessage dataclass with default timestamp via __post_init__
+  - Added async context manager support to MQClient
+  - Fixed message format conversion to exclude None values from router messages
+  - Updated failing tests with correct MQClient constructor parameters
+  - Added proper timing to router tests for client timeout testing
+  - Cleaned up unused imports and fixed boolean comparisons in tests
+
 ## [Release 0.3.0] - 2026-01-02 07:27
 
 
