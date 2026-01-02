@@ -1,13 +1,13 @@
 Deployment Guide
-===============
+================
 
 This guide covers deployment scenarios and operational considerations for HydraRouter in production environments.
 
 Installation Methods
--------------------
+--------------------
 
 PyPI Installation
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 The recommended way to install HydraRouter is via PyPI:
 
@@ -18,7 +18,7 @@ The recommended way to install HydraRouter is via PyPI:
 This installs the ``hydra-router`` command-line tool and all Python dependencies.
 
 Development Installation
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 For development or customization:
 
@@ -29,7 +29,7 @@ For development or customization:
     pip install -e .
 
 Docker Deployment
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Create a Dockerfile for containerized deployment:
 
@@ -51,7 +51,7 @@ Build and run:
     docker run -p 5556:5556 hydra-router
 
 Deployment Scenarios
--------------------
+--------------------
 
 Single Node Deployment
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -68,7 +68,7 @@ For simple applications, deploy HydraRouter on a single node:
     python your_client.py
 
 Multi-Node Deployment
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 For distributed applications, deploy HydraRouter on a dedicated node:
 
@@ -90,7 +90,7 @@ For distributed applications, deploy HydraRouter on a dedicated node:
     )
 
 Load Balancer Integration
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When using load balancers, ensure TCP load balancing is configured:
 
@@ -121,10 +121,10 @@ When using load balancers, ensure TCP load balancing is configured:
     }
 
 Cloud Deployment
----------------
+----------------
 
 AWS Deployment
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 **EC2 Instance:**
 
@@ -168,7 +168,7 @@ AWS Deployment
     }
 
 Kubernetes Deployment
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 **Deployment YAML:**
 
@@ -213,10 +213,10 @@ Kubernetes Deployment
       type: LoadBalancer
 
 Configuration Management
------------------------
+------------------------
 
 Environment Variables
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 HydraRouter supports configuration via environment variables:
 
@@ -229,7 +229,7 @@ HydraRouter supports configuration via environment variables:
     hydra-router start
 
 Configuration Files
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 Create a configuration file for complex deployments:
 
@@ -254,10 +254,10 @@ Use with:
     hydra-router start --config hydra-router.yaml
 
 Monitoring and Observability
----------------------------
+----------------------------
 
 Health Checks
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Implement health checks for deployment monitoring:
 
@@ -289,7 +289,7 @@ Implement health checks for deployment monitoring:
             context.term()
 
 Logging Configuration
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 Configure structured logging for production:
 
@@ -312,7 +312,7 @@ Configure structured logging for production:
             return json.dumps(log_entry)
 
 Metrics Collection
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Monitor key metrics in production:
 
@@ -323,17 +323,17 @@ Monitor key metrics in production:
 - **Memory Usage**: Router process memory consumption
 
 Security Considerations
-----------------------
+-----------------------
 
 Network Security
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 - Use firewalls to restrict access to router ports
 - Consider VPN or private networks for sensitive deployments
 - Implement network segmentation between client types
 
 Authentication
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 While HydraRouter doesn't include built-in authentication, implement it at the application level:
 
@@ -350,7 +350,7 @@ While HydraRouter doesn't include built-in authentication, implement it at the a
             return super().send_message(message)
 
 Encryption
-~~~~~~~~~
+~~~~~~~~~~
 
 For sensitive data, implement message-level encryption:
 
@@ -375,7 +375,7 @@ Performance Tuning
 ------------------
 
 Router Configuration
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Optimize router performance for your use case:
 
@@ -391,7 +391,7 @@ Optimize router performance for your use case:
     )
 
 System Tuning
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 **Linux System Limits:**
 
@@ -415,10 +415,10 @@ System Tuning
     socket.setsockopt(zmq.LINGER, 1000)   # Linger time on close
 
 Backup and Recovery
-------------------
+-------------------
 
 State Management
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 HydraRouter is stateless by design, but consider backing up:
 
@@ -427,7 +427,7 @@ HydraRouter is stateless by design, but consider backing up:
 - Client connection patterns (for capacity planning)
 
 Disaster Recovery
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 **Router Failure Recovery:**
 
@@ -458,10 +458,10 @@ Since HydraRouter doesn't persist messages, implement application-level message 
                 raise
 
 Troubleshooting
---------------
+---------------
 
 Common Issues
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 **Connection Refused:**
 
@@ -490,7 +490,7 @@ Common Issues
 - Monitor router logs for error messages
 
 Debug Mode
-~~~~~~~~~
+~~~~~~~~~~
 
 Enable debug logging for troubleshooting:
 
@@ -506,7 +506,7 @@ This provides detailed information about:
 - Performance metrics
 
 Production Checklist
--------------------
+--------------------
 
 Before deploying to production:
 
