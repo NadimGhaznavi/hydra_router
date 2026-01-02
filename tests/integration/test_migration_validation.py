@@ -9,7 +9,7 @@ import ast
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Set
+from typing import List
 
 import pytest
 
@@ -19,7 +19,7 @@ class TestMigrationValidation:
 
     def get_python_files(self) -> List[Path]:
         """Get all Python files in the project."""
-        python_files = []
+        python_files: List[Path] = []
 
         # Get files from main package
         for pattern in ["hydra_router/**/*.py", "examples/**/*.py", "tests/**/*.py"]:
@@ -49,7 +49,7 @@ class TestMigrationValidation:
                         if "router_constants" in line:
                             violations.append(f"{file_path}:{line_num}: {line.strip()}")
 
-            except Exception as e:
+            except Exception:
                 # Skip files that can't be read
                 continue
 
@@ -80,7 +80,7 @@ class TestMigrationValidation:
                         if not line.strip().startswith("#"):
                             violations.append(f"{file_path}:{line_num}: {line.strip()}")
 
-            except Exception as e:
+            except Exception:
                 # Skip files that can't be read
                 continue
 
@@ -115,7 +115,7 @@ class TestMigrationValidation:
                     elif "from .router_constants" in line:
                         import_violations.append(f"{file_path}:{line_num}: {line}")
 
-            except Exception as e:
+            except Exception:
                 continue
 
         if import_violations:
@@ -152,7 +152,7 @@ class TestMigrationValidation:
 
     def test_grep_search_for_old_references(self) -> None:
         """Use grep to search for any remaining old references."""
-        # Search for router_constants, excluding this test file
+        # Search for router_constants, excluding this test file and virtual environment
         result = subprocess.run(
             [
                 "grep",
@@ -161,6 +161,9 @@ class TestMigrationValidation:
                 ".",
                 "--include=*.py",
                 "--exclude=test_migration_validation.py",
+                "--exclude-dir=hydra-venv",
+                "--exclude-dir=.venv",
+                "--exclude-dir=venv",
             ],
             capture_output=True,
             text=True,
@@ -168,8 +171,9 @@ class TestMigrationValidation:
 
         if result.returncode == 0 and result.stdout.strip():
             pytest.fail(
-                f"Found router_constants references with grep:\n{result.stdout}\n"
-                f"These need to be migrated to use DRouter."
+                "Found router_constants references with grep:\n"
+                f"{result.stdout}\n"
+                "These need to be migrated to use DRouter."
             )
 
         # Search for old MessageType (excluding DMsgType)
@@ -188,10 +192,10 @@ class TestMigrationValidation:
 
             if bad_lines:
                 pytest.fail(
-                    f"Found old MessageType references with grep:\n"
+                    "Found old MessageType references with grep:\n"
                     + "\n".join(bad_lines)
                     + "\n"
-                    f"These need to be migrated to use DMsgType."
+                    "These need to be migrated to use DMsgType."
                 )
 
     def test_ast_parsing_all_files(self) -> None:
@@ -206,7 +210,7 @@ class TestMigrationValidation:
                 ast.parse(content)
             except SyntaxError as e:
                 syntax_errors.append(f"{file_path}: {e}")
-            except Exception as e:
+            except Exception:
                 # Skip files that can't be read
                 continue
 
@@ -252,7 +256,7 @@ class TestMigrationValidation:
                 if result.returncode != 0:
                     import_errors.append(f"{file_path}: {result.stderr.strip()}")
 
-            except Exception as e:
+            except Exception:
                 # Skip files that can't be imported as modules
                 continue
 
