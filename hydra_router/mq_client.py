@@ -7,7 +7,6 @@ connection management, and comprehensive error handling.
 """
 
 import asyncio
-import logging
 import time
 import uuid
 from dataclasses import dataclass
@@ -17,6 +16,7 @@ from typing import Any, Dict, Optional
 import zmq
 import zmq.asyncio
 
+from .constants.DHydraLog import DHydraLog
 from .exceptions import (
     ConnectionError,
     MessageFormatError,
@@ -25,6 +25,7 @@ from .exceptions import (
     create_timeout_error,
 )
 from .router_constants import RouterConstants
+from .util.HydraLog import HydraLog
 from .validation import MessageValidator
 
 
@@ -133,7 +134,8 @@ class MQClient:
         self.message_handlers: Dict[MessageType, callable] = {}
 
         # Logging
-        self.logger = logging.getLogger(f"hydra_router.mq_client.{self.client_id}")
+        self.logger = HydraLog(f"mq_client_{self.client_id}", to_console=True)
+        self.logger.loglevel(DHydraLog.INFO)
 
         # Message type mapping
         self.message_type_mapping = self._create_message_type_mapping()

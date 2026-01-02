@@ -16,8 +16,9 @@ import time
 from enum import Enum
 from typing import Any, Dict, Optional
 
-from hydra_router.logging_config import setup_logging
+from hydra_router.constants.DHydraLog import DHydraLog
 from hydra_router.mq_client import MessageType, MQClient, ZMQMessage
+from hydra_router.util.HydraLog import HydraLog
 
 
 class CustomMessageType(Enum):
@@ -65,7 +66,8 @@ class CustomMathClient:
 
         self.running = False
         self.operation_count = 0
-        self.logger = setup_logging(__name__)
+        self.logger = HydraLog(f"math_client_{self.client_id}", to_console=True)
+        self.logger.loglevel(DHydraLog.INFO)
 
     async def start(self) -> None:
         """Start the custom client."""
@@ -248,7 +250,8 @@ class CustomMathServer:
 
         self.running = False
         self.operations_processed = 0
-        self.logger = setup_logging(__name__)
+        self.logger = HydraLog(f"math_server_{self.server_id}", to_console=True)
+        self.logger.loglevel(DHydraLog.INFO)
 
     async def start(self) -> None:
         """Start the custom server."""

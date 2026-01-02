@@ -11,9 +11,10 @@ import sys
 import time
 from typing import Optional
 
-from .logging_config import setup_logging
+from .constants.DHydraLog import DHydraLog
 from .mq_client import MessageType, MQClient, ZMQMessage
 from .router_constants import RouterConstants
+from .util.HydraLog import HydraLog
 
 
 class SimpleClient:
@@ -38,7 +39,8 @@ class SimpleClient:
             client_id=self.client_id,
         )
         self.running = False
-        self.logger = setup_logging(__name__)
+        self.logger = HydraLog(f"simple_client_{self.client_id}", to_console=True)
+        self.logger.loglevel(DHydraLog.INFO)
 
     async def start(self) -> None:
         """Start the client and connect to router."""
@@ -198,9 +200,6 @@ async def main() -> None:
     )
 
     args = parser.parse_args()
-
-    # Setup logging
-    setup_logging(__name__, level=args.log_level)
 
     # Create and start client
     client = SimpleClient(router_address=args.router_address, client_id=args.client_id)

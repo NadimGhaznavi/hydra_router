@@ -12,9 +12,10 @@ import sys
 import time
 from typing import Optional
 
-from .logging_config import setup_logging
+from .constants.DHydraLog import DHydraLog
 from .mq_client import MessageType, MQClient, ZMQMessage
 from .router_constants import RouterConstants
+from .util.HydraLog import HydraLog
 
 
 class SimpleServer:
@@ -40,7 +41,8 @@ class SimpleServer:
         )
         self.running = False
         self.request_count = 0
-        self.logger = setup_logging(__name__)
+        self.logger = HydraLog(f"simple_server_{self.server_id}", to_console=True)
+        self.logger.loglevel(DHydraLog.INFO)
 
     async def start(self) -> None:
         """Start the server and connect to router."""
@@ -224,9 +226,6 @@ async def main() -> None:
     )
 
     args = parser.parse_args()
-
-    # Setup logging
-    setup_logging(__name__, level=args.log_level)
 
     # Create and start server
     server = SimpleServer(router_address=args.router_address, server_id=args.server_id)
