@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- **CLI**: Resolve all mypy type checking issues with proper type annotations
+- **Exceptions**: Resolve all mypy type checking issues with proper type annotations
 
 ### Changed
 - **Specs**: Update CLI parameter fix task status to reflect current implementation progress
