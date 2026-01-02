@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Specs**: Mark RouterConstants task as completed
 - **Specs**: Mark Task 3.2 message format conversion as completed
 - **Specs**: Update task 1.1 status to completed
+- **Specs**: Mark Task 6.4 simple client/server implementation as completed
 
 ## [Release 0.2.6] - 2026-01-01 21:28
 
