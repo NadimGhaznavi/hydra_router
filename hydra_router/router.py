@@ -9,7 +9,7 @@ import asyncio
 import logging
 import signal
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import zmq
 import zmq.asyncio
@@ -17,6 +17,38 @@ import zmq.asyncio
 from .constants.DRouter import DRouter
 from .exceptions import ConnectionError, MessageRoutingError, ServerNotAvailableError
 from .validation import MessageValidator
+
+
+class ClientInfo:
+    """
+    Information about a connected client.
+
+    Encapsulates client type and heartbeat timestamp for cleaner
+    type annotations and better code organization.
+    """
+
+    def __init__(self, client_type: str, last_heartbeat: float) -> None:
+        """
+        Initialize client information.
+
+        Args:
+            client_type: Type of client (e.g., HydraClient, HydraServer)
+            last_heartbeat: Timestamp of last heartbeat received
+        """
+        self.client_type = client_type
+        self.last_heartbeat = last_heartbeat
+
+    def update_heartbeat(self, timestamp: float) -> None:
+        """Update the last heartbeat timestamp."""
+        self.last_heartbeat = timestamp
+
+    def is_server(self) -> bool:
+        """Check if this client is a server type."""
+        return self.client_type in [DRouter.HYDRA_SERVER, DRouter.SIMPLE_SERVER]
+
+    def __repr__(self) -> str:
+        """String representation for debugging."""
+        return f"ClientInfo(type={self.client_type}, heartbeat={self.last_heartbeat})"
 
 
 class ClientRegistry:
@@ -29,9 +61,7 @@ class ClientRegistry:
 
     def __init__(self) -> None:
         """Initialize the client registry."""
-        self.clients: Dict[
-            str, Tuple[str, float]
-        ] = {}  # client_id -> (client_type, last_heartbeat)
+        self.clients: Dict[str, ClientInfo] = {}
         self.server_id: Optional[str] = None
         self.lock = asyncio.Lock()
         self.logger = logging.getLogger("hydra_router.client_registry")
@@ -45,7 +75,7 @@ class ClientRegistry:
             client_type: Type of client (must be valid DRouter type)
         """
         async with self.lock:
-            self.clients[client_id] = (client_type, time.time())
+            self.clients[client_id] = ClientInfo(client_type, time.time())
 
             # Track server separately
             if client_type in [DRouter.HYDRA_SERVER, DRouter.SIMPLE_SERVER]:
@@ -66,8 +96,7 @@ class ClientRegistry:
         """
         async with self.lock:
             if client_id in self.clients:
-                client_type, _ = self.clients[client_id]
-                self.clients[client_id] = (client_type, time.time())
+                self.clients[client_id].update_heartbeat(time.time())
                 self.logger.debug(f"Updated heartbeat for {client_id}")
 
     async def remove_client(self, client_id: str) -> None:
@@ -79,7 +108,7 @@ class ClientRegistry:
         """
         async with self.lock:
             if client_id in self.clients:
-                client_type, _ = self.clients[client_id]
+                client_info = self.clients[client_id]
                 del self.clients[client_id]
 
                 # Clear server reference if this was the server
@@ -87,7 +116,9 @@ class ClientRegistry:
                     self.server_id = None
                     self.logger.info(f"Server {client_id} disconnected")
 
-                self.logger.info(f"Removed {client_type} client: {client_id}")
+                self.logger.info(
+                    f"Removed {client_info.client_type} client: {client_id}"
+                )
 
     async def get_clients_by_type(self, client_type: str) -> List[str]:
         """
@@ -102,8 +133,8 @@ class ClientRegistry:
         async with self.lock:
             return [
                 client_id
-                for client_id, (ctype, _) in self.clients.items()
-                if ctype == client_type
+                for client_id, client_info in self.clients.items()
+                if client_info.client_type == client_type
             ]
 
     async def prune_inactive_clients(self, timeout: float) -> List[str]:
@@ -122,12 +153,12 @@ class ClientRegistry:
         async with self.lock:
             inactive_clients = [
                 client_id
-                for client_id, (_, last_heartbeat) in self.clients.items()
-                if current_time - last_heartbeat > timeout
+                for client_id, client_info in self.clients.items()
+                if current_time - client_info.last_heartbeat > timeout
             ]
 
             for client_id in inactive_clients:
-                client_type, _ = self.clients[client_id]
+                client_info = self.clients[client_id]
                 del self.clients[client_id]
                 removed_clients.append(client_id)
 
@@ -136,7 +167,9 @@ class ClientRegistry:
                     self.server_id = None
                     self.logger.info(f"Server {client_id} timed out")
 
-                self.logger.info(f"Pruned inactive {client_type} client: {client_id}")
+                self.logger.info(
+                    f"Pruned inactive {client_info.client_type} client: {client_id}"
+                )
 
         return removed_clients
 
@@ -149,10 +182,10 @@ class ClientRegistry:
         """
         async with self.lock:
             registry_data = {}
-            for client_id, (client_type, last_heartbeat) in self.clients.items():
+            for client_id, client_info in self.clients.items():
                 registry_data[client_id] = {
-                    "client_type": client_type,
-                    "last_heartbeat": last_heartbeat,
+                    "client_type": client_info.client_type,
+                    "last_heartbeat": client_info.last_heartbeat,
                     "is_server": client_id == self.server_id,
                 }
             return registry_data
