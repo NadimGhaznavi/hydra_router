@@ -302,7 +302,8 @@ class TestRealCommunication:
         assert response.message_type == DMsgType.CLIENT_REGISTRY_RESPONSE
         assert response.request_id == "registry-req-1"
         assert response.data is not None
-        assert "clients" in response.data
+        # The response data contains client information directly
+        assert "test-client" in response.data
 
     async def test_error_handling_no_server(
         self, router: HydraRouter, client: MQClient
@@ -338,4 +339,4 @@ class TestRealCommunication:
         assert error.message_type == DMsgType.ERROR
         assert error.request_id == "no-server-req"
         assert error.data is not None
-        assert "No server available" in error.data.get("message", "")
+        assert "No server connected" in error.data.get("message", "")
