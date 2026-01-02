@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Constants**: Add constants package __init__.py with proper exports for clean package imports
 - **Integration Tests**: Add comprehensive real communication tests with end-to-end ZeroMQ testing
+- **Debug Tools**: Add client-server communication debug script for testing real communication patterns
 
 ### Fixed
 - **Tests**: Resolve type annotations and improve test reliability in integration tests
