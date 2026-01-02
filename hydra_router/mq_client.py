@@ -1,11 +1,606 @@
 """
 MQClient - Generic ZeroMQ client library for the Hydra Router system.
 
-This module will be implemented in Task 3.1.
+This module provides a unified interface for both client and server applications
+to communicate with the Hydra Router, handling automatic message format conversion,
+connection management, and comprehensive error handling.
 """
+
+import asyncio
+import logging
+import time
+import uuid
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Dict, Optional
+
+import zmq
+import zmq.asyncio
+
+from .exceptions import (
+    ConnectionError,
+    MessageFormatError,
+    MessageValidationError,
+    create_connection_error,
+    create_timeout_error,
+)
+from .router_constants import RouterConstants
+from .validation import MessageValidator
+
+
+class MessageType(Enum):
+    """Enumeration of message types for internal application use."""
+
+    HEARTBEAT = "heartbeat"
+    SQUARE_REQUEST = "square_request"
+    SQUARE_RESPONSE = "square_response"
+    CLIENT_REGISTRY_REQUEST = "client_registry_request"
+    CLIENT_REGISTRY_RESPONSE = "client_registry_response"
+    START_SIMULATION = "start_simulation"
+    STOP_SIMULATION = "stop_simulation"
+    PAUSE_SIMULATION = "pause_simulation"
+    RESUME_SIMULATION = "resume_simulation"
+    RESET_SIMULATION = "reset_simulation"
+    GET_SIMULATION_STATUS = "get_simulation_status"
+    STATUS_UPDATE = "status_update"
+    SIMULATION_STARTED = "simulation_started"
+    SIMULATION_STOPPED = "simulation_stopped"
+    SIMULATION_PAUSED = "simulation_paused"
+    SIMULATION_RESUMED = "simulation_resumed"
+    SIMULATION_RESET = "simulation_reset"
+    ERROR_OCCURRED = "error"
+
+
+@dataclass
+class ZMQMessage:
+    """
+    Internal message format used by client applications.
+
+    This format is used internally by applications and is automatically
+    converted to/from RouterConstants format by the MQClient.
+    """
+
+    message_type: MessageType
+    timestamp: float
+    client_id: Optional[str] = None
+    request_id: Optional[str] = None
+    data: Optional[Dict[str, Any]] = None
 
 
 class MQClient:
-    """Placeholder - will be implemented in Task 3.1."""
+    """
+    Generic ZeroMQ client library for communicating with the Hydra Router.
 
-    pass
+    Provides a unified interface for both client and server applications with:
+    - Automatic message format conversion between ZMQMessage and RouterConstants
+    - Connection lifecycle management including heartbeat sending
+    - Both synchronous and asynchronous communication patterns
+    - Comprehensive error handling and validation
+    - Configurable client types and connection parameters
+    """
+
+    def __init__(
+        self,
+        router_address: str,
+        client_type: str,
+        heartbeat_interval: float = RouterConstants.HEARTBEAT_INTERVAL,
+        client_id: Optional[str] = None,
+        connection_timeout: float = RouterConstants.DEFAULT_CLIENT_TIMEOUT,
+        message_timeout: float = RouterConstants.DEFAULT_MESSAGE_TIMEOUT,
+    ):
+        """
+        Initialize the MQClient.
+
+        Args:
+            router_address: Address of the Hydra Router (e.g., "tcp://localhost:5556")
+            client_type: Type of client (must be valid RouterConstants client type)
+            heartbeat_interval: Interval between heartbeat messages in seconds
+            client_id: Unique client identifier (auto-generated if None)
+            connection_timeout: Timeout for connection operations in seconds
+            message_timeout: Default timeout for message operations in seconds
+        """
+        self.router_address = router_address
+        self.client_type = client_type
+        self.heartbeat_interval = heartbeat_interval
+        self.client_id = client_id or f"{client_type}-{uuid.uuid4().hex[:8]}"
+        self.connection_timeout = connection_timeout
+        self.message_timeout = message_timeout
+
+        # Validation
+        self.validator = MessageValidator()
+        if not self.validator.validate_sender_type(client_type):
+            valid_types = ", ".join(RouterConstants.VALID_CLIENT_TYPES)
+            raise ValueError(
+                f"Invalid client type '{client_type}', must be one of: {valid_types}"
+            )
+
+        # ZeroMQ components
+        self.context: Optional[zmq.asyncio.Context] = None
+        self.socket: Optional[zmq.asyncio.Socket] = None
+        self.connected = False
+
+        # Background tasks
+        self.heartbeat_task: Optional[asyncio.Task] = None
+        self.receive_task: Optional[asyncio.Task] = None
+
+        # Message handling
+        self.pending_requests: Dict[str, asyncio.Future] = {}
+        self.message_handlers: Dict[MessageType, callable] = {}
+
+        # Logging
+        self.logger = logging.getLogger(f"hydra_router.mq_client.{self.client_id}")
+
+        # Message type mapping
+        self.message_type_mapping = self._create_message_type_mapping()
+
+    def _create_message_type_mapping(self) -> Dict[str, str]:
+        """Create mapping between MessageType enum and RouterConstants."""
+        return {
+            MessageType.HEARTBEAT.value: RouterConstants.HEARTBEAT,
+            MessageType.SQUARE_REQUEST.value: RouterConstants.SQUARE_REQUEST,
+            MessageType.SQUARE_RESPONSE.value: RouterConstants.SQUARE_RESPONSE,
+            MessageType.CLIENT_REGISTRY_REQUEST.value: RouterConstants.CLIENT_REGISTRY_REQUEST,
+            MessageType.CLIENT_REGISTRY_RESPONSE.value: RouterConstants.CLIENT_REGISTRY_RESPONSE,
+            MessageType.START_SIMULATION.value: RouterConstants.START_SIMULATION,
+            MessageType.STOP_SIMULATION.value: RouterConstants.STOP_SIMULATION,
+            MessageType.PAUSE_SIMULATION.value: RouterConstants.PAUSE_SIMULATION,
+            MessageType.RESUME_SIMULATION.value: RouterConstants.RESUME_SIMULATION,
+            MessageType.RESET_SIMULATION.value: RouterConstants.RESET_SIMULATION,
+            MessageType.GET_SIMULATION_STATUS.value: RouterConstants.GET_SIMULATION_STATUS,
+            MessageType.STATUS_UPDATE.value: RouterConstants.STATUS_UPDATE,
+            MessageType.SIMULATION_STARTED.value: RouterConstants.SIMULATION_STARTED,
+            MessageType.SIMULATION_STOPPED.value: RouterConstants.SIMULATION_STOPPED,
+            MessageType.SIMULATION_PAUSED.value: RouterConstants.SIMULATION_PAUSED,
+            MessageType.SIMULATION_RESUMED.value: RouterConstants.SIMULATION_RESUMED,
+            MessageType.SIMULATION_RESET.value: RouterConstants.SIMULATION_RESET,
+            MessageType.ERROR_OCCURRED.value: RouterConstants.ERROR,
+        }
+
+    async def connect(self) -> bool:
+        """
+        Connect to the Hydra Router.
+
+        Returns:
+            True if connection successful, False otherwise
+
+        Raises:
+            ConnectionError: If connection fails
+        """
+        try:
+            self.logger.info(f"Connecting to router at {self.router_address}")
+
+            # Create ZeroMQ context and socket
+            self.context = zmq.asyncio.Context()
+            self.socket = self.context.socket(zmq.DEALER)
+            self.socket.setsockopt(zmq.IDENTITY, self.client_id.encode())
+
+            # Set socket options
+            self.socket.setsockopt(zmq.LINGER, 1000)  # 1 second linger
+            self.socket.setsockopt(zmq.RCVTIMEO, int(self.connection_timeout * 1000))
+            self.socket.setsockopt(zmq.SNDTIMEO, int(self.connection_timeout * 1000))
+
+            # Connect to router
+            self.socket.connect(self.router_address)
+
+            # Send initial heartbeat to establish connection
+            await self._send_heartbeat()
+
+            # Start background tasks
+            self.heartbeat_task = asyncio.create_task(self._heartbeat_loop())
+            self.receive_task = asyncio.create_task(self._receive_loop())
+
+            self.connected = True
+            self.logger.info(
+                f"Successfully connected to router as {self.client_type} ({self.client_id})"
+            )
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Failed to connect to router: {e}")
+            await self._cleanup_connection()
+            raise create_connection_error(
+                self.router_address.split("://")[1].split(":")[0],
+                int(self.router_address.split(":")[-1]),
+                e,
+            )
+
+    async def disconnect(self) -> None:
+        """Disconnect from the Hydra Router and cleanup resources."""
+        self.logger.info("Disconnecting from router")
+        self.connected = False
+
+        # Cancel background tasks
+        if self.heartbeat_task:
+            self.heartbeat_task.cancel()
+            try:
+                await self.heartbeat_task
+            except asyncio.CancelledError:
+                pass
+
+        if self.receive_task:
+            self.receive_task.cancel()
+            try:
+                await self.receive_task
+            except asyncio.CancelledError:
+                pass
+
+        # Cancel pending requests
+        for future in self.pending_requests.values():
+            if not future.done():
+                future.cancel()
+        self.pending_requests.clear()
+
+        await self._cleanup_connection()
+        self.logger.info("Disconnected from router")
+
+    async def _cleanup_connection(self) -> None:
+        """Clean up ZeroMQ connection resources."""
+        if self.socket:
+            self.socket.close()
+            self.socket = None
+
+        if self.context:
+            self.context.term()
+            self.context = None
+
+    async def send_message(self, message: ZMQMessage) -> None:
+        """
+        Send a message to the router.
+
+        Args:
+            message: The ZMQMessage to send
+
+        Raises:
+            ConnectionError: If not connected or send fails
+            MessageFormatError: If message format conversion fails
+        """
+        if not self.connected or not self.socket:
+            raise ConnectionError("Not connected to router")
+
+        try:
+            # Convert to router format
+            router_message = self._convert_to_router_format(message)
+
+            # Validate the converted message
+            is_valid, error = self.validator.validate_router_message(router_message)
+            if not is_valid:
+                raise MessageValidationError(f"Invalid router message format: {error}")
+
+            # Send the message
+            await self.socket.send_json(router_message)
+            self.logger.debug(f"Sent message: {message.message_type.value}")
+
+        except Exception as e:
+            self.logger.error(f"Failed to send message: {e}")
+            if isinstance(e, (MessageValidationError, MessageFormatError)):
+                raise
+            raise ConnectionError(f"Failed to send message: {e}")
+
+    async def receive_message(self) -> Optional[Dict[str, Any]]:
+        """
+        Receive a message from the router (non-blocking).
+
+        Returns:
+            Router message dictionary or None if no message available
+        """
+        if not self.connected or not self.socket:
+            return None
+
+        try:
+            # Non-blocking receive
+            message = await self.socket.recv_json(zmq.NOBLOCK)
+            self.logger.debug(f"Received message: {message.get('elem', 'unknown')}")
+            return message
+        except zmq.Again:
+            # No message available
+            return None
+        except Exception as e:
+            self.logger.error(f"Failed to receive message: {e}")
+            return None
+
+    async def send_command(
+        self,
+        message_type: MessageType,
+        data: Dict[str, Any],
+        timeout: Optional[float] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Send a command and wait for response with timeout.
+
+        Args:
+            message_type: Type of message to send
+            data: Message data payload
+            timeout: Timeout in seconds (uses default if None)
+
+        Returns:
+            Response message or None if timeout
+
+        Raises:
+            TimeoutError: If response not received within timeout
+            ConnectionError: If send fails
+        """
+        if timeout is None:
+            timeout = self.message_timeout
+
+        # Generate request ID for correlation
+        request_id = str(uuid.uuid4())
+
+        # Create message
+        message = ZMQMessage(
+            message_type=message_type,
+            timestamp=time.time(),
+            client_id=self.client_id,
+            request_id=request_id,
+            data=data,
+        )
+
+        # Create future for response
+        response_future = asyncio.Future()
+        self.pending_requests[request_id] = response_future
+
+        try:
+            # Send message
+            await self.send_message(message)
+
+            # Wait for response with timeout
+            response = await asyncio.wait_for(response_future, timeout=timeout)
+            return response
+
+        except asyncio.TimeoutError:
+            # Clean up pending request
+            self.pending_requests.pop(request_id, None)
+            raise create_timeout_error("send_command", timeout)
+        except Exception:
+            # Clean up pending request
+            self.pending_requests.pop(request_id, None)
+            raise
+
+    async def request_client_registry(
+        self, timeout: float = 5.0
+    ) -> Optional[Dict[str, Dict[str, Any]]]:
+        """
+        Request client registry information from the router.
+
+        Args:
+            timeout: Timeout in seconds
+
+        Returns:
+            Client registry data or None if timeout/error
+        """
+        try:
+            response = await self.send_command(
+                MessageType.CLIENT_REGISTRY_REQUEST, {}, timeout=timeout
+            )
+
+            if (
+                response
+                and response.get("elem") == RouterConstants.CLIENT_REGISTRY_RESPONSE
+            ):
+                return response.get("data", {})
+
+            return None
+
+        except Exception as e:
+            self.logger.error(f"Failed to request client registry: {e}")
+            return None
+
+    def _convert_to_router_format(self, message: ZMQMessage) -> Dict[str, Any]:
+        """
+        Convert ZMQMessage to RouterConstants format.
+
+        Args:
+            message: ZMQMessage to convert
+
+        Returns:
+            RouterConstants format dictionary
+
+        Raises:
+            MessageFormatError: If conversion fails
+        """
+        try:
+            # Map message type to router element
+            elem = self._map_message_type_to_elem(message.message_type.value)
+
+            router_message = {
+                RouterConstants.SENDER: self.client_type,
+                RouterConstants.ELEM: elem,
+                RouterConstants.DATA: message.data,
+                RouterConstants.CLIENT_ID: message.client_id or self.client_id,
+                RouterConstants.TIMESTAMP: message.timestamp,
+            }
+
+            # Add request ID if present
+            if message.request_id:
+                router_message[RouterConstants.REQUEST_ID] = message.request_id
+
+            return router_message
+
+        except Exception as e:
+            raise MessageFormatError(
+                f"Failed to convert ZMQMessage to RouterConstants format: {e}",
+                source_format="ZMQMessage",
+                target_format="RouterConstants",
+                conversion_step="message_type_mapping",
+                original_message=message.__dict__,
+            )
+
+    def _convert_from_router_format(self, router_message: Dict[str, Any]) -> ZMQMessage:
+        """
+        Convert RouterConstants format to ZMQMessage.
+
+        Args:
+            router_message: RouterConstants format dictionary
+
+        Returns:
+            ZMQMessage instance
+
+        Raises:
+            MessageFormatError: If conversion fails
+        """
+        try:
+            # Map router element to message type
+            elem = router_message.get(RouterConstants.ELEM, "")
+            message_type = self._map_elem_to_message_type(elem)
+
+            return ZMQMessage(
+                message_type=message_type,
+                timestamp=router_message.get(RouterConstants.TIMESTAMP, time.time()),
+                client_id=router_message.get(RouterConstants.CLIENT_ID),
+                request_id=router_message.get(RouterConstants.REQUEST_ID),
+                data=router_message.get(RouterConstants.DATA),
+            )
+
+        except Exception as e:
+            raise MessageFormatError(
+                f"Failed to convert RouterConstants to ZMQMessage format: {e}",
+                source_format="RouterConstants",
+                target_format="ZMQMessage",
+                conversion_step="elem_to_message_type_mapping",
+                original_message=router_message,
+            )
+
+    def _map_message_type_to_elem(self, message_type: str) -> str:
+        """Map MessageType to RouterConstants elem."""
+        return self.message_type_mapping.get(message_type, message_type)
+
+    def _map_elem_to_message_type(self, elem: str) -> MessageType:
+        """Map RouterConstants elem to MessageType."""
+        # Reverse lookup in mapping
+        for msg_type, router_elem in self.message_type_mapping.items():
+            if router_elem == elem:
+                try:
+                    return MessageType(msg_type)
+                except ValueError:
+                    pass
+
+        # If not found, try to create MessageType directly
+        try:
+            return MessageType(elem)
+        except ValueError:
+            # Default to ERROR for unknown message types
+            self.logger.warning(f"Unknown message type '{elem}', defaulting to ERROR")
+            return MessageType.ERROR_OCCURRED
+
+    def _validate_router_message(
+        self, message: Dict[str, Any]
+    ) -> tuple[bool, Optional[str]]:
+        """Validate a RouterConstants format message."""
+        return self.validator.validate_router_message(message)
+
+    async def _send_heartbeat(self) -> None:
+        """Send a heartbeat message to the router."""
+        try:
+            heartbeat_message = ZMQMessage(
+                message_type=MessageType.HEARTBEAT,
+                timestamp=time.time(),
+                client_id=self.client_id,
+                data={"status": "alive"},
+            )
+
+            await self.send_message(heartbeat_message)
+            self.logger.debug("Sent heartbeat")
+
+        except Exception:
+            self.logger.error("Failed to send heartbeat")
+
+    async def _heartbeat_loop(self) -> None:
+        """Background task for sending periodic heartbeats."""
+        while self.connected:
+            try:
+                await asyncio.sleep(self.heartbeat_interval)
+                if self.connected:
+                    await self._send_heartbeat()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Heartbeat loop error: {e}")
+
+    async def _receive_loop(self) -> None:
+        """Background task for receiving and processing messages."""
+        while self.connected:
+            try:
+                message = await self.receive_message()
+                if message:
+                    await self._process_received_message(message)
+                else:
+                    # Small delay to prevent busy waiting
+                    await asyncio.sleep(0.01)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Receive loop error: {e}")
+
+    async def _process_received_message(self, message: Dict[str, Any]) -> None:
+        """Process a received message from the router."""
+        try:
+            # Check if this is a response to a pending request
+            request_id = message.get(RouterConstants.REQUEST_ID)
+            if request_id and request_id in self.pending_requests:
+                future = self.pending_requests.pop(request_id)
+                if not future.done():
+                    future.set_result(message)
+                return
+
+            # Convert to ZMQMessage format
+            zmq_message = self._convert_from_router_format(message)
+
+            # Check for registered message handlers
+            if zmq_message.message_type in self.message_handlers:
+                handler = self.message_handlers[zmq_message.message_type]
+                if asyncio.iscoroutinefunction(handler):
+                    await handler(zmq_message)
+                else:
+                    handler(zmq_message)
+            else:
+                self.logger.debug(
+                    f"No handler for message type: {zmq_message.message_type}"
+                )
+
+        except Exception as e:
+            self.logger.error(f"Failed to process received message: {e}")
+
+    def register_message_handler(
+        self, message_type: MessageType, handler: callable
+    ) -> None:
+        """
+        Register a handler for a specific message type.
+
+        Args:
+            message_type: The message type to handle
+            handler: Function to call when message is received (can be async)
+        """
+        self.message_handlers[message_type] = handler
+        self.logger.debug(f"Registered handler for {message_type}")
+
+    def unregister_message_handler(self, message_type: MessageType) -> None:
+        """
+        Unregister a message handler.
+
+        Args:
+            message_type: The message type to unregister
+        """
+        if message_type in self.message_handlers:
+            del self.message_handlers[message_type]
+            self.logger.debug(f"Unregistered handler for {message_type}")
+
+    @property
+    def is_connected(self) -> bool:
+        """Check if client is connected to router."""
+        return self.connected
+
+    def get_client_info(self) -> Dict[str, Any]:
+        """
+        Get client information.
+
+        Returns:
+            Dictionary with client information
+        """
+        return {
+            "client_id": self.client_id,
+            "client_type": self.client_type,
+            "router_address": self.router_address,
+            "connected": self.connected,
+            "heartbeat_interval": self.heartbeat_interval,
+            "pending_requests": len(self.pending_requests),
+            "registered_handlers": list(self.message_handlers.keys()),
+        }
