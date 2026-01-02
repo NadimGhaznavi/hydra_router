@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Router Constants Tests**: Comprehensive unit tests for RouterConstants module with complete test coverage for all class methods, client type validation, message classification, constant definitions, and field getter methods
+
 ### Changed
 - **Specs**: Mark HydraRouter core implementation task as completed
 - **Specs**: Mark RouterConstants task as completed
