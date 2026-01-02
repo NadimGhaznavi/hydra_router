@@ -32,10 +32,12 @@ Configure the router programmatically:
 .. code-block:: python
 
    from hydra_router.router import HydraRouter
-   from hydra_router.logging_config import setup_logging
+   from hydra_router.util.HydraLog import HydraLog
+   from hydra_router.constants.DHydraLog import DHydraLog
 
    # Configure logging
-   setup_logging(__name__, level="INFO")
+   logger = HydraLog("my_router_app", to_console=True)
+   logger.loglevel(DHydraLog.INFO)
 
    # Create router with custom settings
    router = HydraRouter(

@@ -68,7 +68,7 @@ Exceptions
 Logging Configuration
 ---------------------
 
-.. automodule:: hydra_router.logging_config
+.. automodule:: hydra_router.util.HydraLog
    :members:
    :undoc-members:
    :show-inheritance:
