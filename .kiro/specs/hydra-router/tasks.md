@@ -365,6 +365,47 @@ class ClientRegistry:
 - Performance metrics collection
 - Resource cleanup
 
+#### Task 4.5: Implement Communication Debugging and Logging
+**Priority**: High
+**Estimated Time**: 3 hours
+**Assignee**: Developer
+**Status**: ❌ NOT STARTED
+
+**Description**: Implement comprehensive debugging and logging capabilities to fix communication issues where clients don't receive server responses and router traffic isn't visible.
+
+**Acceptance Criteria**:
+- [ ] Add DEBUG-level logging for all message routing decisions in HydraRouter
+- [ ] Implement complete message content logging when DEBUG is enabled in both router and MQClient
+- [ ] Add traffic logging that shows sender, recipient, message type, and full payload
+- [ ] Ensure simple client prints server responses to console for user visibility
+- [ ] Print exceptions when communication failures occur to help identify issues
+- [ ] Add timestamp and client identifier logging for all messages
+- [ ] Fix any issues preventing client-server response delivery
+
+**Target Files**:
+- `hydra_router/router.py` (add DEBUG logging)
+- `hydra_router/mq_client.py` (add DEBUG logging and response printing)
+- `hydra_router/simple_client.py` (ensure response printing)
+- `hydra_router/simple_server.py` (add request/response logging)
+
+**Key Implementation Details**:
+```python
+# In HydraRouter - add comprehensive DEBUG logging
+self.logger.debug(f"Routing message: sender={sender}, elem={elem}, data={data}")
+self.logger.debug(f"Message content: {json.dumps(message, indent=2)}")
+
+# In MQClient - add message content logging
+if self.logger.isEnabledFor(logging.DEBUG):
+    self.logger.debug(f"Sending message: {json.dumps(router_message, indent=2)}")
+    self.logger.debug(f"Received message: {json.dumps(received_message, indent=2)}")
+
+# In SimpleClient - print exceptions for debugging
+except Exception as e:
+    print(f"Communication error: {e}")
+```
+
+**Requirements Coverage**: _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9_
+
 ### Phase 5: Integration and Testing
 
 #### Task 5.1: Create Unit Test Suite

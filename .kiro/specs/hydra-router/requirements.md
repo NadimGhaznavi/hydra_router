@@ -161,7 +161,7 @@ The Hydra Router is a standalone ZeroMQ-based message routing system that provid
 4. WHEN the router is configured with DEBUG log level, THE router SHALL print detailed traffic information including all message routing decisions
 5. WHEN DEBUG logging is enabled, THE router SHALL print the complete contents of all incoming and outgoing messages including headers and payload data
 6. WHEN DEBUG logging is enabled, THE MQClient SHALL print the complete contents of all messages being sent and received including format conversion details
-7. WHEN a client-server communication fails, THE system SHALL provide detailed error messages indicating the failure point (client, router, or server)
+7. WHEN a client-server communication fails, THE system SHALL print the exception to help identify the failure point
 8. THE router SHALL log all incoming and outgoing messages with timestamps and client identifiers for debugging purposes
 9. THE simple client and simple server SHALL demonstrate end-to-end communication with visible request/response logging
 
