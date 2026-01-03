@@ -365,43 +365,53 @@ class ClientRegistry:
 - Performance metrics collection
 - Resource cleanup
 
-#### Task 4.5: Implement Communication Debugging and Logging
+#### Task 4.5: Implement Communication Flow Testing and Debugging
 **Priority**: High
 **Estimated Time**: 3 hours
 **Assignee**: Developer
 **Status**: ❌ NOT STARTED
 
-**Description**: Implement comprehensive debugging and logging capabilities to fix communication issues where clients don't receive server responses and router traffic isn't visible.
+**Description**: Implement comprehensive tests and debugging capabilities to validate message flow through the client-router-server communication path and ensure the MQClient network abstraction layer works correctly.
 
 **Acceptance Criteria**:
+- [ ] Create integration tests that validate client > router > server message flow
+- [ ] Create integration tests that validate server > router > client response flow
 - [ ] Add DEBUG-level logging for all message routing decisions in HydraRouter
 - [ ] Implement complete message content logging when DEBUG is enabled in both router and MQClient
 - [ ] Add traffic logging that shows sender, recipient, message type, and full payload
 - [ ] Ensure simple client prints server responses to console for user visibility
-- [ ] Print exceptions when communication failures occur to help identify issues
 - [ ] Add timestamp and client identifier logging for all messages
-- [ ] Fix any issues preventing client-server response delivery
+- [ ] Print exceptions when communication issues occur
+- [ ] Create tests that validate MQClient network abstraction layer functionality
 
 **Target Files**:
+- `tests/integration/test_message_flow.py` (new test file for message flow validation)
 - `hydra_router/router.py` (add DEBUG logging)
-- `hydra_router/mq_client.py` (add DEBUG logging and response printing)
+- `hydra_router/mq_client.py` (add DEBUG logging)
 - `hydra_router/simple_client.py` (ensure response printing)
 - `hydra_router/simple_server.py` (add request/response logging)
 
-**Key Implementation Details**:
+**Key Test Scenarios**:
 ```python
-# In HydraRouter - add comprehensive DEBUG logging
-self.logger.debug(f"Routing message: sender={sender}, elem={elem}, data={data}")
-self.logger.debug(f"Message content: {json.dumps(message, indent=2)}")
+# Test client > router > server flow
+def test_client_to_server_message_flow():
+    # Start router, server, client
+    # Send message from client
+    # Validate message reaches server
+    # Validate message content integrity
 
-# In MQClient - add message content logging
-if self.logger.isEnabledFor(logging.DEBUG):
-    self.logger.debug(f"Sending message: {json.dumps(router_message, indent=2)}")
-    self.logger.debug(f"Received message: {json.dumps(received_message, indent=2)}")
+# Test server > router > client flow
+def test_server_to_client_response_flow():
+    # Start router, server, client
+    # Server sends response
+    # Validate response reaches all clients
+    # Validate response content integrity
 
-# In SimpleClient - print exceptions for debugging
-except Exception as e:
-    print(f"Communication error: {e}")
+# Test MQClient network abstraction
+def test_mqclient_network_abstraction():
+    # Validate MQClient handles network details
+    # Test message format conversion
+    # Test connection management
 ```
 
 **Requirements Coverage**: _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9_
