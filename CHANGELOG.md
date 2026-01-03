@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **Specs**: Refine communication validation requirements to focus on flow validation and debugging with enhanced testing emphasis
 - **Specs**: Add communication debugging requirements with comprehensive acceptance criteria for reliable message delivery and diagnostic tools
 - **Requirements**: Clarify error handling requirement for communication failures to specify printing exceptions
 
