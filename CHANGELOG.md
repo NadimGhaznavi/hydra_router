@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Hydra Router v2**: Initialize package structure with core components including DRouter constants, ZMQMessage format, and placeholder modules for all core components
+
 ### Changed
 - **Specs**: Refine communication validation requirements to focus on flow validation and debugging with enhanced testing emphasis
 - **Specs**: Add communication debugging requirements with comprehensive acceptance criteria for reliable message delivery and diagnostic tools
