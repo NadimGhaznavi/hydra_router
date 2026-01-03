@@ -17,6 +17,9 @@ The Hydra Router is a standalone ZeroMQ-based message routing system that provid
 - **RouterConstants_Format**: Standardized message format used for router communication with `sender`, `elem`, and `data` fields
 - **Client_Type**: Classification of connected entities (HydraClient, HydraServer, etc.)
 - **Message_Routing**: Process of forwarding messages between clients and the server based on sender type and routing rules
+- **Traffic_Logger**: Component that logs all message routing activity for debugging and monitoring purposes
+- **Response_Delivery**: Process of ensuring client receives server responses and confirming successful delivery
+- **Communication_Debug**: Comprehensive logging and error reporting system for diagnosing communication failures
 
 ## Requirements
 
@@ -145,3 +148,33 @@ The Hydra Router is a standalone ZeroMQ-based message routing system that provid
 3. THE MQClient SHALL provide a method to request client registry information from the router
 4. THE router SHALL validate that only authorized client types can request registry information
 5. THE client registry query SHALL not interfere with normal message routing operations
+
+### Requirement 11: Communication Bug Fixes and Debugging
+
+**User Story:** As a system operator, I want reliable client-server communication with comprehensive debugging capabilities, so that I can identify and resolve communication issues quickly.
+
+#### Acceptance Criteria
+
+1. WHEN a client sends a request to the server through the router, THE client SHALL receive the server's response within the configured timeout period
+2. WHEN the router receives any message, THE router SHALL log the message routing activity at DEBUG level including sender, recipient, and message type
+3. WHEN a simple client receives a response from the simple server, THE client SHALL print the answer to the console for user visibility
+4. WHEN the router is configured with DEBUG log level, THE router SHALL print detailed traffic information including all message routing decisions
+5. WHEN DEBUG logging is enabled, THE router SHALL print the complete contents of all incoming and outgoing messages including headers and payload data
+6. WHEN DEBUG logging is enabled, THE MQClient SHALL print the complete contents of all messages being sent and received including format conversion details
+7. WHEN a client-server communication fails, THE system SHALL provide detailed error messages indicating the failure point (client, router, or server)
+8. THE router SHALL log all incoming and outgoing messages with timestamps and client identifiers for debugging purposes
+9. THE simple client and simple server SHALL demonstrate end-to-end communication with visible request/response logging
+
+### Requirement 11: Communication Bug Fixes and Debugging
+
+**User Story:** As a system operator, I want reliable message delivery between clients and servers with comprehensive debugging capabilities, so that I can quickly identify and resolve communication failures.
+
+#### Acceptance Criteria
+
+1. WHEN a client sends a message to the server through the router, THE server SHALL receive the message and THE client SHALL receive the server's response
+2. WHEN the router log level is set to DEBUG, THE router SHALL log all incoming and outgoing message traffic including sender, recipient, and message content
+3. WHEN message routing fails, THE router SHALL log detailed error information including the failure reason, affected clients, and suggested remediation steps
+4. THE router SHALL validate that all message routing paths are functional during startup and log any configuration issues
+5. WHEN a client or server fails to receive expected messages, THE system SHALL provide diagnostic tools to trace message flow through the router
+6. THE router SHALL detect and log when clients or servers are not properly processing received messages
+7. WHEN running simple client and server examples, THE complete request-response cycle SHALL work reliably with proper message delivery confirmation
