@@ -35,26 +35,5 @@ jobs:
             - name: Build package
               run: poetry build
 
-            - name: Check if version exists on PyPI
-              id: check_version
-              run: |
-                  VERSION=$(poetry version -s)
-                  if pip index versions ai-hydra | grep -q "$VERSION"; then
-                    echo "version_exists=true" >> $GITHUB_OUTPUT
-                    echo "⚠️ Version $VERSION already exists on PyPI"
-                  else
-                    echo "version_exists=false" >> $GITHUB_OUTPUT
-                    echo "✅ Version $VERSION is new, proceeding with publish"
-                  fi
-
             - name: Publish to PyPI
-              if: steps.check_version.outputs.version_exists == 'false'
               run: poetry publish
-
-            - name: Skip publish (version exists)
-              if: steps.check_version.outputs.version_exists == 'true'
-              run: |
-                  VERSION=$(poetry version -s)
-                  echo "❌ Skipping publish - version $VERSION already exists on PyPI"
-                  echo "💡 To publish a new version, run: ./scripts/update-version.sh \"X.Y.Z\" \"Description\""
-                  exit 1
