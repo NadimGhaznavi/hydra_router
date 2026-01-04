@@ -1,0 +1,6 @@
+#!/opt/dev/hydra_router/hydra_venv/bin/python
+import sys
+from hydra_router.client.HydraClient import main
+
+if __name__ == '__main__':
+    sys.exit(main())

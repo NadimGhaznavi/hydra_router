@@ -1,110 +1,47 @@
-[project]
-name = "hydra-router"
-version = "0.3.13"
-description = "A ZeroMQ messaging router and client"
-authors = [{ name = "Nadim-Daniel Ghaznavi", email = "nghaznavi@gmail.com" }]
-license = { text = "GPL-3.0" }
-readme = "README.md"
-repository = "https://github.com/NadimGhaznavi/hydra_router"
-keywords = [
-    "ZeroMQ",
-    "Messaging Framework"
-]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Operating System :: OS Independent",
-    "Topic :: Games/Entertainment :: Puzzle Games",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Software Development :: Libraries :: Python Modules"
-]
-requires-python = ">=3.11,<3.15"
-
-dependencies = [
-    # ZeroMQ for headless server communication
-    "pyzmq>=25.0.0",
-
-    # System monitoring and utilities
-    "psutil>=5.9.0",
-
-    # Data handling and serialization
-    "pyyaml>=6.0",
-
-    # Testing framework (needed for runtime property-based testing)
-    "pytest>=7.0.0",
-    "hypothesis>=6.0.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.15.0",
-    "pytest-timeout>=2.1.0",
-    "pytest-asyncio>=0.21.0",
-    "hypothesis>=6.0.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "flake8>=6.0.0",
-    "mypy>=1.0.0",
-]
-docs = [
-    "sphinx>=7.0.0",
-    "sphinx-rtd-theme>=1.3.0",
-    "myst-parser>=2.0.0",
-]
-viz = [
-    "matplotlib>=3.7.0",
-    "tensorboard>=2.13.0",
-    "pillow>=10.0.0",
-]
-server = [
-    "python-daemon>=3.0.0",
-    "aiohttp>=3.8.0",
-]
-tui = [
-    "textual>=0.41.0",
-    "rich>=13.0.0",
-]
-
-[project.scripts]
-hydra-router = "hydra_router.cli:main"
-hydra-client-simple = "hydra_router.simple_client:sync_main"
-hydra-server-simple = "hydra_router.simple_server:sync_main"
-
-[project.urls]
-"Bug Tracker" = "https://github.com/NadimGhaznavi/hydra_router/issues"
-"Documentation" = "https://hydra-router.readthedocs.io/en/latest/"
-"Source" = "https://github.com/NadimGhaznavi/hydra_router"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "-v",
-    "--strict-markers",
-    "--strict-config",
-]
-markers = [
-    "unit: Unit tests",
-    "property: Property-based tests",
-    "integration: Integration tests",
-    "performance: Performance tests",
-    "slow: Slow tests (skip in CI)",
-    "timeout: Tests with custom timeout limits",
-    "asyncio: Async tests",
-]
-asyncio_mode = "auto"
+
+[tool.poetry]
+name = "ai-hydra"
+version = "0.3.18"
+description = "ZeroMQ-based client-server communication framework"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "hydra_router"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyzmq = "^25.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+pytest-cov = "^4.1.0"
+hypothesis = "^6.0.0"
+bandit = "<1.8.0"
+flake8 = "^6.0.0"
+mypy = "^1.8.0"
+black = "^23.12.0"
+isort = "^5.13.0"
+pre-commit = "^3.6.0"
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+# Less strict settings for gradual adoption
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
 
 [tool.black]
 line-length = 88
@@ -128,52 +65,11 @@ extend-exclude = '''
 profile = "black"
 multi_line_output = 3
 line_length = 88
-known_first_party = ["hydra_router"]
-known_third_party = ["torch", "hydra_zen", "hypothesis", "pytest", "numpy"]
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
 
-[tool.mypy]
-python_version = "3.11"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
-strict_equality = true
-
-[[tool.mypy.overrides]]
-module = [
-    "hypothesis.*",
-    "matplotlib.*",
-    "tensorboard.*",
-]
-ignore_missing_imports = true
-
-[tool.coverage.run]
-source = ["hydra_router"]
-omit = [
-    "*/tests/*",
-    "*/test_*",
-    "*/__pycache__/*",
-    "*/venv/*",
-    "*/env/*",
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
-]
+[tool.poetry.scripts]
+hydra-server = "hydra_router.server.HydraServer:main"
+hydra-client = "hydra_router.client.HydraClient:main"

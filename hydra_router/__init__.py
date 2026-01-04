@@ -1,24 +1,11 @@
 """
-Hydra Router - A ZeroMQ-based message routing system.
+Hydra Router - ZeroMQ-based client-server communication framework.
 
-This package provides a standalone message router that enables reliable communication
-between multiple clients and a single server through a centralized routing pattern.
+This package provides HydraServer and HydraClient classes for simple
+REQ/REP messaging patterns using ZeroMQ.
 """
 
-__version__ = "0.3.13"
-__author__ = "Nadim-Daniel Ghaznavi"
-__email__ = "nghaznavi@gmail.com"
+__version__ = "0.1.0"
 
-from .constants.DMsgType import DMsgType
-from .constants.DRouter import DRouter
-from .mq_client import MQClient
-from .router import HydraRouter
-from .util.HydraLog import HydraLog
-
-__all__ = [
-    "DRouter",
-    "DMsgType",
-    "MQClient",
-    "HydraRouter",
-    "HydraLog",
-]
+# Classes will be available after implementation
+__all__ = ["HydraServer", "HydraClient"]

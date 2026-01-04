@@ -94,3 +94,23 @@ GPL-3.0
 ## Contributing
 
 This project follows the specification-driven development methodology. See the `.kiro/specs/` directory for detailed requirements, design, and implementation tasks.
+
+## Packaging & publishing 🔁
+
+- Local development and install (recommended):
+
+```bash
+poetry lock      # update lockfile
+poetry install   # install deps into the active environment
+```
+
+- Run the console command from the Poetry environment:
+
+```bash
+poetry run hydra-router   # or `poetry run hydra_router`
+# or: python -m hydra_router
+```
+
+- Publishing is handled by a GitHub Actions workflow that publishes on tag push (`v*.*.*`). See `.github/workflows/pypi-publish.yml` for the exact steps (install Poetry, build, and `poetry publish`).
+
+Note: The project uses Poetry/PEP621 `[project.scripts]` to declare console entry points (no setuptools entry-points). If you bump the package version, tag a release `vX.Y.Z` to trigger the publish workflow.

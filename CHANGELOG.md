@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [Release 0.3.17] - 2025-01-04 14:02
+
+See Release notes.
+
+---
+
+## [Release 0.3.14] - 2026-01-03 21:10
+
+
 ### Added
 - **Sample Code**: ZMQ router RPC server implementation with basic RPC functionality, ROUTER socket pattern for handling multiple clients, and proper error handling
 - **Hydra Router v2**: Complete rewrite implementing all 11 requirements from specification

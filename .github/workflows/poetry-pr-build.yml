@@ -1,0 +1,53 @@
+name: Poetry package build (PR)
+
+on:
+    pull_request:
+        branches: [main, develop]
+    workflow_dispatch:
+
+jobs:
+    poetry-build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.11"
+
+            - name: Install Poetry
+              run: |
+                  curl -sSL https://install.python-poetry.org | python3 -
+                  echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+            - name: Configure Poetry
+              run: |
+                  poetry config virtualenvs.create true
+                  poetry config virtualenvs.in-project true
+
+            - name: Cache Poetry dependencies
+              uses: actions/cache@v4
+              with:
+                  path: .venv
+                  key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+            - name: Lock dependencies
+              run: |
+                  poetry lock --check
+
+            - name: Install dependencies
+              run: |
+                  poetry install --with dev
+
+            - name: Build package
+              run: |
+                  poetry build
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: dist-pr-${{ github.event.number }}
+                  path: dist/

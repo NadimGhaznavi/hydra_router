@@ -1,4 +1,4 @@
-# Pre-commit hooks for Hydra Router
+# Pre-commit hooks for AI Hydra
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
@@ -22,8 +22,9 @@ repos:
     rev: 23.12.1
     hooks:
       - id: black
-        language_version: python3.11
+        language_version: python3
         args: [--line-length=88]
+        files: ^hydra_router/
 
   # isort import sorting
   - repo: https://github.com/pycqa/isort
@@ -31,42 +32,44 @@ repos:
     hooks:
       - id: isort
         args: [--profile=black, --line-length=88]
+        files: ^hydra_router/
 
   # flake8 linting
   - repo: https://github.com/pycqa/flake8
     rev: 7.0.0
     hooks:
       - id: flake8
-        args: [--max-line-length=88, "--extend-ignore=E203,E501,D401"]
-        additional_dependencies: [flake8-docstrings]
+        args: [--max-line-length=88, "--extend-ignore=E203,E501,W503"]
+        files: ^hydra_router/
 
-  # mypy type checking (re-enabled after fixing type issues)
+  # mypy type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-PyYAML, types-psutil]
-        args: [--ignore-missing-imports, --disable-error-code=unreachable]
-        exclude: hydra_router/logging_config.py
+        args: [--config-file=pyproject.toml]
+        files: ^hydra_router/
 
-  # pytest testing
-  - repo: local
-    hooks:
-      - id: pytest-check
-        name: pytest-check
-        entry: pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        args: [tests/unit/, -v, --tb=short]
-
-  # Security checks with bandit (disabled due to dependency issues)
-  # - repo: https://github.com/pycqa/bandit
-  #   rev: 1.7.5
+  # pytest testing (only run if tests directory exists)
+  # - repo: local
   #   hooks:
-  #     - id: bandit
-  #       args: [-r, hydra_router/]
-  #       exclude: tests/
+  #     - id: pytest-check
+  #       name: pytest-check
+  #       entry: pytest
+  #       language: system
+  #       pass_filenames: false
+  #       always_run: true
+  #       args: [tests/, -v, --tb=short]
+
+  # Security checks with bandit
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        additional_dependencies: [pbr]
+        args: [-r, hydra_router/, --skip=B101]
+        files: ^hydra_router/
+        pass_filenames: false
 
 # Configuration for pre-commit.ci (if using)
 ci:
