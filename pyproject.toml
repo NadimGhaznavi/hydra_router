@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ai-hydra"
-version = "0.3.20"
+version = "0.4.0"
 description = "ZeroMQ-based client-server communication framework"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"

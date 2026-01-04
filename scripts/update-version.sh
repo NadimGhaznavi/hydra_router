@@ -96,3 +96,12 @@ echo "   3. Run quality checks: ./scripts/check-code-quality.sh"
 echo "   4. Commit changes: git add . && git commit -m \"$MSG\""
 echo "   5. Create tag: git tag v$VERSION"
 echo "   6. Push: git push origin main && git push origin v$VERSION"
+
+echo <<FOOBAR
+Next you'll need to run:
+
+git add . -v
+git commit -m "$MSG"
+git tag -a v$VERSION -m "$MSG"
+git push origin main --tags
+FOOBAR
