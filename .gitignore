@@ -130,7 +130,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-hydra-venv/
+hydra_venv/
 
 # Spyder project settings
 .spyderproject
