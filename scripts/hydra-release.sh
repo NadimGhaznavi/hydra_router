@@ -37,11 +37,11 @@ if [ $CUR_BRANCH == "main" ]; then
 
 elif [ $CUR_BRANCH == "dev" ]; then
 	echo "We're cruising along the DEV line."
-	exit 1
+	dev_branch_process
 
 else
 	echo "Up in the clouds of the $CUR_BRANCH branch..."
-	feat_branch_proc
+	feat_branch_process
 fi
 
 echo $DIV

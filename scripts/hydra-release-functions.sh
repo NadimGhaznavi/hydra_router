@@ -7,12 +7,46 @@ _HELPER_SH_LOADED=1
 
 DIV="----------------------------------------------------------------------------"
 
-dev_branch_proc() {
-	echo
-	echo "MERGE into DEV not yet implemented"
+dev_branch_process() {
+	while true; do
+        read -rp "Create a new feature branch? [y|n]: " ANSWER
+		ANSWER=${ANSWER,,} # lowercase
+
+		[[ "$ANSWER" == y || "$ANSWER" == n ]] || {
+			echo "Enter y or n"
+			continue
+		}
+
+		[[ "$ANSWER" == y ]] && {
+			ACTION="new_branch"
+			break
+		}
+		[[ "$ANSWER" == n ]] && {
+			ACTION="exit"
+			break
+		}
+	done
+
+	if [[ "$ACTION" == "exit" ]]; then
+		echo "Abort count down, exiting now..."
+		return 1
+	fi
+
+    while true; do
+        read -rp "Enter new branch name (e.g. feat/widget): " NEW_BRANCH
+        [[ -n "$NEW_BRANCH" ]] || {
+            echo "Branch cannot be empty"
+            continue
+        }
+        break
+    done
+
+    # Create new breanch
+    check_clean_git
+    git checkout -b "$NEW_BRANCH"
 }
 
-feat_branch_proc() {
+feat_branch_process() {
 	# Print out git status
 	echo "Confirm that git state is correct:"
 	echo $DIV
@@ -40,7 +74,7 @@ feat_branch_proc() {
 
 	if [[ "$ACTION" == "exit" ]]; then
 		echo "Abort count down, exiting now..."
-		return
+		return 1
 	fi
 
 	# Get the version out of the TOML file
