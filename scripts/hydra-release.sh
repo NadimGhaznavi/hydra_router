@@ -33,11 +33,11 @@ CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 if [ $CUR_BRANCH == "main" ]; then
 	echo "We're on the MAIN line, almost ready to release!!"
-	main_branch_proc
+	exit 1
 
 elif [ $CUR_BRANCH == "dev" ]; then
 	echo "We're cruising along the DEV line."
-	dev_branch_proc
+	exit 1
 
 else
 	echo "Up in the clouds of the $CUR_BRANCH branch..."
