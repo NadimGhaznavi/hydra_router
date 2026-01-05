@@ -8,6 +8,10 @@ _HELPER_SH_LOADED=1
 DIV="----------------------------------------------------------------------------"
 
 dev_branch_process() {
+    # Print out the current git status
+    echo "Current status of the git repository: git status..."
+    git status
+    echo $DIV
 	while true; do
         read -rp "Create a new feature branch? [y|n]: " ANSWER
 		ANSWER=${ANSWER,,} # lowercase
