@@ -51,7 +51,7 @@ feat_branch_proc() {
 	CONST_VERSION=$(get_cur_const_version $BASE_DIR)
 	echo "Current Constants version : $CONST_VERSION"
 
-    echo $DIV
+	echo $DIV
 
 	NEW_VERSION=$(get_new_version)
 	NEW_REL_STR=$(get_new_release_name)
@@ -62,32 +62,37 @@ feat_branch_proc() {
 	# Get this feature branch name
 	FEAT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
-    echo $DIV
+	echo $DIV
 
 	# Switch the the dev branch
-    echo "Switching to the dev branch"
+	echo "Switching to the dev branch"
 	git checkout dev
-    echo $DIV
+	echo $DIV
 
 	# Merge the feature branch into dev
-    echo "Merging the feature branch ($FEAT_BRANCH) into dev"
+	echo "Merging the feature branch ($FEAT_BRANCH) into dev"
 	git merge $FEAT_BRANCH -m "Merging $FEAT_BRANCH into dev"
-    echo $DIV
+	echo $DIV
 
 	# Create a new branch for the release
-    echo "Creating a new release branch: release/$NEW_VERION"
+	echo "Creating a new release branch: release/$NEW_VERION"
 	git checkout -b release/$NEW_VERSION
-    echo $DIV
+	echo $DIV
 
 	# Update the version number in the TOML file
-    echo "Updating the version in the pyproject.toml file"
+	echo "Updating the version in the pyproject.toml file"
 	update_toml_version $NEW_VERSION
-    echo $DIV
+	echo $DIV
+
+	# Update the version number in the constants file
+	echo "Updating the version in the DHydra constants file"
+	update_constants_version $NEW_VERSION
+	echo $DIV
 }
 
 get_base_dir() {
-    SCRIPTS_DIR=$(get_scripts_dir)
-    echo "$(cd -- "$SCRIPTS_DIR/.." && pwd)"
+	SCRIPTS_DIR=$(get_scripts_dir)
+	echo "$(cd -- "$SCRIPTS_DIR/.." && pwd)"
 }
 get_cur_const_version() {
 	local BASE_DIR="$1"
@@ -172,14 +177,31 @@ main_branch_proc() {
 	echo "Release string     : $NEW_REL_STR"
 }
 
+update_constants_version() {
+	local NEW_VERION="$1"
+	BASE_DIR=$(get_base_dir)
+	CONSTANTS_FILE="$BASE_DIR/hydra_router/constants/DHydra.py"
+	if [ -f "$CONSTANTS_FILE" ]; then
+		# Use sed to replace the VERSION constant
+		if [[ "$OSTYPE" == "darwin"* ]]; then
+			# macOS sed requires -i ''
+			sed -i '' "s/VERSION: str = \".*\"/VERSION: str = \"$NEW_VERION\"/" "$CONSTANTS_FILE"
+		else
+			# Linux sed
+			sed -i "s/VERSION: str = \".*\"/VERSION: str = \"$NEW_VERION\"/" "$CONSTANTS_FILE"
+		fi
+		echo "✅ Updated $CONSTANTS_FILE VERSION to $NEW_VERION"
+	else
+		echo "❌ Error: $CONSTANTS_FILE not found"
+		exit 1
+	fi
+}
+
 update_toml_version() {
 	local NEW_VERSION="$1"
-
-    BASE_DIR=$(get_base_dir)
-
+	BASE_DIR=$(get_base_dir)
 	TOML_FILE="$BASE_DIR/pyproject.toml"
 
-	echo "📦 Updating $TOML_FILE..."
 	if [ -f "$TOML_FILE" ]; then
 		# Use sed to replace the version line
 		if [[ "$OSTYPE" == "darwin"* ]]; then
