@@ -38,26 +38,26 @@ feat_branch_proc() {
 		}
 	done
 
-	if [ $ACTION == "exit" ]; then
+	if [[ "$ACTION" == "exit" ]]; then
 		echo "Abort count down, exiting now..."
 		return
 	fi
 
 	# Get the version out of the TOML file
-	TOML_VERSION=$(get_cur_toml_version $BASE_DIR)
+	TOML_VERSION="$(get_cur_toml_version $BASE_DIR)"
 	echo "Current TOML file version : $TOML_VERSION"
 
 	# Get the version out of the Constants file
-	CONST_VERSION=$(get_cur_const_version $BASE_DIR)
+	CONST_VERSION="$(get_cur_const_version $BASE_DIR)"
 	echo "Current Constants version : $CONST_VERSION"
 
 	echo $DIV
 
-	NEW_VERSION=$(get_new_version)
-	NEW_REL_STR=$(get_new_release_name)
+	NEW_VERSION="$(get_new_version)"
+	NEW_RELEASE_STR="$(get_new_release_name)"
 
 	echo "New version set to        : $NEW_VERSION"
-	echo "Release string            : $NEW_REL_STR"
+	echo "Release string            : $NEW_RELEASE_STR"
 
 	# Get this feature branch name
 	FEAT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -66,44 +66,47 @@ feat_branch_proc() {
 
 	# Switch the the dev branch
 	echo "Switching to the dev branch..."
+    check_clean_git
 	git checkout dev
 	echo $DIV
 
 	# Merge the feature branch into dev
 	echo "Merging the feature branch ($FEAT_BRANCH) into dev..."
-	git merge $FEAT_BRANCH -m "Merging $FEAT_BRANCH into dev"
+	git merge "$FEAT_BRANCH"
 	echo $DIV
 
 	# Create a new branch for the release
-	echo "Creating a new release branch: release/$NEW_VERION..."
-	git checkout -b release/$NEW_VERSION
+	echo "Creating a new release branch: release/$NEW_VERSION..."
+    check_clean_git
+	git checkout -b "release/$NEW_VERSION"
 	echo $DIV
 
 	# Update the version number in the TOML file
 	echo "Updating the version in the pyproject.toml file..."
-	update_toml_version $NEW_VERSION
+	update_toml_version "$NEW_VERSION"
 	echo $DIV
 
 	# Update the version number in the constants file
 	echo "Updating the version in the DHydra constants file..."
-	update_constants_version $NEW_VERSION
+	update_constants_version "$NEW_VERSION"
 	echo $DIV
 
     # Add and commit the updated files
     echo "Add and commit with git..."
-    git add . -v
+    git add -v pyproject.toml hydra_router/constants/DHydra.py
     git commit -m "Bump version to v$NEW_VERSION"
-    git push
+    git push -u origin "release/$NEW_VERSION"
     echo $DIV
 
     # Switch the the main branch
     echo "Switching to the main branch..."
+    check_clean_git
     git checkout main
     echo $DIV
 
     # Merge the release into main
     echo "Merge release/$NEW_VERSION into main..."
-    git merge release/$NEW_VERSION -m "$NEW_RELEASE_STR"
+    git merge "release/$NEW_VERSION"
     echo $DIV
 
     # Add the updated files
@@ -114,22 +117,23 @@ feat_branch_proc() {
 
     # Tag the release
     echo "Tagging the repo contents..."
-    git tag -a v$NEW_VERSION -m "$NEW_RELEASE_STR"
+    git tag -a "v$NEW_VERSION" -m "$NEW_RELEASE_STR"
     echo $DIV
 
     # Pushing the new, tagged release to GitHub
     echo "Pushing new release ($NEW_RELEASE_STR) to GitHub..."
-    git push origin main --tags
+    git push origin main --follow-tags
     echo $DIV
 
     # Switch back to the DEV branch
     echo "Switching back to the dev branch"
+    check_clean_git
     git checkout dev
     echo $DIV
 
     # Merge the new release back into dev
     echo "Merging the new release/$NEW_VERSION back into dev..."
-    git merge release/$NEW_VERSION -m "Merging release back into dev"
+    git merge "release/$NEW_VERSION"
     echo $DIV
 
     echo "🚀 Successful release!!!"
@@ -137,9 +141,16 @@ feat_branch_proc() {
 }
 
 get_base_dir() {
-	SCRIPTS_DIR=$(get_scripts_dir)
-	echo "$(cd -- "$SCRIPTS_DIR/.." && pwd)"
+   local scripts_dir
+    scripts_dir="$(get_scripts_dir)"
+    (cd -- "$scripts_dir/.." && pwd)
 }
+
+check_clean_git() {
+    git diff --quiet || { echo "ERROR: working tree dirty"; git status; exit 1; }
+    git diff --cached --quiet || { echo "ERROR: index has staged changes"; git status; exit 1; }
+}
+
 get_cur_const_version() {
 	local BASE_DIR="$1"
 	CONST_FILE=$BASE_DIR/hydra_router/constants/DHydra.py
@@ -169,17 +180,17 @@ get_cur_toml_version() {
 
 get_new_release_name() {
 	while true; do
-		read -rp "Enter new release name: " NEW_REL_NAME
+		read -rp "Enter new release name: " NEW_RELEASE_NAME
 
-		[[ -n "$NEW_REL_NAME" ]] || {
+		[[ -n "$NEW_RELEASE_NAME" ]] || {
 			echo "Releases must be named."
 			continue
 		}
 
 		break
 	done
-	NEW_REL_STR="Release v$NEW_VERSION - $NEW_REL_NAME"
-	echo $NEW_REL_STR
+	NEW_RELEASE_STR="Release v$NEW_VERSION - $NEW_RELEASE_NAME"
+	echo $NEW_RELEASE_STR
 }
 
 get_new_version() {
@@ -217,10 +228,10 @@ main_branch_proc() {
 	echo
 
 	NEW_VERSION=$(get_new_version)
-	NEW_REL_STR=$(get_new_release_name)
+	NEW_RELEASE_STR=$(get_new_release_name)
 
 	echo "New version set to : $NEW_VERSION"
-	echo "Release string     : $NEW_REL_STR"
+	echo "Release string     : $NEW_RELEASE_STR"
 }
 
 update_constants_version() {
