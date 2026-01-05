@@ -107,10 +107,10 @@ feat_branch_proc() {
     echo $DIV
 
     # Add the updated files
-    echo "Adding updated files..."
-    git add . -v
-    git commit -m "$NEW_RELEASE_STR"
-    echo $DIV
+    #echo "Adding updated files..."
+    #git add . -v
+    #git commit -m "$NEW_RELEASE_STR"
+    #echo $DIV
 
     # Tag the release
     echo "Tagging the repo contents..."
