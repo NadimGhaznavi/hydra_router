@@ -5,13 +5,13 @@ clear
 
 # Source the functions file
 FUNCTIONS="hydra-release-functions.sh"
-SCRIPTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR=$(get_scripts_dir)
 echo "SCRIPT_DIR: $SCRIPT_DIR"
-if [ -e  "$SCRIPTS_DIR/$FUNCTIONS" ]; then
-    source "$SCRIPTS_DIR/$FUNCTIONS"
+if [ -e "$SCRIPTS_DIR/$FUNCTIONS" ]; then
+	source "$SCRIPTS_DIR/$FUNCTIONS"
 else
-    echo "FATAL ERROR: Unable to find functions file: $SCRIPTS_DIR/$FUNCTIONS"
-    exit 1
+	echo "FATAL ERROR: Unable to find functions file: $SCRIPTS_DIR/$FUNCTIONS"
+	exit 1
 fi
 
 # Exit on non-zero exit codes
@@ -20,7 +20,8 @@ set -e
 # Get the base directory
 BASE_DIR="$(cd -- "$SCRIPTS_DIR/.." && pwd)"
 
-echo $DIV ; echo $DIV
+echo $DIV
+echo $DIV
 echo
 echo "Hydra Router Release Tool"
 echo "========================="
@@ -31,16 +32,17 @@ CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 #echo "Current Git branch : $CUR_BRANCH"
 
 if [ $CUR_BRANCH == "main" ]; then
-    echo "We're on the MAIN line, almost ready to release!!"
-    main_branch_proc
+	echo "We're on the MAIN line, almost ready to release!!"
+	main_branch_proc
 
 elif [ $CUR_BRANCH == "dev" ]; then
-    echo "We're cruising along the DEV line."
-    dev_branch_proc
+	echo "We're cruising along the DEV line."
+	dev_branch_proc
 
 else
-    echo "Up in the clouds of the $CUR_BRANCH branch..."
-    feat_branch_proc
+	echo "Up in the clouds of the $CUR_BRANCH branch..."
+	feat_branch_proc
 fi
 
-echo $DIV ; echo $DIV
+echo $DIV
+echo $DIV
