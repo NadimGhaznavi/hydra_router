@@ -20,32 +20,68 @@ feat_branch_proc() {
     echo $DIV
 
     while true; do
-    read -rp "Ready to release from $CUR_BRANCH [y|n]: " ANSWER
+        read -rp "Ready to release from $CUR_BRANCH [y|n]: " ANSWER
+        ANSWER=${ANSWER,,}   # lowercase
 
-    [[ -n "$ANSWER" ]] || {
-        echo "Enter 'y', 'Y', 'n' or 'N'"
+        [[ "$ANSWER" == y || "$ANSWER" == n ]] || {
+            echo "Enter y or n"
+            continue
+        }
+
+        [[ "$ANSWER" == y ]] && { ACTION="release"; break; }
+        [[ "$ANSWER" == n ]] && { ACTION="exit"; break; }
+    done
+
+    if [ $ACTION == "exit" ]; then
+        echo "Abort count down, exiting now..."
+        return
+    fi
+
+    NEW_VERSION=$(get_new_version)
+    NEW_REL_STR=$(get_new_release_name)
+
+    echo "New version set to : $NEW_VERSION"
+    echo "Release string     : $NEW_REL_STR"
+
+    # Get this feature branch name
+    FEAT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+    git checkout dev
+    git merge $FEAT_BRANCH -m "Merging $FEAT_BRANCH into dev"
+
+}
+
+get_new_release_name() {
+    while true; do
+    read -rp "Enter new release name: " NEW_REL_NAME
+
+    [[ -n "$NEW_REL_NAME" ]] || {
+        echo "Releases must be named."
         continue
-    }
-
-    [[ "$ANSWER" =~ ^[yYnN]$ ]] || {
-        echo "Enter 'y', 'Y', 'n' or 'N'"
-        continue
-    }
-
-    [[ "$ANSWER" =~ ^[yY]$ ]] && {
-        echo "YES!!!!"
-        ANSWER="yes"
-        break
-    }
-
-    [[ "$ANSWER" =~ ^[nN]$ ]] && {
-        echo "NO! Not yet..."
-        ANSWER="no"
-        break
     }
 
     break
     done
+    NEW_REL_STR="Release v$NEW_VERSION - $NEW_REL_NAME"
+    echo $NEW_REL_STR
+}
+
+get_new_version() {
+    while true; do
+    read -rp "Enter new version number (e.g. 0.4.6): " NEW_VERSION
+
+    [[ -n "$NEW_VERSION" ]] || {
+        echo "Version cannot be empty."
+        continue
+    }
+
+    [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+        echo "Invalid version format (expected X.Y.Z)."
+        continue
+    }
+
+    break
+    done
+    echo $NEW_VERSION
 }
 
 main_branch_proc() {
@@ -66,34 +102,15 @@ main_branch_proc() {
     echo "Current Constants version : $CONST_VERSION"
 
     echo
-    while true; do
-    read -rp "Enter new version number (e.g. 0.4.6): " NEW_VERSION
 
-    [[ -n "$NEW_VERSION" ]] || {
-        echo "Version cannot be empty."
-        continue
-    }
-
-    [[ "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
-        echo "Invalid version format (expected X.Y.Z)."
-        continue
-    }
-
-    break
-    done
-
-    while true; do
-    read -rp "Enter new release name: " NEW_REL_NAME
-
-    [[ -n "$NEW_REL_NAME" ]] || {
-        echo "Releases must be named."
-        continue
-    }
-
-    break
-    done
-    NEW_REL_STR="Release v$NEW_VERSION - $NEW_REL_NAME"
+    NEW_VERSION=$(get_new_version)
+    NEW_REL_STR=$(get_new_release_name)
 
     echo "New version set to : $NEW_VERSION"
     echo "Release string     : $NEW_REL_STR"
+}
+
+
+merge_feat_branch() {
+    CUR_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 }
