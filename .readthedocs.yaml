@@ -12,7 +12,7 @@ build:
 
 # Build documentation in the "docs/" directory with Sphinx
 sphinx:
-   configuration: docs/_source/conf.py
+   configuration: docs/source/conf.py
    fail_on_warning: false
 
 # Install Python requirements and the project itself

@@ -32,6 +32,9 @@ poetry build
 
 # Check package info
 poetry show
+
+# Build documentation
+cd docs && make html
 ```
 
 ## Release Process
