@@ -2,7 +2,7 @@
 class DHydra:
     """Project Defaults"""
 
-    VERSION: str = "0.4.1"
+    VERSION: str = "0.4.2"
 
 
 # HydraServer defaults
