@@ -25,11 +25,3 @@ Installing from PyPI
 
     pip install hydra-router
 
-Dependencies
-------------
-
-The main runtime dependency is:
-
-* **pyzmq** (^25.0.0) - Python bindings for ZeroMQ
-
-Development dependencies include testing, linting, and documentation tools.
