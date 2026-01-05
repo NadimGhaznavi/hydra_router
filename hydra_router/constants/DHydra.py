@@ -23,7 +23,7 @@ class DHydraClientMsg:
     PORT_HELP: str = "Server port to connect to (default: {server_port})"
     RECEIVED: str = "Received response: {response}"
     SENDING: str = "Sending request: {message}"
-    SERVER_HELP: str = "Server hostname to connect to (default: {server})"
+    SERVER_HELP: str = "Server hostname to connect to (default: {server_address})"
 
 
 # HydraServer messages
