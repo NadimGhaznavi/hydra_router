@@ -106,6 +106,12 @@ feat_branch_proc() {
     git merge release/$NEW_VERSION -m "$NEW_RELEASE_STR"
     echo $DIV
 
+    # Add the updated files
+    echo "Adding updated files..."
+    git add . -v
+    git commit -m "$NEW_RELEASE_STR"
+    echo $DIV
+
     # Tag the release
     echo "Tagging the repo contents..."
     git tag -a v$NEW_VERSION -m "$NEW_RELEASE_STR"
