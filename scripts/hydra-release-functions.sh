@@ -65,29 +65,69 @@ feat_branch_proc() {
 	echo $DIV
 
 	# Switch the the dev branch
-	echo "Switching to the dev branch"
+	echo "Switching to the dev branch..."
 	git checkout dev
 	echo $DIV
 
 	# Merge the feature branch into dev
-	echo "Merging the feature branch ($FEAT_BRANCH) into dev"
+	echo "Merging the feature branch ($FEAT_BRANCH) into dev..."
 	git merge $FEAT_BRANCH -m "Merging $FEAT_BRANCH into dev"
 	echo $DIV
 
 	# Create a new branch for the release
-	echo "Creating a new release branch: release/$NEW_VERION"
+	echo "Creating a new release branch: release/$NEW_VERION..."
 	git checkout -b release/$NEW_VERSION
 	echo $DIV
 
 	# Update the version number in the TOML file
-	echo "Updating the version in the pyproject.toml file"
+	echo "Updating the version in the pyproject.toml file..."
 	update_toml_version $NEW_VERSION
 	echo $DIV
 
 	# Update the version number in the constants file
-	echo "Updating the version in the DHydra constants file"
+	echo "Updating the version in the DHydra constants file..."
 	update_constants_version $NEW_VERSION
 	echo $DIV
+
+    # Add and commit the updated files
+    echo "Add and commit with git..."
+    git add . -v
+    git commit -m "Bump version to v$NEW_VERSION"
+    git push
+    echo $DIV
+
+    # Switch the the main branch
+    echo "Switching to the main branch..."
+    git checkout main
+    echo $DIV
+
+    # Merge the release into main
+    echo "Merge release/$NEW_VERSION into main..."
+    git merge release/$NEW_VERSION -m "$NEW_RELEASE_STR"
+    echo $DIV
+
+    # Tag the release
+    echo "Tagging the repo contents..."
+    git tag -a v$NEW_VERSION -m "$NEW_RELEASE_STR"
+    echo $DIV
+
+    # Pushing the new, tagged release to GitHub
+    echo "Pushing new release ($NEW_RELEASE_STR) to GitHub..."
+    git push origin main --tags
+    echo $DIV
+
+    # Switch back to the DEV branch
+    echo "Switching back to the dev branch"
+    git checkout dev
+    echo $DIV
+
+    # Merge the new release back into dev
+    echo "Merging the new release/$NEW_VERSION back into dev..."
+    git merge release/$NEW_VERSION -m "Merging release back into dev"
+    echo $DIV
+
+    echo "🚀 Successful release!!!"
+
 }
 
 get_base_dir() {
