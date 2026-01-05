@@ -5,7 +5,7 @@ clear
 
 # Source the functions file
 FUNCTIONS="hydra-release-functions.sh"
-SCRIPTS_DIR=$(get_scripts_dir)
+SCRIPTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 echo "SCRIPT_DIR: $SCRIPT_DIR"
 if [ -e "$SCRIPTS_DIR/$FUNCTIONS" ]; then
 	source "$SCRIPTS_DIR/$FUNCTIONS"
