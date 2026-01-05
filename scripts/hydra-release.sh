@@ -1,15 +1,16 @@
 #!/bin/bash
 
-FUNCTIONS="hydra-release-functions.sh"
-
 # Clear the terminal
 clear
 
 # Source the functions file
-if [ -e  $FUNCTIONS ]; then
-    source $FUNCTIONS
+FUNCTIONS="hydra-release-functions.sh"
+SCRIPTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+echo "SCRIPT_DIR: $SCRIPT_DIR"
+if [ -e  "$SCRIPTS_DIR/$FUNCTIONS" ]; then
+    source "$SCRIPTS_DIR/$FUNCTIONS"
 else
-    echo "FATAL ERROR: Unable to find functions file: $FUNCTIONS"
+    echo "FATAL ERROR: Unable to find functions file: $SCRIPTS_DIR/$FUNCTIONS"
     exit 1
 fi
 
@@ -17,7 +18,6 @@ fi
 set -e
 
 # Get the base directory
-SCRIPTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 BASE_DIR="$(cd -- "$SCRIPTS_DIR/.." && pwd)"
 
 echo $DIV ; echo $DIV
