@@ -3,7 +3,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "ai-hydra"
+name = "hydra-router"
 version = "0.4.12"
 description = "ZeroMQ-based client-server communication framework"
 authors = ["Your Name <your.email@example.com>"]
