@@ -51,6 +51,8 @@ feat_branch_proc() {
 	CONST_VERSION=$(get_cur_const_version $BASE_DIR)
 	echo "Current Constants version : $CONST_VERSION"
 
+    echo $DIV
+
 	NEW_VERSION=$(get_new_version)
 	NEW_REL_STR=$(get_new_release_name)
 
@@ -60,19 +62,33 @@ feat_branch_proc() {
 	# Get this feature branch name
 	FEAT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
+    echo $DIV
+
 	# Switch the the dev branch
+    echo "Switching to the dev branch"
 	git checkout dev
+    echo $DIV
 
 	# Merge the feature branch into dev
+    echo "Merging the feature branch ($FEAT_BRANCH) into dev"
 	git merge $FEAT_BRANCH -m "Merging $FEAT_BRANCH into dev"
+    echo $DIV
 
 	# Create a new branch for the release
+    echo "Creating a new release branch: release/$NEW_VERION"
 	git checkout -b release/$NEW_VERSION
+    echo $DIV
 
 	# Update the version number in the TOML file
+    echo "Updating the version in the pyproject.toml file"
 	update_toml_version $NEW_VERSION
+    echo $DIV
 }
 
+get_base_dir() {
+    SCRIPTS_DIR=$(get_scripts_dir)
+    echo "$(cd -- "$SCRIPTS_DIR/.." && pwd)"
+}
 get_cur_const_version() {
 	local BASE_DIR="$1"
 	CONST_FILE=$BASE_DIR/hydra_router/constants/DHydra.py
@@ -159,8 +175,9 @@ main_branch_proc() {
 update_toml_version() {
 	local NEW_VERSION="$1"
 
-	SCRIPTS_DIR=$(get_scripts_dir)
-	TOML_FILE="$SCRIPTS_DIR/pyproject.toml"
+    BASE_DIR=$(get_base_dir)
+
+	TOML_FILE="$BASE_DIR/pyproject.toml"
 
 	echo "📦 Updating $TOML_FILE..."
 	if [ -f "$TOML_FILE" ]; then
