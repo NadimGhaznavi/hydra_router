@@ -32,6 +32,11 @@ jobs:
             - name: Install dependencies
               run: poetry install --no-root
 
+            - name: Show package metadata
+              run: |
+                poetry version
+                poetry run python -c "import tomllib, pathlib; d=tomllib.loads(pathlib.Path('pyproject.toml').read_text()); print('name =', d['tool']['poetry']['name']); print('version =', d['tool']['poetry']['version'])"
+
             - name: Build package
               run: poetry build
 
