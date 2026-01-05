@@ -7,40 +7,23 @@ Requirements
 * Python 3.11 or higher
 * Poetry (for development)
 
+Pre-Requisite
+-------------
+
+Create a virtual environment.
+
+.. code-block:: bash
+
+    python3 -m venv hydra_venv
+    . hydra_venv/bin/activate
+
+
 Installing from PyPI
 --------------------
 
 .. code-block:: bash
 
     pip install hydra-router
-
-Development Installation
-------------------------
-
-1. Clone the repository:
-
-.. code-block:: bash
-
-    git clone <repository-url>
-    cd hydra-router
-
-2. Install Poetry if you haven't already:
-
-.. code-block:: bash
-
-    curl -sSL https://install.python-poetry.org | python3 -
-
-3. Install dependencies:
-
-.. code-block:: bash
-
-    poetry install
-
-4. Activate the virtual environment:
-
-.. code-block:: bash
-
-    poetry shell
 
 Dependencies
 ------------

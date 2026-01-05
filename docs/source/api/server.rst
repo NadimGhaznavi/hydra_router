@@ -9,14 +9,6 @@ HydraServer
     :undoc-members:
     :show-inheritance:
 
-HydraRouter
------------
-
-.. automodule:: hydra_router.server.HydraRouter
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Server Package
 --------------
 
