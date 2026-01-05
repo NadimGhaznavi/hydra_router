@@ -74,7 +74,7 @@ feat_branch_proc() {
 }
 
 get_cur_const_version() {
-	local BASE_DIR=""
+	local BASE_DIR="$1"
 	CONST_FILE=$BASE_DIR/hydra_router/constants/DHydra.py
 	CONST_VERSION="$(sed -nE 's/^[[:space:]]*VERSION[[:space:]]*:[[:space:]]*str[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$CONST_FILE" | head -n1)"
 	[[ -n "${CONST_VERSION:-}" ]] || {
