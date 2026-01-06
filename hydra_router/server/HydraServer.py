@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # hydra_router/server/HydraServer.py
 #
 #   Hydra Router
@@ -6,8 +8,6 @@
 #    GitHub: https://github.com/NadimGhaznavi/hydra_router
 #    Website: https://hydra-router.readthedocs.io/en/latest
 #    License: GPL 3.0
-
-#!/usr/bin/env python
 
 import argparse
 import sys
