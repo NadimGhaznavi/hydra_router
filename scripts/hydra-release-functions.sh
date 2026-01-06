@@ -95,9 +95,9 @@ feat_branch_process() {
 	CONST_VERSION="$(get_cur_const_version $BASE_DIR)"
 	echo "Current Constants version   : $CONST_VERSION"
 
-    # Get the version out of the docs/source/conf.py file
-    DOCS_VERSION="$(get_cur_docs_version $BASE_DIR)"
-    echo "Current docs/source/conf,py : $DOCS_VERSION"
+	# Get the version out of the docs/source/conf.py file
+	DOCS_VERSION="$(get_cur_docs_version $BASE_DIR)"
+	echo "Current docs/source/conf,py : $DOCS_VERSION"
 
 	echo $DIV
 
@@ -134,10 +134,10 @@ feat_branch_process() {
 	update_toml_version "$NEW_VERSION"
 	echo $DIV
 
-    # Update the version number in the docs file
-    echo "Updating the release number in the docs/source/conf.py..."
-    update_docs_version "$NEW_VERSION"
-    echo $DIV
+	# Update the version number in the docs file
+	echo "Updating the release number in the docs/source/conf.py..."
+	update_docs_version "$NEW_VERSION"
+	echo $DIV
 
 	# Update the version number in the constants file
 	echo "Updating the version in the DHydra constants file..."
@@ -231,8 +231,8 @@ get_cur_docs_version() {
 	DOCS_FILE="$BASE_DIR/docs/source/conf.py"
 
 	DOCS_VERSION="$(
-		sed -nE 's/^[[:space:]]*release[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$DOCS_FILE" \
-		| head -n1
+		sed -nE 's/^[[:space:]]*release[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$DOCS_FILE" |
+			head -n1
 	)"
 
 	[[ -n "${DOCS_VERSION:-}" ]] || {
@@ -336,10 +336,10 @@ update_constants_version() {
 }
 
 update_docs_version() {
-    local NEW_VERSION="$1"
-    BASE_DIR=$(get_base_dir)
-    DOCS_FILE="$BASE_DIR/docs/conf.py"
-    if [ -f "$DOCS_FILE" ]; then
+	local NEW_VERSION="$1"
+	BASE_DIR=$(get_base_dir)
+	DOCS_FILE="$BASE_DIR/docs/source/conf.py"
+	if [ -f "$DOCS_FILE" ]; then
 		# Use sed to replace the VERSION constant
 		if [[ "$OSTYPE" == "darwin"* ]]; then
 			# macOS sed requires -i ''
@@ -352,7 +352,7 @@ update_docs_version() {
 	else
 		echo "❌ Error: $DOCS_FILE not found"
 		exit 1
-	fi        
+	fi
 
 }
 
