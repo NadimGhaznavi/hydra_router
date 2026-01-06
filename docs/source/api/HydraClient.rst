@@ -6,4 +6,3 @@ HydraClient
     :undoc-members:
     :show-inheritance:
     :noindex:
-

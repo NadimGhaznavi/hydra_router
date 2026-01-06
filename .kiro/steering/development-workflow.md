@@ -104,7 +104,7 @@ Before creating a release, run the comprehensive pre-release check:
 This script performs all code quality checks, runs the full test suite, and ensures the codebase is ready for release. It includes:
 
 - **flake8**: Linting and style checking
-- **mypy**: Static type checking  
+- **mypy**: Static type checking
 - **black**: Code formatting
 - **isort**: Import sorting
 - **bandit**: Security vulnerability scanning

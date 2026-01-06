@@ -1,12 +1,12 @@
 Hydra Router documentation
 ==========================
 
-The **Hydra Router** project implements a ZeroMQ-based distributed computing architecture 
+The **Hydra Router** project implements a ZeroMQ-based distributed computing architecture
 with a ping-pong messaging system.
 
-Hydra Router provides abstract base classes for building distributed clients and servers, 
-along with a concrete reference (ping/pong) implementation. The framework uses structured 
-messaging via the HydraMsg protocol for reliable communication between distributed 
+Hydra Router provides abstract base classes for building distributed clients and servers,
+along with a concrete reference (ping/pong) implementation. The framework uses structured
+messaging via the HydraMsg protocol for reliable communication between distributed
 components.
 
 Key Features

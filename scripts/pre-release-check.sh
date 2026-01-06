@@ -53,4 +53,8 @@ echo "🚦 Executing: shrmt -w scripts/..."
 shfmt -w scripts/
 echo $DIV
 
+echo "👽 Executging: poetry run pre-commit run --all-files ..."
+poetry run pre-commit run --all-files
+echo $DIV
+
 echo "✅ All code quality checks passed!"
