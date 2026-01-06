@@ -6,7 +6,6 @@ clear
 # Source the functions file
 FUNCTIONS="hydra-release-functions.sh"
 SCRIPTS_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-echo "SCRIPT_DIR: $SCRIPT_DIR"
 if [ -e "$SCRIPTS_DIR/$FUNCTIONS" ]; then
 	source "$SCRIPTS_DIR/$FUNCTIONS"
 else
@@ -20,8 +19,6 @@ set -e
 # Get the base directory
 BASE_DIR="$(cd -- "$SCRIPTS_DIR/.." && pwd)"
 
-echo $DIV
-echo $DIV
 echo
 echo "Hydra Router Release Tool"
 echo "========================="
