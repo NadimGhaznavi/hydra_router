@@ -8,18 +8,18 @@ _HELPER_SH_LOADED=1
 DIV="----------------------------------------------------------------------------"
 
 dev_branch_process() {
-    # Print out the current git status
-    echo "Current status of the git repository: git status..."
-    git status
-    echo $DIV
+	# Print out the current git status
+	echo "Current status of the git repository: git status..."
+	git status
+	echo $DIV
 
-    # Print out current branches
-    echo "Current branches..."
-    git branch
-    echo $DIV
-    
+	# Print out current branches
+	echo "Current branches..."
+	git branch
+	echo $DIV
+
 	while true; do
-        read -rp "Create a new feature branch? [y|n]: " ANSWER
+		read -rp "Create a new feature branch? [y|n]: " ANSWER
 		ANSWER=${ANSWER,,} # lowercase
 
 		[[ "$ANSWER" == y || "$ANSWER" == n ]] || {
@@ -42,18 +42,18 @@ dev_branch_process() {
 		return 1
 	fi
 
-    while true; do
-        read -rp "Enter new branch name (e.g. feat/widget): " NEW_BRANCH
-        [[ -n "$NEW_BRANCH" ]] || {
-            echo "Branch cannot be empty"
-            continue
-        }
-        break
-    done
+	while true; do
+		read -rp "Enter new branch name (e.g. feat/widget): " NEW_BRANCH
+		[[ -n "$NEW_BRANCH" ]] || {
+			echo "Branch cannot be empty"
+			continue
+		}
+		break
+	done
 
-    # Create new breanch
-    check_clean_git
-    git checkout -b "$NEW_BRANCH"
+	# Create new breanch
+	check_clean_git
+	git checkout -b "$NEW_BRANCH"
 }
 
 feat_branch_process() {
@@ -110,7 +110,7 @@ feat_branch_process() {
 
 	# Switch the the dev branch
 	echo "Switching to the dev branch..."
-    check_clean_git
+	check_clean_git
 	git checkout dev
 	echo $DIV
 
@@ -121,7 +121,7 @@ feat_branch_process() {
 
 	# Create a new branch for the release
 	echo "Creating a new release branch: release/$NEW_VERSION..."
-    check_clean_git
+	check_clean_git
 	git checkout -b "release/$NEW_VERSION"
 	echo $DIV
 
@@ -135,67 +135,75 @@ feat_branch_process() {
 	update_constants_version "$NEW_VERSION"
 	echo $DIV
 
-    # Add and commit the updated files
-    echo "Add and commit with git..."
-    git add -v pyproject.toml hydra_router/constants/DHydra.py
-    git commit -m "Bump version to v$NEW_VERSION"
-    git push -u origin "release/$NEW_VERSION"
-    echo $DIV
+	# Add and commit the updated files
+	echo "Add and commit with git..."
+	git add -v pyproject.toml hydra_router/constants/DHydra.py
+	git commit -m "Bump version to v$NEW_VERSION"
+	git push -u origin "release/$NEW_VERSION"
+	echo $DIV
 
-    # Switch the the main branch
-    echo "Switching to the main branch..."
-    check_clean_git
-    git checkout main
-    echo $DIV
+	# Switch the the main branch
+	echo "Switching to the main branch..."
+	check_clean_git
+	git checkout main
+	echo $DIV
 
-    # Merge the release into main
-    echo "Merge release/$NEW_VERSION into main..."
-    git merge "release/$NEW_VERSION"
-    echo $DIV
+	# Merge the release into main
+	echo "Merge release/$NEW_VERSION into main..."
+	git merge "release/$NEW_VERSION"
+	echo $DIV
 
-    # Tag the release
-    echo "Tagging the repo contents..."
-    git tag -a "v$NEW_VERSION" -m "$NEW_RELEASE_STR"
-    echo $DIV
+	# Tag the release
+	echo "Tagging the repo contents..."
+	git tag -a "v$NEW_VERSION" -m "$NEW_RELEASE_STR"
+	echo $DIV
 
-    # Pushing the new, tagged release to GitHub
-    echo "Pushing new release ($NEW_RELEASE_STR) to GitHub..."
-    git push origin main --follow-tags
-    echo $DIV
+	# Pushing the new, tagged release to GitHub
+	echo "Pushing new release ($NEW_RELEASE_STR) to GitHub..."
+	git push origin main --follow-tags
+	echo $DIV
 
-    # Switch back to the DEV branch
-    echo "Switching back to the dev branch"
-    check_clean_git
-    git checkout dev
-    echo $DIV
+	# Switch back to the DEV branch
+	echo "Switching back to the dev branch"
+	check_clean_git
+	git checkout dev
+	echo $DIV
 
-    # Merge the new release back into dev
-    echo "Merging the new release/$NEW_VERSION back into dev..."
-    git merge "release/$NEW_VERSION"
-    echo $DIV
+	# Merge the new release back into dev
+	echo "Merging the new release/$NEW_VERSION back into dev..."
+	git merge "release/$NEW_VERSION"
+	echo $DIV
 
-    # Push the changes into the remote dev repo
-    echo "Synching updates with GitHub"
-    git add . -v
-    git commit -m "Merged $NEW_VERSION back into dev"
-    echo $DIV
+	# Push the changes into the remote dev repo
+	echo "Synching updates with GitHub"
+	git add . -v
+	git commit -m "Merged $NEW_VERSION back into dev"
+	echo $DIV
 
-    echo "🚀 Successful release!!!"
+	echo "🚀 Successful release!!!"
 
-    # We're on the dev branch, run the dev_branch_process to get back to a feature
-    # branch
-    dev_branch_process
+	# We're on the dev branch, run the dev_branch_process to get back to a feature
+	# branch
+	dev_branch_process
 }
 
 get_base_dir() {
-   local scripts_dir
-    scripts_dir="$(get_scripts_dir)"
-    (cd -- "$scripts_dir/.." && pwd)
+	local scripts_dir
+	scripts_dir="$(get_scripts_dir)"
+	(cd -- "$scripts_dir/.." && pwd)
 }
 
 check_clean_git() {
-    git diff --quiet || { echo "ERROR: working tree dirty"; git status; exit 1; }
-    git diff --cached --quiet || { echo "ERROR: index has staged changes"; git status; exit 1; }
+	git diff --quiet || {
+		echo "ERROR: working tree dirty"
+		git status
+		exit 1
+	}
+	git diff --cached --quiet || {
+		echo "ERROR: index has staged changes"
+		git status
+		exit 1
+	}
 }
 
 get_cur_const_version() {
