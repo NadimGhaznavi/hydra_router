@@ -12,7 +12,6 @@ from typing import Optional
 
 
 class HydraMsg:
-
     def __init__(
         self,
         sender: Optional[str] = None,
