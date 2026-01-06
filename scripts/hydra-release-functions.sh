@@ -95,9 +95,9 @@ feat_branch_process() {
 	CONST_VERSION="$(get_cur_const_version $BASE_DIR)"
 	echo "Current Constants version   : $CONST_VERSION"
 
-	# Get the version out of the docs/source/conf.py file
+	# Get the version out of the docs/_source/conf.py file
 	DOCS_VERSION="$(get_cur_docs_version $BASE_DIR)"
-	echo "Current docs/source/conf,py : $DOCS_VERSION"
+	echo "Current docs/_source/conf,py : $DOCS_VERSION"
 
 	echo $DIV
 
@@ -135,7 +135,7 @@ feat_branch_process() {
 	echo $DIV
 
 	# Update the version number in the docs file
-	echo "Updating the release number in the docs/source/conf.py..."
+	echo "Updating the release number in the docs/_source/conf.py..."
 	update_docs_version "$NEW_VERSION"
 	echo $DIV
 
@@ -146,7 +146,7 @@ feat_branch_process() {
 
 	# Add and commit the updated files
 	echo "Add and commit with git..."
-	git add -v pyproject.toml hydra_router/constants/DHydra.py docs/source/conf.py
+	git add -v pyproject.toml hydra_router/constants/DHydra.py docs/_source/conf.py
 	git commit -m "Bump version to v$NEW_VERSION"
 	git push -u origin "release/$NEW_VERSION"
 	echo $DIV
@@ -228,7 +228,7 @@ get_cur_const_version() {
 
 get_cur_docs_version() {
 	local BASE_DIR="$1"
-	DOCS_FILE="$BASE_DIR/docs/source/conf.py"
+	DOCS_FILE="$BASE_DIR/docs/_source/conf.py"
 
 	DOCS_VERSION="$(
 		sed -nE 's/^[[:space:]]*release[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$DOCS_FILE" |
@@ -338,7 +338,7 @@ update_constants_version() {
 update_docs_version() {
 	local NEW_VERSION="$1"
 	BASE_DIR=$(get_base_dir)
-	DOCS_FILE="$BASE_DIR/docs/source/conf.py"
+	DOCS_FILE="$BASE_DIR/docs/_source/conf.py"
 	if [ -f "$DOCS_FILE" ]; then
 		# Use sed to replace the VERSION constant
 		if [[ "$OSTYPE" == "darwin"* ]]; then
