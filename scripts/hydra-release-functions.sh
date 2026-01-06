@@ -170,6 +170,9 @@ feat_branch_process() {
 
     echo "🚀 Successful release!!!"
 
+    # We're on the dev branch, run the dev_branch_process to get back to a feature
+    # branch
+    dev_branch_process
 }
 
 get_base_dir() {
