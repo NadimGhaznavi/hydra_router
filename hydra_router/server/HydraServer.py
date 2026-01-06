@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 # hydra_router/server/HydraServer.py
 #
 #   Hydra Router
@@ -9,30 +7,40 @@
 #    Website: https://hydra-router.readthedocs.io/en/latest
 #    License: GPL 3.0
 
-import argparse
-import sys
+from abc import ABC, abstractmethod
 from typing import Optional
 
 import zmq
 
-from hydra_router.constants.DHydra import DHydra, DHydraServerDef, DHydraServerMsg
+from hydra_router.constants.DHydra import DHydraServerDef, DHydraServerMsg
+from hydra_router.utils.HydraLog import HydraLog
 
 
-class HydraServer:
+class HydraServer(ABC):
     """
-    HydraServer provides a simple ZeroMQ-based server that binds to a port
-    and handles client requests using the REQ/REP pattern.
+    Abstract base class for HydraServer implementations.
+
+    Provides common ZeroMQ-based server functionality that binds to a port
+    and handles client requests using the REQ/REP pattern. Subclasses must
+    implement application-specific message handling logic.
     """
 
-    def __init__(self, address: str = "*", port: int = DHydraServerDef.PORT):
+    def __init__(
+        self,
+        address: str = "*",
+        port: int = DHydraServerDef.PORT,
+        server_id: Optional[str] = None,
+    ):
         """
         Initialize the HydraServer with binding parameters.
 
         Args:
-            address (str): The address to bind to (default: "*" for all
-                interfaces)
-            port (int): The port to bind to (default: 5555)
+            address (str): The address to bind to (default: "*" for all interfaces)
+            port (int): The port to bind to
+            server_id (str): Identifier for logging purposes
         """
+        self.log = HydraLog(client_id=server_id or "HydraServer", to_console=True)
+
         self.address = address
         self.port = port
         self.context: Optional[zmq.Context] = None
@@ -40,11 +48,15 @@ class HydraServer:
 
     def _setup_socket(self) -> None:
         """Set up ZeroMQ context and REP socket."""
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.REP)
-        bind_address = f"tcp://{self.address}:{self.port}"
-        self.socket.bind(bind_address)
-        print(DHydraServerMsg.BIND.format(bind_address=bind_address))
+        try:
+            self.context = zmq.Context()
+            self.socket = self.context.socket(zmq.REP)
+            bind_address = f"tcp://{self.address}:{self.port}"
+            self.socket.bind(bind_address)
+            self.log.info(DHydraServerMsg.BIND.format(bind_address=bind_address))
+        except Exception as e:
+            self.log.error(DHydraServerMsg.ERROR.format(e=e))
+            exit(1)
 
     def start(self) -> None:
         """
@@ -53,26 +65,31 @@ class HydraServer:
         """
         if self.socket is None:
             self._setup_socket()
-        print(DHydraServerMsg.LOOP_UP.format(address=self.address, port=self.port))
+
+        self.log.info(
+            DHydraServerMsg.LOOP_UP.format(address=self.address, port=self.port)
+        )
 
         try:
             while True:
                 # Wait for next request from client
                 if self.socket is not None:
                     message = self.socket.recv()
-                    print(DHydraServerMsg.RECEIVE.format(message=message))
+                    self.log.debug(DHydraServerMsg.RECEIVE.format(message=message))
 
-                    # Send reply back to client (simple echo for now)
-                    response = b"World"
+                    # Process message using subclass implementation
+                    response = self.handle_message(message)
+
+                    # Send reply back to client
                     self.socket.send(response)
-                    print(DHydraServerMsg.SENT.format(response=response))
+                    self.log.debug(DHydraServerMsg.SENT.format(response=response))
                 else:
                     raise RuntimeError("Socket not initialized")
 
         except KeyboardInterrupt:
-            print(DHydraServerMsg.SHUTDOWN)
+            self.log.info(DHydraServerMsg.SHUTDOWN)
         except Exception as e:
-            print(DHydraServerMsg.ERROR.format(e=e))
+            self.log.error(DHydraServerMsg.ERROR.format(e=e))
             exit(1)
         finally:
             self._cleanup()
@@ -83,58 +100,26 @@ class HydraServer:
             self.socket.close()
         if self.context:
             self.context.term()
-        print(DHydraServerMsg.CLEANUP)
+        self.log.info(DHydraServerMsg.CLEANUP)
 
+    @abstractmethod
+    def handle_message(self, message: bytes) -> bytes:
+        """
+        Abstract method that subclasses must implement to define
+        application-specific message handling logic.
 
-def main() -> None:
-    """Main entry point for hydra-server command."""
-    parser = argparse.ArgumentParser(
-        description="Start a HydraServer instance",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  hydra-server                          # Start server on default (*:5757)
-  hydra-server --port 8080              # Start server on port 8080
-  hydra-server --address localhost      # Start server on localhost:5757
-  hydra-server --address 0.0.0.0 --port 9000  # Start on all interfaces
-        """,
-    )
+        Args:
+            message (bytes): The message received from a client
 
-    parser.add_argument(
-        "--address",
-        "-a",
-        default="*",
-        help=DHydraServerMsg.ADDRESS_HELP,
-    )
+        Returns:
+            bytes: The response to send back to the client
+        """
+        pass
 
-    parser.add_argument(
-        "--port",
-        "-p",
-        type=int,
-        default=DHydraServerDef.PORT,
-        help=DHydraServerMsg.PORT_HELP.format(port=DHydraServerDef.PORT),
-    )
-
-    parser.add_argument(
-        "--version", "-v", action="version", version="ai-hydra " + DHydra.VERSION
-    )
-
-    args = parser.parse_args()
-
-    try:
-        print(DHydraServerMsg.STARTING.format(address=args.address, port=args.port))
-        print(DHydraServerMsg.STOP_HELP)
-
-        server = HydraServer(address=args.address, port=args.port)
-        server.start()
-
-    except KeyboardInterrupt:
-        print(DHydraServerMsg.USER_STOP)
-        sys.exit(0)
-    except Exception as e:
-        print(DHydraServerMsg.ERROR.format(e=e))
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
+    @abstractmethod
+    def run(self) -> None:
+        """
+        Abstract method that subclasses must implement to define
+        application-specific server startup behavior.
+        """
+        pass

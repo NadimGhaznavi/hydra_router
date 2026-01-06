@@ -7,10 +7,8 @@
 #    Website: https://hydra-router.readthedocs.io/en/latest
 #    License: GPL 3.0
 
-from typing import Optional
 import uuid
-
-from hydra_router.constants.DHydra import HydraMsg
+from typing import Optional
 
 
 class HydraMsg:

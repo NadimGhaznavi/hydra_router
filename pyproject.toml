@@ -73,5 +73,5 @@ use_parentheses = true
 ensure_newline_before_comments = true
 
 [tool.poetry.scripts]
-hydra-server = "hydra_router.server.HydraServer:main"
-hydra-client = "hydra_router.client.HydraClient:main"
+hydra-ping-client = "hydra_router.client.HydraClientPing:main"
+hydra-pong-server = "hydra_router.server.HydraServerPong:main"

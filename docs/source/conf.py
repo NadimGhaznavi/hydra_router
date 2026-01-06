@@ -91,3 +91,6 @@ html_theme_options = {
     "includehidden": True,
     "titles_only": False,
 }
+
+# Logo configuration
+html_logo = "_static/hydra-router.png"

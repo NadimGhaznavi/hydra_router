@@ -26,7 +26,7 @@ class DHydraServerDef:
 
 
 # HydraClient messages
-class HydraMsg:
+class DHydraMsg:
     """Hydra Client"""
 
     CLEANUP: str = "HydraClient cleanup complete"

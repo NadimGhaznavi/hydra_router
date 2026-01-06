@@ -12,7 +12,7 @@
 import pytest
 from hydra_router.constants.DHydra import (
     DHydra,
-    HydraMsg,
+    DHydraMsg,
     DHydraServerDef,
     DHydraServerMsg,
 )
@@ -45,13 +45,13 @@ class TestDHydraClientMsg:
 
     def test_messages_have_placeholders(self):
         """Test that messages contain format placeholders."""
-        assert "{server_address}" in HydraMsg.CONNECTED
-        assert "{e}" in HydraMsg.ERROR
-        assert "{server_port}" in HydraMsg.PORT_HELP
+        assert "{server_address}" in DHydraMsg.CONNECTED
+        assert "{e}" in DHydraMsg.ERROR
+        assert "{server_port}" in DHydraMsg.PORT_HELP
 
     def test_cleanup_message(self):
         """Test cleanup message."""
-        assert "cleanup" in HydraMsg.CLEANUP.lower()
+        assert "cleanup" in DHydraMsg.CLEANUP.lower()
 
 
 class TestDHydraServerMsg:
