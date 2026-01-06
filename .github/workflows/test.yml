@@ -54,6 +54,11 @@ jobs:
                   # Check all other issues
                   poetry run flake8 hydra_router --count --statistics
 
+            - name: Black version info
+              run: |
+                  poetry run black --version
+                  poetry show black
+
             - name: Format check with Black
               run: |
                   poetry run black --check --diff hydra_router
