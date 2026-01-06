@@ -12,6 +12,12 @@ dev_branch_process() {
     echo "Current status of the git repository: git status..."
     git status
     echo $DIV
+
+    # Print out current branches
+    echo "Current branches..."
+    git branch
+    echo $DIV
+    
 	while true; do
         read -rp "Create a new feature branch? [y|n]: " ANSWER
 		ANSWER=${ANSWER,,} # lowercase
