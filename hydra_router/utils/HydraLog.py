@@ -9,7 +9,7 @@
 
 import logging
 
-from hydra_router.constants.DHydra import DHydraLog, LOG_LEVELS
+from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLog
 
 
 class HydraLog:
