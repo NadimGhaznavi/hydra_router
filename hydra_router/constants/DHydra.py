@@ -1,3 +1,6 @@
+import logging
+
+
 # Project globals
 class DHydra:
     """Project Defaults"""
@@ -24,6 +27,29 @@ class DHydraClientMsg:
     RECEIVED: str = "Received response: {response}"
     SENDING: str = "Sending request: {message}"
     SERVER_HELP: str = "Server hostname to connect to (default: {server_address})"
+
+
+# HydraLog levels
+class DHydraLog:
+    """Logging Constants"""
+
+    INFO: str = "info"
+    DEBUG: str = "debug"
+    WARNING: str = "warning"
+    ERROR: str = "error"
+    CRITICAL: str = "critical"
+    DEFAULT: str = "warning"
+
+
+# HydraLog levels dictionary
+LOG_LEVELS: dict = {
+    DHydraLog.INFO: logging.INFO,
+    DHydraLog.DEBUG: logging.DEBUG,
+    DHydraLog.WARNING: logging.WARNING,
+    DHydraLog.ERROR: logging.ERROR,
+    DHydraLog.CRITICAL: logging.CRITICAL,
+    DHydraLog.DEFAULT: logging.WARNING,
+}
 
 
 # HydraServer messages
