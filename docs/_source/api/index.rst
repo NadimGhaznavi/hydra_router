@@ -22,4 +22,5 @@ Utilities and Constants
     :maxdepth: 2
 
     HydraLog
+    HydraMsg
     DHydra

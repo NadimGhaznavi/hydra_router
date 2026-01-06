@@ -40,6 +40,9 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = []
 
+# Suppress warnings for missing references
+suppress_warnings = ["ref.python"]
+
 # Autodoc settings
 autodoc_default_options = {
     "members": True,
@@ -48,6 +51,10 @@ autodoc_default_options = {
     "undoc-members": True,
     "exclude-members": "__weakref__",
 }
+
+# Autodoc type hints
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented"
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -61,6 +68,7 @@ napoleon_use_admonition_for_references = False
 napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
+napoleon_preprocess_types = False
 
 # Intersphinx mapping
 intersphinx_mapping = {
