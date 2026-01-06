@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch, MagicMock
 import zmq
 
 from hydra_router.client.HydraClient import HydraClient
-from hydra_router.constants.DHydra import DHydraClientMsg, DHydraServerDef
+from hydra_router.constants.DHydra import HydraMsg, DHydraServerDef
 
 
 class TestHydraClient:
@@ -73,7 +73,7 @@ class TestHydraClient:
         mock_socket.connect.assert_called_once_with(client.server_address)
 
         # Verify success message
-        expected_message = DHydraClientMsg.CONNECTED.format(
+        expected_message = HydraMsg.CONNECTED.format(
             server_address=client.server_address
         )
         mock_print.assert_called_with(expected_message)
@@ -93,7 +93,7 @@ class TestHydraClient:
         HydraClient()
 
         # Verify error handling
-        expected_error = DHydraClientMsg.ERROR.format(e="Connection failed")
+        expected_error = HydraMsg.ERROR.format(e="Connection failed")
         mock_print.assert_called_with(expected_error)
         mock_exit.assert_called_once_with(1)
 
@@ -120,8 +120,8 @@ class TestHydraClient:
         mock_socket.recv.assert_called_once()
 
         # Verify print calls
-        sending_msg = DHydraClientMsg.SENDING.format(message=test_message)
-        received_msg = DHydraClientMsg.RECEIVED.format(response=test_response)
+        sending_msg = HydraMsg.SENDING.format(message=test_message)
+        received_msg = HydraMsg.RECEIVED.format(response=test_response)
         mock_print.assert_any_call(sending_msg)
         mock_print.assert_any_call(received_msg)
 
@@ -142,7 +142,7 @@ class TestHydraClient:
         client.send_message(test_message)
 
         # Verify error handling
-        expected_error = DHydraClientMsg.ERROR.format(e="Socket not initialized")
+        expected_error = HydraMsg.ERROR.format(e="Socket not initialized")
         mock_print.assert_called_with(expected_error)
         mock_exit.assert_called_once_with(1)
 
@@ -164,7 +164,7 @@ class TestHydraClient:
         client.send_message(test_message)
 
         # Verify error handling
-        expected_error = DHydraClientMsg.ERROR.format(e="Network error")
+        expected_error = HydraMsg.ERROR.format(e="Network error")
         mock_print.assert_called_with(expected_error)
         mock_exit.assert_called_once_with(1)
 
@@ -186,7 +186,7 @@ class TestHydraClient:
         # Verify cleanup calls
         mock_socket.close.assert_called_once()
         mock_context.term.assert_called_once()
-        mock_print.assert_called_with(DHydraClientMsg.CLEANUP)
+        mock_print.assert_called_with(HydraMsg.CLEANUP)
 
     @patch("hydra_router.client.HydraClient.HydraClient._setup_socket")
     @patch("builtins.print")
@@ -200,7 +200,7 @@ class TestHydraClient:
         client._cleanup()
 
         # Should still print cleanup message
-        mock_print.assert_called_with(DHydraClientMsg.CLEANUP)
+        mock_print.assert_called_with(HydraMsg.CLEANUP)
 
     @patch("hydra_router.client.HydraClient.HydraClient._setup_socket")
     def test_server_address_formatting(self, mock_setup):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# hydra_router/client/HydraClient.py
+# hydra_router/client/HydraClientPing.py
 #
 #   Hydra Router
 #    Author: Nadim-Daniel Ghaznavi
@@ -17,12 +17,15 @@ import zmq
 
 from hydra_router.constants.DHydra import HydraMsg, DHydraServerDef, DModule
 from hydra_router.utils.HydraLog import HydraLog
+from hydra_router.utils.HydraMsg import HydraMsg
+from hydra_router.client.HydraClient import HydraClient
 
 
-class HydraClient:
+class HydraClientPing(HydraClient):
     """
-    HydraClient provides a simple ZeroMQ-based client that connects to a server
-    and sends requests using the REQ/REP pattern.
+    HydraClientPing uses the HydraClient to create a simple "ping-client" that
+    connects to a "pong-server", sends a "ping" and -hopefully- displays a "pong"
+    from the "pong-server".
     """
 
     def __init__(

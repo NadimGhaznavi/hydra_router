@@ -26,7 +26,7 @@ class DHydraServerDef:
 
 
 # HydraClient messages
-class DHydraClientMsg:
+class HydraMsg:
     """Hydra Client"""
 
     CLEANUP: str = "HydraClient cleanup complete"
@@ -77,3 +77,11 @@ class DHydraServerMsg:
     STARTING: str = "Starting HydraServer on {address}:{port}"
     STOP_HELP: str = "Press Ctrl+C to stop the server"
     USER_STOP: str = "Server stopped by user"
+
+
+# Hydra Router Modules
+class DModule:
+    """Hydra Router Project Modules"""
+
+    HYDRA_CLIENT: str = "HydraClient"
+    HYDRA_SERVER: str = "HydraServer"

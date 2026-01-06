@@ -7,7 +7,7 @@ The **Hydra Router** project implements a ZeroMQ based distributed computing arc
     :maxdepth: 2
     :caption: Contents:
 
-    installation
+    installation.rst
     api/index
 
 
