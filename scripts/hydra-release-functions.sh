@@ -226,7 +226,7 @@ get_cur_const_version() {
 	echo $CONST_VERSION
 }
 
-get_docs_version() {
+get_cur_docs_version() {
 	local BASE_DIR="$1"
 	DOCS_FILE="$BASE_DIR/docs/source/conf.py"
 
