@@ -4,7 +4,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "hydra-router"
+<<<<<<< HEAD
 version = "0.8.2"
+=======
+version = "0.8.3"
+>>>>>>> release/0.8.3
 description = "ZeroMQ-based client-server communication framework"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
