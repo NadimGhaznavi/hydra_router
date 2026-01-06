@@ -14,7 +14,7 @@ import logging
 class DHydra:
     """Project Defaults"""
 
-    VERSION: str = "0.9.0"
+    VERSION: str = "0.10.0"
 
 
 # HydraServer defaults
