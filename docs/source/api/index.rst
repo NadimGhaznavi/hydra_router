@@ -10,8 +10,9 @@ Core Classes
     :maxdepth: 2
 
     HydraClient
-    HydraServer
     HydraClientPing
+    HydraLog
+    HydraServer
     HydraServerPong
 
 Utilities and Constants
