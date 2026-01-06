@@ -168,6 +168,12 @@ feat_branch_process() {
     git merge "release/$NEW_VERSION"
     echo $DIV
 
+    # Push the changes into the remote dev repo
+    echo "Synching updates with GitHub"
+    git add . -v
+    git commit -m "Merged $NEW_VERSION back into dev"
+    echo $DIV
+
     echo "🚀 Successful release!!!"
 
     # We're on the dev branch, run the dev_branch_process to get back to a feature
