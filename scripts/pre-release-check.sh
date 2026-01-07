@@ -57,4 +57,9 @@ echo "👽 Executging: poetry run pre-commit run --all-files ..."
 poetry run pre-commit run --all-files
 echo $DIV
 
+echo "🗃️ Rebuilding documentation ..."
+cd $BASE_DIR/docs && make clean
+cd $BASE_DIR/docs && make html
+echo $DIV
+
 echo "✅ All code quality checks passed!"

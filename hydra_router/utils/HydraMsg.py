@@ -45,3 +45,23 @@ class HydraMsg:
         self._payload = payload
 
         self._id = uuid.uuid4()
+
+    def sender(self, sender=None):
+        if sender is not None:
+            self._sender = sender
+        return self._sender
+
+    def target(self, target=None):
+        if target is not None:
+            self._target = target
+        return self._target
+
+    def method(self, method=None):
+        if method is not None:
+            self._method = method
+        return self._method
+
+    def payload(self, payload=None):
+        if payload is not None:
+            self._payload = payload
+        return self._payload
