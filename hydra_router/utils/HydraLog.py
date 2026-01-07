@@ -8,7 +8,7 @@
 #    License: GPL 3.0
 
 import logging
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLog
 
