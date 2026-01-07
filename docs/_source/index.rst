@@ -32,15 +32,10 @@ Key Features
     HydraClient.rst
     HydraClientPing.rst
     HydraLog.rst
+    HydraMsg.rst
     HydraServer.rst
     HydraServerPong.rst
 
-utils
------
-
-.. autoclass:: hydra_router.utils.HydraMsg.HydraMsg
-    :members:
-    :show-inheritance:
 
 
 Indices and tables
