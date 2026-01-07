@@ -89,15 +89,19 @@ feat_branch_process() {
 
 	# Get the version out of the TOML file
 	TOML_VERSION="$(get_cur_toml_version $BASE_DIR)"
-	echo "Current TOML file version   : $TOML_VERSION"
+	echo "Current TOML file version    : $TOML_VERSION"
 
 	# Get the version out of the Constants file
 	CONST_VERSION="$(get_cur_const_version $BASE_DIR)"
-	echo "Current Constants version   : $CONST_VERSION"
+	echo "Current Constants version    : $CONST_VERSION"
 
 	# Get the version out of the docs/_source/conf.py file
 	DOCS_VERSION="$(get_cur_docs_version $BASE_DIR)"
 	echo "Current docs/_source/conf,py : $DOCS_VERSION"
+
+    # Get the version out of the module __init__.py file
+    INIT_VERSION="$(get_cur_init_version $BASE_DIR)"
+    echo "Current __init__.py version  : $INIT_VERSION"
 
 	echo $DIV
 
@@ -144,9 +148,14 @@ feat_branch_process() {
 	update_constants_version "$NEW_VERSION"
 	echo $DIV
 
+    # Update the version number in the __init__.py file
+    echo "Updating the version in the project __init__.py file..."
+    update_init_version "$NEW_VERSION"
+    echo $DIV
+
 	# Add and commit the updated files
 	echo "Add and commit with git..."
-	git add -v pyproject.toml hydra_router/constants/DHydra.py docs/_source/conf.py
+	git add -v pyproject.toml hydra_router/constants/DHydra.py docs/_source/conf.py hydra_router/__init__.py
 	git commit -m "Pre $NEW_RELEASE_STR"
 	git push -u origin "release/$NEW_VERSION"
 	echo $DIV
@@ -255,6 +264,17 @@ get_cur_toml_version() {
 	echo $TOML_VERSION
 }
 
+get_cur_init_version() {
+    local BASE_DIR="$1"
+    INIT_FILE="$BASE_DIR/hydra_router/__init__.py"
+    INIT_VERSION="$(sed -nE 's/^[[:space:]]*__version__[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$INIT_FILE" | head -n1)"
+    [[ -n "${INIT_VERSION:-}" ]] || {
+        echo "ERROR: Could not find __version__ in $INIT_FILE" >&2
+        exit 1
+    }
+    echo $INIT_VERSION
+}
+
 get_new_release_name() {
 	while true; do
 		read -rp "Enter new release name: " NEW_RELEASE_NAME
@@ -354,6 +374,26 @@ update_docs_version() {
 		exit 1
 	fi
 
+}
+
+update_init_version() {
+    local NEW_VERSION="$1"
+    BASE_DIR=$(get_base_dir)
+    INIT_FILE="$BASE_DIR/hydra_router/__init__.py"
+    if [ -f "$INIT_FILE" ]; then
+        # Use sed to replace the __version__ variable
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS sed requires -i ''
+            sed -i '' "s/^__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$INIT_FILE"
+        else
+            # Linux sed
+            sed -i "s/^__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$INIT_FILE"
+        fi
+        echo "✅ Updated $INIT_FILE __version__ to $NEW_VERSION"
+    else
+        echo "❌ Error: $INIT_FILE not found"
+        exit 1
+    fi
 }
 
 update_toml_version() {
