@@ -60,9 +60,8 @@ class HydraServerPong(HydraServer):
             Dict[str, Any]: Parsed ping message data or error information
 
         Raises:
-            json.JSONDecodeError: If message is not valid JSON (handled internally)
-            UnicodeDecodeError: If message cannot be decoded as UTF-8 (handled
-            internally)
+            json.JSONDecodeError: If message is not valid JSON (caught and handled)
+            UnicodeDecodeError: If message cannot be decoded as UTF-8 (caught and handled)
         """
         try:
             # For now, assume simple JSON message
@@ -90,7 +89,7 @@ class HydraServerPong(HydraServer):
             HydraMsg: Structured pong response message
 
         Raises:
-            json.JSONDecodeError: If ping payload is not valid JSON (handled internally)
+            json.JSONDecodeError: If ping payload is not valid JSON (caught and handled)
         """
         # Extract ping information
         ping_payload = {}
@@ -152,7 +151,7 @@ class HydraServerPong(HydraServer):
             bytes: The pong response to send back to the client
 
         Raises:
-            Exception: If message processing fails (handled internally)
+            Exception: If message processing fails (caught and handled)
         """
         self.ping_count += 1
 
@@ -216,7 +215,7 @@ class HydraServerPong(HydraServer):
             None
 
         Raises:
-            KeyboardInterrupt: When user interrupts with Ctrl+C (handled internally)
+            KeyboardInterrupt: When user interrupts with Ctrl+C (caught and handled)
         """
         self.log.info(f"Starting pong server on {self.address}:{self.port}")
         if self.response_delay > 0:

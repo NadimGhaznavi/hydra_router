@@ -93,9 +93,8 @@ class HydraClientPing(HydraClient):
             Dict[str, Any]: Parsed pong message data or error information
 
         Raises:
-            json.JSONDecodeError: If response is not valid JSON (handled internally)
-            UnicodeDecodeError: If response cannot be decoded as UTF-8 (handled
-            internally)
+            json.JSONDecodeError: If response is not valid JSON (caught and handled)
+            UnicodeDecodeError: If response cannot be decoded as UTF-8 (caught and handled)
         """
         try:
             # For now, assume simple JSON response
@@ -123,8 +122,7 @@ class HydraClientPing(HydraClient):
             Optional[Dict[str, Any]]: Parsed pong response or None if failed
 
         Raises:
-            Exception: If message creation, sending, or parsing fails (handled
-            internally)
+            Exception: If message creation, sending, or parsing fails (caught and handled)
         """
         try:
             # Create structured ping message
@@ -180,7 +178,7 @@ class HydraClientPing(HydraClient):
             None
 
         Raises:
-            KeyboardInterrupt: When user interrupts with Ctrl+C (handled internally)
+            KeyboardInterrupt: When user interrupts with Ctrl+C (caught and handled)
         """
         self.log.info(
             f"Starting ping client: {self.ping_count} pings to {self.server_address}"
