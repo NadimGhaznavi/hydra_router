@@ -99,9 +99,9 @@ feat_branch_process() {
 	DOCS_VERSION="$(get_cur_docs_version $BASE_DIR)"
 	echo "Current docs/_source/conf,py : $DOCS_VERSION"
 
-    # Get the version out of the module __init__.py file
-    #INIT_VERSION="$(get_cur_init_version $BASE_DIR)"
-    #echo "Current __init__.py version  : $INIT_VERSION"
+	# Get the version out of the module __init__.py file
+	#INIT_VERSION="$(get_cur_init_version $BASE_DIR)"
+	#echo "Current __init__.py version  : $INIT_VERSION"
 
 	echo $DIV
 
@@ -148,10 +148,10 @@ feat_branch_process() {
 	update_constants_version "$NEW_VERSION"
 	echo $DIV
 
-    # Update the version number in the __init__.py file
-    #echo "Updating the version in the project __init__.py file..."
-    #update_init_version "$NEW_VERSION"
-    #echo $DIV
+	# Update the version number in the __init__.py file
+	#echo "Updating the version in the project __init__.py file..."
+	#update_init_version "$NEW_VERSION"
+	#echo $DIV
 
 	# Add and commit the updated files
 	echo "Add and commit with git..."
@@ -265,14 +265,14 @@ get_cur_toml_version() {
 }
 
 get_cur_init_version() {
-    local BASE_DIR="$1"
-    INIT_FILE="$BASE_DIR/hydra_router/__init__.py"
-    INIT_VERSION="$(sed -nE 's/^[[:space:]]*__version__[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$INIT_FILE" | head -n1)"
-    [[ -n "${INIT_VERSION:-}" ]] || {
-        echo "ERROR: Could not find __version__ in $INIT_FILE" >&2
-        exit 1
-    }
-    echo $INIT_VERSION
+	local BASE_DIR="$1"
+	INIT_FILE="$BASE_DIR/hydra_router/__init__.py"
+	INIT_VERSION="$(sed -nE 's/^[[:space:]]*__version__[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$INIT_FILE" | head -n1)"
+	[[ -n "${INIT_VERSION:-}" ]] || {
+		echo "ERROR: Could not find __version__ in $INIT_FILE" >&2
+		exit 1
+	}
+	echo $INIT_VERSION
 }
 
 get_new_release_name() {
@@ -377,23 +377,23 @@ update_docs_version() {
 }
 
 update_init_version() {
-    local NEW_VERSION="$1"
-    BASE_DIR=$(get_base_dir)
-    INIT_FILE="$BASE_DIR/hydra_router/__init__.py"
-    if [ -f "$INIT_FILE" ]; then
-        # Use sed to replace the __version__ variable
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS sed requires -i ''
-            sed -i '' "s/^__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$INIT_FILE"
-        else
-            # Linux sed
-            sed -i "s/^__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$INIT_FILE"
-        fi
-        echo "✅ Updated $INIT_FILE __version__ to $NEW_VERSION"
-    else
-        echo "❌ Error: $INIT_FILE not found"
-        exit 1
-    fi
+	local NEW_VERSION="$1"
+	BASE_DIR=$(get_base_dir)
+	INIT_FILE="$BASE_DIR/hydra_router/__init__.py"
+	if [ -f "$INIT_FILE" ]; then
+		# Use sed to replace the __version__ variable
+		if [[ "$OSTYPE" == "darwin"* ]]; then
+			# macOS sed requires -i ''
+			sed -i '' "s/^__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$INIT_FILE"
+		else
+			# Linux sed
+			sed -i "s/^__version__ = \".*\"/__version__ = \"$NEW_VERSION\"/" "$INIT_FILE"
+		fi
+		echo "✅ Updated $INIT_FILE __version__ to $NEW_VERSION"
+	else
+		echo "❌ Error: $INIT_FILE not found"
+		exit 1
+	fi
 }
 
 update_toml_version() {
