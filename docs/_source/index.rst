@@ -14,16 +14,16 @@ Key Features
 
 * **Abstract Base Classes**: Extensible HydraClient and HydraServer base classes
 * **Structured Messaging**: JSON-based HydraMsg protocol for reliable communication
-* **Ping-Pong Implementation**: Ready-to-use ping client and pong server
+* **Reference Application Implementation**: Includes a reference implementation (ping/pong)
 * **ZeroMQ Backend**: High-performance messaging using ZeroMQ
-* **Command Line Tools**: Easy-to-use executables for testing and development
+* **Command Line Tools**: Easy-to-use architecture
 
 
 .. toctree::
     :maxdepth: 2
     :caption: Contents:
 
-    installation.rst
+    install-guide.rst
     quickstart.rst
     user-guide.rst
     architecture.rst
@@ -32,9 +32,15 @@ Key Features
     HydraClient.rst
     HydraClientPing.rst
     HydraLog.rst
-    HydraMsg.rst
     HydraServer.rst
     HydraServerPong.rst
+
+utils
+-----
+
+.. autoclass:: hydra_router.utils.HydraMsg.HydraMsg
+    :members:
+    :show-inheritance:
 
 
 Indices and tables
