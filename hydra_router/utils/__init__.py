@@ -11,7 +11,11 @@
 Utility components for Hydra Router.
 """
 
-from .HydraLog import HydraLog
-from .HydraMsg import HydraMsg
+try:
+    from .HydraLog import HydraLog
+    from .HydraMsg import HydraMsg
 
-__all__ = ["HydraLog", "HydraMsg"]
+    __all__ = ["HydraLog", "HydraMsg"]
+except ImportError:
+    # Handle import errors during documentation builds
+    __all__ = []

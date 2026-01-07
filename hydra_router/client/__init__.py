@@ -11,7 +11,11 @@
 Client components for Hydra Router.
 """
 
-from .HydraClient import HydraClient
-from .HydraClientPing import HydraClientPing
+try:
+    from .HydraClient import HydraClient
+    from .HydraClientPing import HydraClientPing
 
-__all__ = ["HydraClient", "HydraClientPing"]
+    __all__ = ["HydraClient", "HydraClientPing"]
+except ImportError:
+    # Handle import errors during documentation builds
+    __all__ = []

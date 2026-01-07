@@ -11,7 +11,11 @@
 Server components for Hydra Router.
 """
 
-from .HydraServer import HydraServer
-from .HydraServerPong import HydraServerPong
+try:
+    from .HydraServer import HydraServer
+    from .HydraServerPong import HydraServerPong
 
-__all__ = ["HydraServer", "HydraServerPong"]
+    __all__ = ["HydraServer", "HydraServerPong"]
+except ImportError:
+    # Handle import errors during documentation builds
+    __all__ = []
