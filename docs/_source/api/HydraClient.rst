@@ -1,7 +1,6 @@
 HydraClient
 ===========
 
-.. automodule:: hydra_router.client.HydraClient
+.. autoclass:: hydra_router.client.HydraClient.HydraClient
     :members:
-    :undoc-members:
     :show-inheritance:

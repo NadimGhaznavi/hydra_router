@@ -1,8 +1,7 @@
 HydraLog
 ========
 
-.. automodule:: hydra_router.utils.HydraLog
+.. autoclass:: hydra_router.utils.HydraLog.HydraLog
     :members:
-    :undoc-members:
     :show-inheritance:
     :noindex:

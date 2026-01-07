@@ -1,7 +1,6 @@
 HydraServer
 ===========
 
-.. automodule:: hydra_router.server.HydraServer
+.. autoclass:: hydra_router.server.HydraServer.HydraServer
     :members:
-    :undoc-members:
     :show-inheritance:

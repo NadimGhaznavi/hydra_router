@@ -1,7 +1,6 @@
 DHydra
 ======
 
-.. automodule:: hydra_router.constants.DHydra
+.. automodule:: hydra_router.constants
     :members:
-    :undoc-members:
-    :noindex:
+    :show-inheritance:

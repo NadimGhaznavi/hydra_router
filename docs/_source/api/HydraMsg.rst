@@ -1,7 +1,6 @@
 HydraMsg
 ========
 
-.. automodule:: hydra_router.utils.HydraMsg
+.. autoclass:: hydra_router.utils.HydraMsg.HydraMsg
     :members:
-    :undoc-members:
     :show-inheritance:
