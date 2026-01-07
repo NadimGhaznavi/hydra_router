@@ -1,4 +1,4 @@
-# hydra_router/client/__init__.py
+# hydra_router/utils/__init__.py
 #
 #   Hydra Router
 #    Author: Nadim-Daniel Ghaznavi
@@ -8,10 +8,10 @@
 #    License: GPL 3.0
 
 """
-Client components for Hydra Router.
+Utility components for Hydra Router.
 """
 
-from .HydraClient import HydraClient
-from .HydraClientPing import HydraClientPing
+from .HydraLog import HydraLog
+from .HydraMsg import HydraMsg
 
-__all__ = ["HydraClient", "HydraClientPing"]
+__all__ = ["HydraLog", "HydraMsg"]

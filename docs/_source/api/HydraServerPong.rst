@@ -1,6 +1,6 @@
 HydraServerPong
 ===============
 
-.. autoclass:: hydra_router.server.HydraServerPong.HydraServerPong
+.. autoclass:: hydra_router.server.HydraServerPong
     :members:
     :show-inheritance:

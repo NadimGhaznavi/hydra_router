@@ -11,5 +11,7 @@
 Server components for Hydra Router.
 """
 
-# HydraServer class will be available after implementation
-__all__ = ["HydraServer"]
+from .HydraServer import HydraServer
+from .HydraServerPong import HydraServerPong
+
+__all__ = ["HydraServer", "HydraServerPong"]
