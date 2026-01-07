@@ -22,8 +22,8 @@ def short_function(param1: str, param2: int) -> bool:
 
 # ✅ Good - Properly wrapped long line
 def long_function_name(
-    parameter_one: str, 
-    parameter_two: int, 
+    parameter_one: str,
+    parameter_two: int,
     parameter_three: Optional[str] = None
 ) -> Dict[str, Any]:
     return {"result": "success"}
