@@ -6,6 +6,33 @@ inclusion: always
 
 This document outlines the coding style and patterns to follow for this project, based on the established patterns in the HydraRouter implementation.
 
+## Code Formatting Standards
+
+### Line Length
+- **CRITICAL**: Maximum line length is **88 characters**
+- This applies to all code, comments, and docstrings
+- Use line breaks and proper indentation for long lines
+- Tools like `black` will enforce this automatically
+
+### Examples
+```python
+# ✅ Good - Under 88 characters
+def short_function(param1: str, param2: int) -> bool:
+    return True
+
+# ✅ Good - Properly wrapped long line
+def long_function_name(
+    parameter_one: str, 
+    parameter_two: int, 
+    parameter_three: Optional[str] = None
+) -> Dict[str, Any]:
+    return {"result": "success"}
+
+# ❌ Bad - Over 88 characters
+def bad_function(param1: str, param2: int, param3: str, param4: bool) -> Dict[str, Any]:
+    return {"this_line_is_way_too_long_and_violates_the_88_character_limit": True}
+```
+
 ## Constants Organization
 
 ### Structure
@@ -135,12 +162,15 @@ from project.constants.DLongModuleName import DLongModuleDefaults as Defaults
 ## Code Review Checklist
 
 When reviewing code, ensure:
+- [ ] **Line length does not exceed 88 characters**
 - [ ] Hard-coded strings are moved to constants
 - [ ] Message formatting uses `.format()` with named placeholders
 - [ ] Default values come from constants, not inline literals
 - [ ] Constants are logically grouped in appropriate classes
 - [ ] Import statements follow the established patterns
 - [ ] Error messages include sufficient context for debugging
+- [ ] Code passes `flake8` linting with 88-character limit
+- [ ] Code is formatted with `black` using 88-character line length
 
 ## Migration Guidelines
 

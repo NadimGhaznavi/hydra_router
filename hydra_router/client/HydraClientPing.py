@@ -94,7 +94,8 @@ class HydraClientPing(HydraClient):
 
         Raises:
             json.JSONDecodeError: If response is not valid JSON (caught and handled)
-            UnicodeDecodeError: If response cannot be decoded as UTF-8 (caught and handled)
+            UnicodeDecodeError: If response cannot be decoded as UTF-8 (caught
+                and handled)
         """
         try:
             # For now, assume simple JSON response
@@ -122,7 +123,8 @@ class HydraClientPing(HydraClient):
             Optional[Dict[str, Any]]: Parsed pong response or None if failed
 
         Raises:
-            Exception: If message creation, sending, or parsing fails (caught and handled)
+            Exception: If message creation, sending, or parsing fails (caught
+                and handled)
         """
         try:
             # Create structured ping message

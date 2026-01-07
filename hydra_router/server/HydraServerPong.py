@@ -61,7 +61,8 @@ class HydraServerPong(HydraServer):
 
         Raises:
             json.JSONDecodeError: If message is not valid JSON (caught and handled)
-            UnicodeDecodeError: If message cannot be decoded as UTF-8 (caught and handled)
+            UnicodeDecodeError: If message cannot be decoded as UTF-8 (caught
+                and handled)
         """
         try:
             # For now, assume simple JSON message
