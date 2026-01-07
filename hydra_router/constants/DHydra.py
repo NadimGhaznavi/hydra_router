@@ -8,18 +8,29 @@
 #    License: GPL 3.0
 
 import logging
+from typing import Dict
 
 
 # Project globals
 class DHydra:
-    """Project Defaults"""
+    """
+    Global project constants and version information.
+
+    Contains the current version string and other project-wide constants
+    used throughout the HydraRouter package.
+    """
 
     VERSION: str = "0.12.13"
 
 
 # HydraServer defaults
 class DHydraServerDef:
-    """Hydra Server Defaults"""
+    """
+    Default configuration values for HydraServer instances.
+
+    Provides standard hostname and port values used when no explicit
+    configuration is provided during server initialization.
+    """
 
     HOSTNAME: str = "localhost"
     PORT: int = 5757
@@ -27,7 +38,12 @@ class DHydraServerDef:
 
 # HydraClient messages
 class DHydraMsg:
-    """Hydra Client"""
+    """
+    Message templates for HydraClient logging and user feedback.
+
+    Contains formatted string templates with placeholders for dynamic
+    values. Use .format() method to substitute actual values.
+    """
 
     CLEANUP: str = "HydraClient cleanup complete"
     CONNECTED: str = "HydraClient connected to {server_address}"
@@ -40,7 +56,12 @@ class DHydraMsg:
 
 # HydraLog levels
 class DHydraLog:
-    """Logging Constants"""
+    """
+    Logging level constants for HydraLog configuration.
+
+    Defines string constants for different logging levels that map
+    to Python's standard logging levels via the LOG_LEVELS dictionary.
+    """
 
     INFO: str = "info"
     DEBUG: str = "debug"
@@ -51,7 +72,10 @@ class DHydraLog:
 
 
 # HydraLog levels dictionary
-LOG_LEVELS: dict = {
+# Mapping of HydraLog level strings to Python logging level integers.
+# Used by HydraLog to convert string-based log level configuration
+# to the integer values expected by Python's logging module.
+LOG_LEVELS: Dict[str, int] = {
     DHydraLog.INFO: logging.INFO,
     DHydraLog.DEBUG: logging.DEBUG,
     DHydraLog.WARNING: logging.WARNING,
@@ -63,7 +87,12 @@ LOG_LEVELS: dict = {
 
 # HydraServer messages
 class DHydraServerMsg:
-    """Hydra Server Messages"""
+    """
+    Message templates for HydraServer logging and user feedback.
+
+    Contains formatted string templates with placeholders for dynamic
+    values. Use .format() method to substitute actual values.
+    """
 
     ADDRESS_HELP: str = "Address to bind to (default: '*' for all interfaces)"
     BIND: str = "HydraServer bound to {bind_address}"
@@ -81,7 +110,12 @@ class DHydraServerMsg:
 
 # Hydra Router Modules
 class DModule:
-    """Hydra Router Project Modules"""
+    """
+    Module identifier constants for HydraRouter components.
+
+    Provides standardized string identifiers for different HydraRouter
+    modules, used in logging and component identification.
+    """
 
     HYDRA_CLIENT: str = "HydraClient"
     HYDRA_SERVER: str = "HydraServer"

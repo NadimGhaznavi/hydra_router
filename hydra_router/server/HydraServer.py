@@ -47,7 +47,18 @@ class HydraServer(ABC):
         self.socket: Optional[zmq.Socket] = None
 
     def _setup_socket(self) -> None:
-        """Set up ZeroMQ context and REP socket."""
+        """
+        Set up ZeroMQ context and REP socket.
+
+        Creates a new ZeroMQ context and REP socket, then binds to the
+        configured address and port. Logs binding success or exits on failure.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If socket creation or binding fails
+        """
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REP)
@@ -61,7 +72,19 @@ class HydraServer(ABC):
     def start(self) -> None:
         """
         Start the server and begin listening for requests in a continuous loop.
-        This method will run indefinitely until interrupted.
+
+        Initializes the socket if needed, then enters an infinite loop waiting
+        for client requests. Each received message is processed by the
+        handle_message() method and the response is sent back to the client.
+        The loop continues until interrupted by Ctrl+C or an exception occurs.
+
+        Returns:
+            None
+
+        Raises:
+            KeyboardInterrupt: When user interrupts with Ctrl+C
+            RuntimeError: If socket is not initialized
+            Exception: If message handling fails
         """
         if self.socket is None:
             self._setup_socket()
@@ -95,7 +118,16 @@ class HydraServer(ABC):
             self._cleanup()
 
     def _cleanup(self) -> None:
-        """Clean up ZeroMQ resources."""
+        """
+        Clean up ZeroMQ resources.
+
+        Properly closes the socket and terminates the ZeroMQ context
+        to prevent resource leaks. Should be called when the server
+        is shutting down.
+
+        Returns:
+            None
+        """
         if self.socket:
             self.socket.close()
         if self.context:

@@ -50,11 +50,18 @@ class HydraServerPong(HydraServer):
         """
         Parse an incoming ping message.
 
+        Attempts to decode and parse a JSON message from the client.
+        If parsing fails, returns an error dictionary with the raw message.
+
         Args:
             message_bytes (bytes): Raw message from client
 
         Returns:
-            dict: Parsed ping message data
+            Dict[str, Any]: Parsed ping message data or error information
+
+        Raises:
+            json.JSONDecodeError: If message is not valid JSON (handled internally)
+            UnicodeDecodeError: If message cannot be decoded as UTF-8 (handled internally)
         """
         try:
             # For now, assume simple JSON message
@@ -68,15 +75,21 @@ class HydraServerPong(HydraServer):
                 "raw": message_bytes.decode("utf-8", errors="replace"),
             }
 
-    def create_pong_response(self, ping_data: dict) -> HydraMsg:
+    def create_pong_response(self, ping_data: Dict[str, Any]) -> HydraMsg:
         """
         Create a structured pong response using HydraMsg.
 
+        Extracts information from the ping message and creates a corresponding
+        pong response with original ping data and server response information.
+
         Args:
-            ping_data (dict): Parsed ping message data
+            ping_data (Dict[str, Any]): Parsed ping message data
 
         Returns:
             HydraMsg: Structured pong response message
+
+        Raises:
+            json.JSONDecodeError: If ping payload is not valid JSON (handled internally)
         """
         # Extract ping information
         ping_payload = {}
@@ -107,6 +120,9 @@ class HydraServerPong(HydraServer):
         """
         Create an error response for invalid ping messages.
 
+        Generates a standardized error response in JSON format with
+        error details, server identification, and timestamp.
+
         Args:
             error_message (str): Description of the error
 
@@ -124,11 +140,18 @@ class HydraServerPong(HydraServer):
         """
         Handle incoming ping messages and generate pong responses.
 
+        Processes incoming messages, validates them as ping requests,
+        and generates appropriate pong responses or error messages.
+        Updates internal counters and applies configured response delays.
+
         Args:
             message (bytes): The ping message received from a client
 
         Returns:
             bytes: The pong response to send back to the client
+
+        Raises:
+            Exception: If message processing fails (handled internally)
         """
         self.ping_count += 1
 
@@ -183,6 +206,16 @@ class HydraServerPong(HydraServer):
     def run(self) -> None:
         """
         Run the pong server, listening for ping messages and responding with pongs.
+
+        Starts the server and begins listening for incoming ping messages.
+        Logs server startup information and handles keyboard interruption gracefully.
+        Displays a summary of processed messages when shutting down.
+
+        Returns:
+            None
+
+        Raises:
+            KeyboardInterrupt: When user interrupts with Ctrl+C (handled internally)
         """
         self.log.info(f"Starting pong server on {self.address}:{self.port}")
         if self.response_delay > 0:
@@ -201,7 +234,20 @@ class HydraServerPong(HydraServer):
 
 
 def main() -> None:
-    """Main entry point for hydra-pong-server command."""
+    """
+    Main entry point for hydra-pong-server command.
+
+    Parses command line arguments, creates a HydraServerPong instance,
+    and runs the pong server. Handles keyboard interruption and errors
+    gracefully with appropriate exit codes.
+
+    Returns:
+        None
+
+    Raises:
+        KeyboardInterrupt: When user interrupts with Ctrl+C (handled)
+        Exception: For any other errors during execution (handled)
+    """
     parser = argparse.ArgumentParser(
         description="HydraRouter Pong Server - Respond to structured ping messages",
         formatter_class=argparse.RawDescriptionHelpFormatter,

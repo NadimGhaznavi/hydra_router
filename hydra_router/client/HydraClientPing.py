@@ -83,11 +83,18 @@ class HydraClientPing(HydraClient):
         """
         Parse a pong response message.
 
+        Attempts to decode and parse a JSON response from the server.
+        If parsing fails, returns an error dictionary with the raw response.
+
         Args:
             response_bytes (bytes): Raw response from server
 
         Returns:
-            dict: Parsed pong message data
+            Dict[str, Any]: Parsed pong message data or error information
+
+        Raises:
+            json.JSONDecodeError: If response is not valid JSON (handled internally)
+            UnicodeDecodeError: If response cannot be decoded as UTF-8 (handled internally)
         """
         try:
             # For now, assume simple JSON response
@@ -105,11 +112,17 @@ class HydraClientPing(HydraClient):
         """
         Send a single ping message and wait for pong response.
 
+        Creates a ping message, sends it to the server, measures round-trip time,
+        and parses the response. Updates internal counters for sent/received messages.
+
         Args:
             sequence (int): Sequence number for this ping
 
         Returns:
-            Optional[dict]: Parsed pong response or None if failed
+            Optional[Dict[str, Any]]: Parsed pong response or None if failed
+
+        Raises:
+            Exception: If message creation, sending, or parsing fails (handled internally)
         """
         try:
             # Create structured ping message
@@ -156,6 +169,16 @@ class HydraClientPing(HydraClient):
     def run(self) -> None:
         """
         Run the ping client, sending the specified number of ping messages.
+
+        Executes the main ping loop, sending messages at the configured interval
+        and displaying a summary of results. Handles keyboard interruption gracefully
+        and ensures proper cleanup of resources.
+
+        Returns:
+            None
+
+        Raises:
+            KeyboardInterrupt: When user interrupts with Ctrl+C (handled internally)
         """
         self.log.info(
             f"Starting ping client: {self.ping_count} pings to {self.server_address}"
@@ -187,7 +210,20 @@ class HydraClientPing(HydraClient):
 
 
 def main() -> None:
-    """Main entry point for hydra-ping-client command."""
+    """
+    Main entry point for hydra-ping-client command.
+
+    Parses command line arguments, creates a HydraClientPing instance,
+    and runs the ping client. Handles keyboard interruption and errors
+    gracefully with appropriate exit codes.
+
+    Returns:
+        None
+
+    Raises:
+        KeyboardInterrupt: When user interrupts with Ctrl+C (handled)
+        Exception: For any other errors during execution (handled)
+    """
     parser = argparse.ArgumentParser(
         description="HydraRouter Ping Client - Send structured ping messages "
         "to a pong server",

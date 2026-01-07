@@ -8,12 +8,35 @@
 #    License: GPL 3.0
 
 import logging
+from typing import Optional, Dict, Any
 
 from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLog
 
 
 class HydraLog:
-    def __init__(self, client_id: str, log_file=None, to_console=True):
+    """
+    Centralized logging utility for HydraRouter components.
+
+    HydraLog provides a standardized logging interface with configurable
+    output destinations (console and/or file) and log levels. It wraps
+    Python's standard logging module with HydraRouter-specific formatting
+    and configuration.
+    """
+
+    def __init__(
+        self, client_id: str, log_file: Optional[str] = None, to_console: bool = True
+    ) -> None:
+        """
+        Initialize the HydraLog instance with specified configuration.
+
+        Args:
+            client_id (str): Unique identifier for the logging client
+            log_file (Optional[str]): Path to log file for file output
+            to_console (bool): Whether to output logs to console
+
+        Returns:
+            None
+        """
         self._logger = logging.getLogger(client_id)
 
         # The default logger log level
@@ -40,25 +63,93 @@ class HydraLog:
 
         self._logger.propagate = False
 
-    def loglevel(self, loglevel):
+    def loglevel(self, loglevel: str) -> None:
+        """
+        Set the logging level for this logger instance.
+
+        Args:
+            loglevel (str): Log level string from DHydraLog constants
+
+        Returns:
+            None
+
+        Raises:
+            KeyError: If loglevel is not a valid log level constant
+        """
         self._logger.setLevel(LOG_LEVELS[loglevel])
 
-    def shutdown(self):
+    def shutdown(self) -> None:
+        """
+        Cleanly shutdown the logging system and flush all handlers.
+
+        Returns:
+            None
+        """
         # Exit cleanly
         logging.shutdown()  # Flush all handler
 
     # Basic log message handling, wraps Python's logging object
-    def info(self, message, extra=None):
+    def info(self, message: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Log an informational message.
+
+        Args:
+            message (str): The message to log
+            extra (Optional[Dict[str, Any]]): Extra context data for logging
+
+        Returns:
+            None
+        """
         self._logger.info(message, extra=extra)
 
-    def debug(self, message, extra=None):
+    def debug(self, message: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Log a debug message.
+
+        Args:
+            message (str): The message to log
+            extra (Optional[Dict[str, Any]]): Extra context data for logging
+
+        Returns:
+            None
+        """
         self._logger.debug(message, extra=extra)
 
-    def warning(self, message, extra=None):
+    def warning(self, message: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Log a warning message.
+
+        Args:
+            message (str): The message to log
+            extra (Optional[Dict[str, Any]]): Extra context data for logging
+
+        Returns:
+            None
+        """
         self._logger.warning(message, extra=extra)
 
-    def error(self, message, extra=None):
+    def error(self, message: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Log an error message.
+
+        Args:
+            message (str): The message to log
+            extra (Optional[Dict[str, Any]]): Extra context data for logging
+
+        Returns:
+            None
+        """
         self._logger.error(message, extra=extra)
 
-    def critical(self, message, extra=None):
+    def critical(self, message: str, extra: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Log a critical error message.
+
+        Args:
+            message (str): The message to log
+            extra (Optional[Dict[str, Any]]): Extra context data for logging
+
+        Returns:
+            None
+        """
         self._logger.critical(message, extra=extra)

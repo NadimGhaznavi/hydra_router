@@ -12,13 +12,33 @@ from typing import Optional
 
 
 class HydraMsg:
+    """
+    Structured message class for HydraRouter communication protocol.
+
+    HydraMsg provides a standardized message format for communication between
+    HydraClient and HydraServer instances. Each message contains sender/target
+    identification, method specification, and optional payload data.
+    """
+
     def __init__(
         self,
         sender: Optional[str] = None,
         target: Optional[str] = None,
         method: Optional[str] = None,
         payload: Optional[str] = None,
-    ):
+    ) -> None:
+        """
+        Initialize a new HydraMsg instance.
+
+        Args:
+            sender (Optional[str]): Identifier of the message sender
+            target (Optional[str]): Identifier of the intended message recipient
+            method (Optional[str]): Method or action to be performed
+            payload (Optional[str]): Message data or parameters as JSON string
+
+        Returns:
+            None
+        """
         self._sender = sender
         self._target = target
         self._method = method

@@ -52,7 +52,18 @@ class HydraClient(ABC):
         self._setup_socket()
 
     def _setup_socket(self) -> None:
-        """Set up ZeroMQ context and REQ socket with connection."""
+        """
+        Set up ZeroMQ context and REQ socket with connection.
+
+        Creates a new ZeroMQ context and REQ socket, then connects to the
+        configured server address. Logs connection success or exits on failure.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If socket creation or connection fails
+        """
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
@@ -68,11 +79,19 @@ class HydraClient(ABC):
         """
         Send a message to the server and wait for response.
 
+        Sends a message to the connected server using the REQ/REP pattern
+        and blocks until a response is received. Logs the message exchange
+        for debugging purposes.
+
         Args:
             message (bytes): The message to send to the server
 
         Returns:
             bytes: The response received from the server
+
+        Raises:
+            RuntimeError: If socket is not initialized
+            Exception: If message sending or receiving fails
         """
         try:
             self.log.debug(DHydraMsg.SENDING.format(message=message))
@@ -91,7 +110,16 @@ class HydraClient(ABC):
             exit(1)
 
     def _cleanup(self) -> None:
-        """Clean up ZeroMQ resources."""
+        """
+        Clean up ZeroMQ resources.
+
+        Properly closes the socket and terminates the ZeroMQ context
+        to prevent resource leaks. Should be called when the client
+        is no longer needed.
+
+        Returns:
+            None
+        """
         if self.socket:
             self.socket.close()
         if self.context:
