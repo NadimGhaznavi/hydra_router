@@ -1,3 +1,9 @@
+API
+===
+
+utils
+-----
+
 .. autoclass:: hydra_router.utils.HydraMsg.HydraMsg
     :no-index:
     :members:
