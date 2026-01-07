@@ -147,7 +147,7 @@ feat_branch_process() {
 	# Add and commit the updated files
 	echo "Add and commit with git..."
 	git add -v pyproject.toml hydra_router/constants/DHydra.py docs/_source/conf.py
-	git commit -m "Pre-$NEW_RELEASE_STR"
+	git commit -m "Pre $NEW_RELEASE_STR"
 	git push -u origin "release/$NEW_VERSION"
 	echo $DIV
 
