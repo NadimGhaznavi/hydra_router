@@ -27,7 +27,14 @@ Key Features
     quickstart.rst
     user-guide.rst
     architecture.rst
-    api/index
+
+    DHydra.rst
+    HydraClient.rst
+    HydraClientPing.rst
+    HydraLog.rst
+    HydraMsg.rst
+    HydraServer.rst
+    HydraServerPong.rst
 
 
 Indices and tables
