@@ -100,8 +100,8 @@ feat_branch_process() {
 	echo "Current docs/_source/conf,py : $DOCS_VERSION"
 
     # Get the version out of the module __init__.py file
-    INIT_VERSION="$(get_cur_init_version $BASE_DIR)"
-    echo "Current __init__.py version  : $INIT_VERSION"
+    #INIT_VERSION="$(get_cur_init_version $BASE_DIR)"
+    #echo "Current __init__.py version  : $INIT_VERSION"
 
 	echo $DIV
 
@@ -149,9 +149,9 @@ feat_branch_process() {
 	echo $DIV
 
     # Update the version number in the __init__.py file
-    echo "Updating the version in the project __init__.py file..."
-    update_init_version "$NEW_VERSION"
-    echo $DIV
+    #echo "Updating the version in the project __init__.py file..."
+    #update_init_version "$NEW_VERSION"
+    #echo $DIV
 
 	# Add and commit the updated files
 	echo "Add and commit with git..."
