@@ -41,7 +41,7 @@ templates_path = ["_templates"]
 exclude_patterns = ["tests", "tests/**"]
 
 # Suppress warnings for missing references
-suppress_warnings = ["ref.python"]
+# suppress_warnings = ["ref.python"]
 
 # Autodoc settings
 autodoc_default_options = {
