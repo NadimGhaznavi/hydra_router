@@ -71,10 +71,10 @@ napoleon_use_rtype = True
 napoleon_preprocess_types = False
 
 # Intersphinx mapping
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-    "zmq": ("https://pyzmq.readthedocs.io/en/latest/", None),
-}
+# intersphinx_mapping = {
+#    "python": ("https://docs.python.org/3", None),
+#    "zmq": ("https://pyzmq.readthedocs.io/en/latest/", None),
+# }
 
 
 # -- Options for HTML output -------------------------------------------------
