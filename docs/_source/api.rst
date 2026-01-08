@@ -17,3 +17,11 @@ HydraMsg
     :no-index:
     :members:
     :show-inheritance:
+
+HydraLog
+--------
+
+.. autoclass:: hydra_router.utils.HydraLog.HydraLog
+    :no-index:
+    :members:
+    :show-inheritance:

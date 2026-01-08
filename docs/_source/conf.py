@@ -70,15 +70,8 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_preprocess_types = False
 
-# Intersphinx mapping
-# intersphinx_mapping = {
-#    "python": ("https://docs.python.org/3", None),
-#    "zmq": ("https://pyzmq.readthedocs.io/en/latest/", None),
-# }
-
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
