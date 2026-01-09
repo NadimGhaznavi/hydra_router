@@ -27,6 +27,11 @@ pre-commit = "^3.6.0"
 sphinx = "<8.0"
 sphinx-rtd-theme = "^3.0.2"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = "<8.0"
+sphinx-rtd-theme = "^3.0.2"
+
+
 [tool.flake8]
 max-line-length = 88
 extend-ignore = ["E203", "W503"]
