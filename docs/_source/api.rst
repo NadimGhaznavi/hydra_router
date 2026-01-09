@@ -2,6 +2,30 @@ API
 ===
 
 
+HydraServer
+-----------
+
+.. autoclass:: hydra_router.server.HydraServer.HydraServer
+    :no-index:
+    :members:
+    :show-inheritance:
+
+HydraServerPong
+---------------
+
+.. autoclass:: hydra_router.server.HydraServerPong.HydraServerPong
+    :no-index:
+    :members:
+    :show-inheritance:
+
+HydraClientPing
+---------------
+
+.. autoclass:: hydra_router.client.HydraClientPing.HydraClientPing
+    :no-index:
+    :members:
+    :show-inheritance:
+
 HydraClient
 -----------
 
