@@ -20,7 +20,7 @@ class DHydra:
     used throughout the HydraRouter package.
     """
 
-    VERSION: str = "0.13.0"
+    VERSION: str = "0.13.1"
 
 
 # HydraServer defaults

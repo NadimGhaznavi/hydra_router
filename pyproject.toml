@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "hydra-router"
-version = "0.13.0"
+version = "0.13.1"
 description = "ZeroMQ-based distributed framework"
 authors = ["Nadim-Daniel Ghaznavi <nghaznavi@gmail.com>"]
 readme = "README.md"
