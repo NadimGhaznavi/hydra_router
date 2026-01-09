@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "sphinx.ext.coverage",
+    "sphinx_rtd_theme",
 ]
 
 templates_path = ["_templates"]
