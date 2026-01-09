@@ -7,7 +7,6 @@
 #    Website: https://hydra-router.readthedocs.io/en/latest
 #    License: GPL 3.0
 
-from abc import ABC, abstractmethod
 from typing import Optional
 
 import zmq
@@ -16,7 +15,7 @@ from hydra_router.constants.DHydra import DHydraMsg, DHydraServerDef
 from hydra_router.utils.HydraLog import HydraLog
 
 
-class HydraClient(ABC):
+class HydraClient:
     """
     Abstract base class for HydraClient implementations.
 
@@ -126,10 +125,9 @@ class HydraClient(ABC):
             self.context.term()
         self.log.info(DHydraMsg.CLEANUP)
 
-    @abstractmethod
     def run(self) -> None:
         """
         Abstract method that subclasses must implement to define
         application-specific client behavior.
         """
-        pass
+        raise NotImplementedError("This should be implemented in the child class")
