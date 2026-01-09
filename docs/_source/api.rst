@@ -18,18 +18,18 @@ HydraServerPong
     :members:
     :show-inheritance:
 
-HydraClientPing
----------------
-
-.. autoclass:: hydra_router.client.HydraClientPing.HydraClientPing
-    :no-index:
-    :members:
-    :show-inheritance:
-
 HydraClient
 -----------
 
 .. autoclass:: hydra_router.client.HydraClient.HydraClient
+    :no-index:
+    :members:
+    :show-inheritance:
+
+HydraClientPing
+---------------
+
+.. autoclass:: hydra_router.client.HydraClientPing.HydraClientPing
     :no-index:
     :members:
     :show-inheritance:
