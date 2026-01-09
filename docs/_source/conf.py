@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = "Hydra Router"
 copyright = "2026, Nadim-Daniel Ghaznavi"
 author = "Nadim-Daniel Ghaznavi"
-release = "0.12.32"
+release = "0.12.33"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
