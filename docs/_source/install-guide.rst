@@ -22,6 +22,10 @@ environment.
 Installing from PyPI
 --------------------
 
+Simply install the **Hydra Router** software using *pip* from within your newly created
+virtual environment.
+
 .. code-block:: bash
 
+    . hydra_venv/bin/activate
     pip install hydra-router
