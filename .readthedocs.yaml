@@ -12,6 +12,7 @@ build:
     post_install:
       - poetry config virtualenvs.create false
       - poetry install --with dev
+      - python -m pip install --force-reinstall "sphinx==7.4.7" "sphinx-rtd-theme==3.0.2"
 
 sphinx:
   configuration: docs/_source/conf.py
