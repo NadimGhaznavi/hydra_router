@@ -31,11 +31,6 @@ class ConcreteHydraServer(HydraServer):
 class TestHydraServer:
     """Test cases for HydraServer abstract base class."""
 
-    def test_cannot_instantiate_abstract_class(self):
-        """Test that HydraServer cannot be instantiated directly."""
-        with pytest.raises(TypeError):
-            HydraServer()
-
     @patch("hydra_router.server.HydraServer.HydraServer._setup_socket")
     def test_init_with_defaults(self, mock_setup):
         """Test HydraServer initialization with default parameters."""

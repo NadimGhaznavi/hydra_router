@@ -7,7 +7,6 @@
 #    Website: https://hydra-router.readthedocs.io/en/latest
 #    License: GPL 3.0
 
-from abc import ABC, abstractmethod
 from typing import Optional
 
 import zmq
@@ -16,7 +15,7 @@ from hydra_router.constants.DHydra import DHydraServerDef, DHydraServerMsg
 from hydra_router.utils.HydraLog import HydraLog
 
 
-class HydraServer(ABC):
+class HydraServer:
     """
     Abstract base class for HydraServer implementations.
 
@@ -134,7 +133,6 @@ class HydraServer(ABC):
             self.context.term()
         self.log.info(DHydraServerMsg.CLEANUP)
 
-    @abstractmethod
     def handle_message(self, message: bytes) -> bytes:
         """
         Abstract method that subclasses must implement to define
@@ -146,12 +144,11 @@ class HydraServer(ABC):
         Returns:
             bytes: The response to send back to the client
         """
-        pass
+        raise NotImplementedError("This should be implemented in the child class")
 
-    @abstractmethod
     def run(self) -> None:
         """
         Abstract method that subclasses must implement to define
         application-specific server startup behavior.
         """
-        pass
+        raise NotImplementedError("This should be implemented in the child class")
