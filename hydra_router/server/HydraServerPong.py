@@ -313,7 +313,7 @@ Examples:
         DHydraServerMsg.STARTING.format(address=args.address, port=args.port)
     )
     server.log.info(DHydraServerMsg.STOP_HELP)
-    # server.run()
+    server.run()
 
     # except KeyboardInterrupt:
     #    print(DHydraServerMsg.USER_STOP)

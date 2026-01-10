@@ -41,6 +41,7 @@ class HydraLog:
         Returns:
             None
         """
+        print("FOO")
         self._logger = logging.getLogger(client_id)
 
         # The default logger log level
