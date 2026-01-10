@@ -11,8 +11,8 @@ from typing import Optional
 
 import zmq
 
-from hydra_router.constants.DHydra import DHydraClientMsg, DHydraServerDef
 from hydra_router.utils.HydraLog import HydraLog
+from hydra_router.constants.DHydra import DHydraClientMsg, DHydraServerDef, DModule
 
 
 class HydraClient:
@@ -28,7 +28,7 @@ class HydraClient:
         self,
         server_hostname: Optional[str] = None,
         server_port: Optional[int] = None,
-        client_id: Optional[str] = None,
+        id: Optional[str] = DModule.HYDRA_CLIENT,
     ) -> None:
         """
         Initialize the HydraClient with server connection parameters.
@@ -38,10 +38,9 @@ class HydraClient:
             server_port (int): The server port to connect to
             client_id (str): Identifier for logging purposes
         """
-        self.log = HydraLog(client_id=client_id or "HydraClient", to_console=True)
-
         self._server_hostname = server_hostname or DHydraServerDef.HOSTNAME
         self._server_port = server_port or DHydraServerDef.PORT
+        self._id = id
 
         self.server_address = (
             "tcp://" + self._server_hostname + ":" + str(self._server_port)
@@ -49,6 +48,20 @@ class HydraClient:
         self.context: Optional[zmq.Context] = None
         self.socket: Optional[zmq.Socket] = None
         self._setup_socket()
+
+    def loglevel(self, log_level: str) -> None:
+        """
+                Docstring for _init_log
+
+                :param self: Description
+                :param log_id: Description
+                :type log_id: str
+                :param log_level: Description(hydra_venv) dan@sally:~/dev/hydra_router$ hydra-pong-server --log-level DEBUG
+        HydraServer error: 30
+
+                :type log_level: str
+        """
+        self.log = HydraLog(client_id=self._id, log_level=log_level, to_console=True)
 
     def _setup_socket(self) -> None:
         """

@@ -63,6 +63,7 @@ class DHydraClientMsg:
     CLEANUP: str = "HydraClient cleanup complete"
     CONNECTED: str = "HydraClient connected to {server_address}"
     ERROR: str = "HydraClient error: {e}"
+    LOGLEVEL_HELP: str = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
     PORT_HELP: str = "Server port to connect to (default: {server_port})"
     RECEIVED: str = "Received response: {response}"
     SENDING: str = "Sending request: {message}"
@@ -124,6 +125,11 @@ class DHydraServerMsg:
     USER_STOP: str = "Server stopped by user"
 
 
+# Hydra ZeroMQ RPC Methods
+class DMethod:
+    PING: str = "ping"
+
+
 # Hydra Router Modules
 class DModule:
     """
@@ -135,4 +141,5 @@ class DModule:
 
     HYDRA_CLIENT: str = "HydraClient"
     HYDRA_SERVER: str = "HydraServer"
+    HYDRA_PING_CLIENT: str = "HydraPingClient"
     HYDRA_PONG_SERVER: str = "HydraPongServer"

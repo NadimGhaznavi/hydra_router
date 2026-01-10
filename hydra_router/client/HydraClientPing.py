@@ -16,7 +16,15 @@ import time
 from typing import Any, Dict, Optional
 
 from hydra_router.client.HydraClient import HydraClient
-from hydra_router.constants.DHydra import DHydra, DHydraServerDef
+from hydra_router.utils.HydraMsg import HydraMsg
+from hydra_router.constants.DHydra import (
+    DHydra,
+    DHydraServerDef,
+    DHydraClientMsg,
+    DHydraLog,
+    DMethod,
+    DModule,
+)
 from hydra_router.utils.HydraMsg import HydraMsg
 
 
@@ -30,9 +38,6 @@ class HydraClientPing(HydraClient):
         self,
         server_hostname: Optional[str] = None,
         server_port: Optional[int] = None,
-        ping_count: int = 1,
-        ping_interval: float = 1.0,
-        message_payload: str = "ping",
     ) -> None:
         """
         Initialize the HydraClientPing with ping-specific parameters.
@@ -47,14 +52,8 @@ class HydraClientPing(HydraClient):
         super().__init__(
             server_hostname=server_hostname,
             server_port=server_port,
-            client_id="HydraPingClient",
+            id=DModule.HYDRA_PING_CLIENT,
         )
-
-        self.ping_count = ping_count
-        self.ping_interval = ping_interval
-        self.message_payload = message_payload
-        self.sent_pings = 0
-        self.received_pongs = 0
 
     def create_ping_message(self, sequence: int) -> HydraMsg:
         """
@@ -67,8 +66,8 @@ class HydraClientPing(HydraClient):
             HydraMsg: Structured ping message
         """
         return HydraMsg(
-            sender="HydraPingClient",
-            target="HydraPongServer",
+            sender=DModule.HYDRA_PING_CLIENT,
+            target=DModule.HYDRA_PONG_SERVER,
             method="ping",
             payload=json.dumps(
                 {
@@ -271,6 +270,13 @@ Examples:
         default=1.0,
         help="Interval between pings in seconds (default: 1.0)",
     )
+    parser.add_argument(
+        "--loglevel",
+        "-l",
+        type=str,
+        default=DHydraLog.INFO,
+        help=DHydraClientMsg.LOGLEVEL_HELP,
+    )
 
     parser.add_argument(
         "--message",
@@ -296,6 +302,7 @@ Examples:
             ping_interval=args.interval,
             message_payload=args.message,
         )
+        client.loglevel(args.loglevel)
 
         client.run()
 
