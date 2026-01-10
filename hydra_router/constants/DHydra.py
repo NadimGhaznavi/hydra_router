@@ -21,7 +21,7 @@ class DHydra:
     """
 
     PROTOCOL_VERSION = 1
-    VERSION: str = "0.13.1"
+    VERSION: str = "0.14.0"
 
 
 # HydraMsg class constants
