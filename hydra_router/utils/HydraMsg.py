@@ -8,7 +8,10 @@
 #    License: GPL 3.0
 
 import uuid
-from typing import Optional
+import json
+from typing import Optional, Dict, Any
+
+from hydra_router.constants.DHydra import DHydra, DHydraMsg
 
 
 class HydraMsg:
@@ -25,7 +28,8 @@ class HydraMsg:
         sender: Optional[str] = None,
         target: Optional[str] = None,
         method: Optional[str] = None,
-        payload: Optional[str] = None,
+        payload: Optional[Dict[str, Any]] = None,
+        msg_id: Optional[str] = None,
     ) -> None:
         """
         Initialize a new HydraMsg instance.
@@ -42,9 +46,23 @@ class HydraMsg:
         self._sender = sender
         self._target = target
         self._method = method
-        self._payload = payload
 
-        self._id = uuid.uuid4()
+        self._payload = payload or {}
+        self._id = msg_id or uuid.uuid4()
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "HydraMsg":
+        return cls(
+            sender=data.get(DHydraMsg.SENDER),
+            target=data.get(DHydraMsg.TARGET),
+            method=data.get(DHydraMsg.METHOD),
+            payload=data.get(DHydraMsg.PAYLOAD),
+            msg_id=data.get(DHydraMsg.ID),
+        )
+
+    @classmethod
+    def from_json(cls, raw: str) -> "HydraMsg":
+        return cls.from_dict(json.loads(raw))
 
     def sender(self, sender=None):
         if sender is not None:
@@ -55,6 +73,16 @@ class HydraMsg:
         if target is not None:
             self._target = target
         return self._target
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            DHydraMsg.ID: self._id,
+            DHydraMsg.SENDER: self._sender,
+            DHydraMsg.TARGET: self._target,
+            DHydraMsg.METHOD: self._method,
+            DHydraMsg.PAYLOAD: self._payload,
+            DHydraMsg.V: DHydra.PROTOCOL_VERSION,
+        }
 
     def method(self, method=None):
         if method is not None:

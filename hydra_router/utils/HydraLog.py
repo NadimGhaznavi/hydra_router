@@ -24,7 +24,11 @@ class HydraLog:
     """
 
     def __init__(
-        self, client_id: str, log_file: Optional[str] = None, to_console: bool = True
+        self,
+        client_id: str,
+        log_file: Optional[str] = None,
+        to_console: bool = True,
+        log_level: Optional[str] = DHydraLog.DEFAULT,
     ) -> None:
         """
         Initialize the HydraLog instance with specified configuration.
@@ -40,7 +44,7 @@ class HydraLog:
         self._logger = logging.getLogger(client_id)
 
         # The default logger log level
-        self._logger.setLevel(LOG_LEVELS[DHydraLog.DEFAULT])
+        self._logger.setLevel(LOG_LEVELS[log_level])
 
         formatter = logging.Formatter(
             fmt="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",

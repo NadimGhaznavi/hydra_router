@@ -11,7 +11,7 @@ from typing import Optional
 
 import zmq
 
-from hydra_router.constants.DHydra import DHydraMsg, DHydraServerDef
+from hydra_router.constants.DHydra import DHydraClientMsg, DHydraServerDef
 from hydra_router.utils.HydraLog import HydraLog
 
 
@@ -68,10 +68,10 @@ class HydraClient:
             self.socket = self.context.socket(zmq.REQ)
             self.socket.connect(self.server_address)
             self.log.info(
-                DHydraMsg.CONNECTED.format(server_address=self.server_address)
+                DHydraClientMsg.CONNECTED.format(server_address=self.server_address)
             )
         except Exception as e:
-            self.log.error(DHydraMsg.ERROR.format(e=e))
+            self.log.error(DHydraClientMsg.ERROR.format(e=e))
             exit(1)
 
     def send_message(self, message: bytes) -> bytes:
@@ -93,19 +93,19 @@ class HydraClient:
             Exception: If message sending or receiving fails
         """
         try:
-            self.log.debug(DHydraMsg.SENDING.format(message=message))
+            self.log.debug(DHydraClientMsg.SENDING.format(message=message))
             if self.socket is not None:
                 self.socket.send(message)
 
                 # Wait for response
                 response: bytes = self.socket.recv()
-                self.log.debug(DHydraMsg.RECEIVED.format(response=response))
+                self.log.debug(DHydraClientMsg.RECEIVED.format(response=response))
                 return response
             else:
                 raise RuntimeError("Socket not initialized")
 
         except Exception as e:
-            self.log.error(DHydraMsg.ERROR.format(e=e))
+            self.log.error(DHydraClientMsg.ERROR.format(e=e))
             exit(1)
 
     def _cleanup(self) -> None:
@@ -123,7 +123,7 @@ class HydraClient:
             self.socket.close()
         if self.context:
             self.context.term()
-        self.log.info(DHydraMsg.CLEANUP)
+        self.log.info(DHydraClientMsg.CLEANUP)
 
     def run(self) -> None:
         """

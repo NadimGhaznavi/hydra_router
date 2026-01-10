@@ -20,7 +20,22 @@ class DHydra:
     used throughout the HydraRouter package.
     """
 
+    PROTOCOL_VERSION = 1
     VERSION: str = "0.13.1"
+
+
+# HydraMsg class constants
+class DHydraMsg:
+    """
+    Atribute definitions for HydraMsg class messages.
+    """
+
+    ID: str = "id"
+    SENDER: str = "sender"
+    TARGET: str = "target"
+    METHOD: str = "method"
+    PAYLOAD: str = "payload"
+    V: str = "version"
 
 
 # HydraServer defaults
@@ -37,7 +52,7 @@ class DHydraServerDef:
 
 
 # HydraClient messages
-class DHydraMsg:
+class DHydraClientMsg:
     """
     Message templates for HydraClient logging and user feedback.
 
@@ -98,6 +113,7 @@ class DHydraServerMsg:
     BIND: str = "HydraServer bound to {bind_address}"
     CLEANUP: str = "HydraServer cleanup complete"
     ERROR: str = "HydraServer error: {e}"
+    LOGLEVEL_HELP: str = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
     LOOP_UP: str = "HydraServer message loop on {address}:{port} is up and running"
     PORT_HELP: str = "Port to bind to (default: {port})"
     RECEIVE: str = "Received request: {message}"
@@ -119,3 +135,4 @@ class DModule:
 
     HYDRA_CLIENT: str = "HydraClient"
     HYDRA_SERVER: str = "HydraServer"
+    HYDRA_PONG_SERVER: str = "HydraPongServer"

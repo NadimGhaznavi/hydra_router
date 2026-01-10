@@ -13,9 +13,16 @@ import argparse
 import json
 import sys
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
-from hydra_router.constants.DHydra import DHydra, DHydraServerDef, DHydraServerMsg
+from hydra_router.constants.DHydra import (
+    DHydra,
+    DHydraLog,
+    DHydraServerDef,
+    DHydraServerMsg,
+    DModule,
+    LOG_LEVELS,
+)
 from hydra_router.server.HydraServer import HydraServer
 from hydra_router.utils.HydraMsg import HydraMsg
 
@@ -30,7 +37,6 @@ class HydraServerPong(HydraServer):
         self,
         address: str = "*",
         port: int = DHydraServerDef.PORT,
-        response_delay: float = 0.0,
     ):
         """
         Initialize the HydraServerPong with pong-specific parameters.
@@ -38,11 +44,13 @@ class HydraServerPong(HydraServer):
         Args:
             address (str): The address to bind to (default: "*" for all interfaces)
             port (int): The port to bind to
-            response_delay (float): Artificial delay before responding (for testing)
         """
-        super().__init__(address=address, port=port, server_id="HydraPongServer")
+        super().__init__(
+            address=address,
+            port=port,
+            id=DModule.HYDRA_PONG_SERVER,
+        )
 
-        self.response_delay = response_delay
         self.ping_count = 0
         self.pong_count = 0
 
@@ -68,6 +76,7 @@ class HydraServerPong(HydraServer):
             # For now, assume simple JSON message
             # In a full implementation, this would deserialize HydraMsg
             message_str = message_bytes.decode("utf-8")
+            self.log.debug(f"Received message: {message_str}")
             return json.loads(message_str)  # type: ignore
         except (json.JSONDecodeError, UnicodeDecodeError) as e:
             self.log.warning(f"Failed to parse ping message: {e}")
@@ -171,10 +180,6 @@ class HydraServerPong(HydraServer):
             if ping_method == "ping":
                 self.log.info(f"Received ping #{self.ping_count} from {ping_sender}")
 
-                # Add artificial delay if configured
-                if self.response_delay > 0:
-                    time.sleep(self.response_delay)
-
                 # Create pong response
                 pong_msg = self.create_pong_response(ping_data)
 
@@ -219,8 +224,6 @@ class HydraServerPong(HydraServer):
             KeyboardInterrupt: When user interrupts with Ctrl+C (caught and handled)
         """
         self.log.info(f"Starting pong server on {self.address}:{self.port}")
-        if self.response_delay > 0:
-            self.log.info(f"Artificial response delay: {self.response_delay}s")
 
         try:
             self.start()
@@ -259,6 +262,7 @@ Examples:
   hydra-pong-server --address localhost      # Start server on localhost:5757
   hydra-pong-server --address 0.0.0.0 --port 9000  # Start on all interfaces
   hydra-pong-server --delay 0.1              # Add 100ms response delay
+  hydra-pong-server --log-level DEBUG        # Enable debug log messages
         """,
     )
 
@@ -270,19 +274,27 @@ Examples:
     )
 
     parser.add_argument(
-        "--port",
-        "-p",
-        type=int,
-        default=DHydraServerDef.PORT,
-        help=DHydraServerMsg.PORT_HELP.format(port=DHydraServerDef.PORT),
-    )
-
-    parser.add_argument(
         "--delay",
         "-d",
         type=float,
         default=0.0,
         help="Artificial delay before responding to pings in seconds (default: 0.0)",
+    )
+
+    parser.add_argument(
+        "--loglevel",
+        "-l",
+        type=str,
+        default=DHydraLog.INFO,
+        help=DHydraServerMsg.LOGLEVEL_HELP,
+    )
+
+    parser.add_argument(
+        "--port",
+        "-p",
+        type=int,
+        default=DHydraServerDef.PORT,
+        help=DHydraServerMsg.PORT_HELP.format(port=DHydraServerDef.PORT),
     )
 
     parser.add_argument(
@@ -294,21 +306,22 @@ Examples:
 
     args = parser.parse_args()
 
-    try:
-        print(DHydraServerMsg.STARTING.format(address=args.address, port=args.port))
-        print(DHydraServerMsg.STOP_HELP)
+    # try:
+    server = HydraServerPong(address=args.address, port=args.port)
+    server.loglevel(args.loglevel)
+    server.log.info(
+        DHydraServerMsg.STARTING.format(address=args.address, port=args.port)
+    )
+    server.log.info(DHydraServerMsg.STOP_HELP)
+    # server.run()
 
-        server = HydraServerPong(
-            address=args.address, port=args.port, response_delay=args.delay
-        )
-        server.run()
+    # except KeyboardInterrupt:
+    #    print(DHydraServerMsg.USER_STOP)
+    #    sys.exit(0)
 
-    except KeyboardInterrupt:
-        print(DHydraServerMsg.USER_STOP)
-        sys.exit(0)
-    except Exception as e:
-        print(DHydraServerMsg.ERROR.format(e=e))
-        sys.exit(1)
+    # except Exception as e:
+    #    print(DHydraServerMsg.ERROR.format(e=e))
+    #    sys.exit(1)
 
 
 if __name__ == "__main__":

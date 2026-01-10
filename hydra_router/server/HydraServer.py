@@ -11,8 +11,14 @@ from typing import Optional
 
 import zmq
 
-from hydra_router.constants.DHydra import DHydraServerDef, DHydraServerMsg
 from hydra_router.utils.HydraLog import HydraLog
+from hydra_router.constants.DHydra import (
+    DHydraLog,
+    DHydraServerDef,
+    DHydraServerMsg,
+    DModule,
+    LOG_LEVELS,
+)
 
 
 class HydraServer:
@@ -28,7 +34,7 @@ class HydraServer:
         self,
         address: str = "*",
         port: int = DHydraServerDef.PORT,
-        server_id: Optional[str] = None,
+        id: Optional[str] = DModule.HYDRA_SERVER,
     ):
         """
         Initialize the HydraServer with binding parameters.
@@ -38,83 +44,28 @@ class HydraServer:
             port (int): The port to bind to
             server_id (str): Identifier for logging purposes
         """
-        self.log = HydraLog(client_id=server_id or "HydraServer", to_console=True)
 
         self.address = address
         self.port = port
+        self._id = id
+        self.log = HydraLog(client_id=id, to_console=True)
+
         self.context: Optional[zmq.Context] = None
         self.socket: Optional[zmq.Socket] = None
 
-    def _setup_socket(self) -> None:
+    def loglevel(self, log_level: str) -> None:
         """
-        Set up ZeroMQ context and REP socket.
+                Docstring for _init_log
 
-        Creates a new ZeroMQ context and REP socket, then binds to the
-        configured address and port. Logs binding success or exits on failure.
+                :param self: Description
+                :param log_id: Description
+                :type log_id: str
+                :param log_level: Description(hydra_venv) dan@sally:~/dev/hydra_router$ hydra-pong-server --log-level DEBUG
+        HydraServer error: 30
 
-        Returns:
-            None
-
-        Raises:
-            Exception: If socket creation or binding fails
+                :type log_level: str
         """
-        try:
-            self.context = zmq.Context()
-            self.socket = self.context.socket(zmq.REP)
-            bind_address = f"tcp://{self.address}:{self.port}"
-            self.socket.bind(bind_address)
-            self.log.info(DHydraServerMsg.BIND.format(bind_address=bind_address))
-        except Exception as e:
-            self.log.error(DHydraServerMsg.ERROR.format(e=e))
-            exit(1)
-
-    def start(self) -> None:
-        """
-        Start the server and begin listening for requests in a continuous loop.
-
-        Initializes the socket if needed, then enters an infinite loop waiting
-        for client requests. Each received message is processed by the
-        handle_message() method and the response is sent back to the client.
-        The loop continues until interrupted by Ctrl+C or an exception occurs.
-
-        Returns:
-            None
-
-        Raises:
-            KeyboardInterrupt: When user interrupts with Ctrl+C
-            RuntimeError: If socket is not initialized
-            Exception: If message handling fails
-        """
-        if self.socket is None:
-            self._setup_socket()
-
-        self.log.info(
-            DHydraServerMsg.LOOP_UP.format(address=self.address, port=self.port)
-        )
-
-        try:
-            while True:
-                # Wait for next request from client
-                if self.socket is not None:
-                    message = self.socket.recv()
-                    self.log.debug(DHydraServerMsg.RECEIVE.format(message=message))
-
-                    # Process message using subclass implementation
-                    response = self.handle_message(message)
-
-                    # Send reply back to client
-                    self.socket.send(response)
-                    self.log.debug(DHydraServerMsg.SENT.format(response=response))
-                else:
-                    raise RuntimeError("Socket not initialized")
-
-        except KeyboardInterrupt:
-            self.log.info(DHydraServerMsg.SHUTDOWN)
-        except Exception as e:
-            self.log.error(DHydraServerMsg.ERROR.format(e=e))
-            exit(1)
-        finally:
-            self._cleanup()
+        self.log = HydraLog(client_id=self._id, log_level=log_level, to_console=True)
 
     def _cleanup(self) -> None:
         """
@@ -152,3 +103,77 @@ class HydraServer:
         application-specific server startup behavior.
         """
         raise NotImplementedError("This should be implemented in the child class")
+
+    def _setup_socket(self) -> None:
+        """
+        Set up ZeroMQ context and REP socket.
+
+        Creates a new ZeroMQ context and REP socket, then binds to the
+        configured address and port. Logs binding success or exits on failure.
+
+        Returns:
+            None
+
+        Raises:
+            Exception: If socket creation or binding fails
+        """
+        try:
+            bind_address = f"tcp://{self.address}:{self.port}"
+            self.context = zmq.Context()
+            self.socket = self.context.socket(zmq.REP)
+            self.socket.bind(bind_address)
+        except Exception as e:
+            self.log.error(DHydraServerMsg.ERROR.format(e=e))
+            exit(1)
+
+        self.log.info(DHydraServerMsg.BIND.format(bind_address=bind_address))
+
+    def start(self) -> None:
+        """
+        Start the server and begin listening for requests in a continuous loop.
+
+        Initializes the socket if needed, then enters an infinite loop waiting
+        for client requests. Each received message is processed by the
+        handle_message() method and the response is sent back to the client.
+        The loop continues until interrupted by Ctrl+C or an exception occurs.
+
+        Returns:
+            None
+
+        Raises:
+            KeyboardInterrupt: When user interrupts with Ctrl+C
+            RuntimeError: If socket is not initialized
+            Exception: If message handling fails
+        """
+        if self.socket is None:
+            self._setup_socket()
+
+        try:
+            self.log.info(
+                DHydraServerMsg.LOOP_UP.format(address=self.address, port=self.port)
+            )
+
+            while True:
+                # Wait for next request from client
+                if self.socket is not None:
+                    message = self.socket.recv()
+                    self.log.debug(DHydraServerMsg.RECEIVE.format(message=message))
+
+                    # Process message using subclass implementation
+                    response = self.handle_message(message)
+
+                    # Send reply back to client
+                    self.socket.send(response)
+                    self.log.debug(DHydraServerMsg.SENT.format(response=response))
+                else:
+                    raise RuntimeError("Socket not initialized")
+
+        except KeyboardInterrupt:
+            self.log.info(DHydraServerMsg.SHUTDOWN)
+
+        except Exception as e:
+            self.log.error(DHydraServerMsg.ERROR.format(e=e))
+            exit(1)
+
+        finally:
+            self._cleanup()
