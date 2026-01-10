@@ -48,7 +48,7 @@ class HydraServer:
         self.address = address
         self.port = port
         self._id = id
-        self.log = HydraLog(client_id=id, to_console=True)
+        self.log = None
 
         self.context: Optional[zmq.Context] = None
         self.socket: Optional[zmq.Socket] = None

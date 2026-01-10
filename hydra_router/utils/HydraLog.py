@@ -41,8 +41,12 @@ class HydraLog:
         Returns:
             None
         """
-        print("FOO")
+
+        # Get a logging object
         self._logger = logging.getLogger(client_id)
+
+        # Lowercase the log level
+        log_level = log_level.lower()
 
         # The default logger log level
         self._logger.setLevel(LOG_LEVELS[log_level])
@@ -55,14 +59,14 @@ class HydraLog:
         # Optional file handler
         if log_file:
             fh = logging.FileHandler(log_file)
-            fh.setLevel(LOG_LEVELS[DHydraLog.DEFAULT])
+            fh.setLevel(LOG_LEVELS[log_level])
             fh.setFormatter(formatter)
             self._logger.addHandler(fh)
 
         # Optional console handler
         if to_console:
             ch = logging.StreamHandler()
-            ch.setLevel(LOG_LEVELS[DHydraLog.DEFAULT])
+            ch.setLevel(LOG_LEVELS[log_level])
             ch.setFormatter(formatter)
             self._logger.addHandler(ch)
 
