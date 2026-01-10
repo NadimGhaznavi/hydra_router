@@ -65,16 +65,11 @@ class HydraClientPing(HydraClient):
         Returns:
             HydraMsg: Structured ping message
         """
-        return HydraMsg(
-            sender=DModule.HYDRA_PING_CLIENT,
-            target=DModule.HYDRA_PONG_SERVER,
-            method="ping",
-            payload=json.dumps(
-                {
-                    "sequence": sequence,
-                    "message": self.message_payload,
-                    "timestamp": time.time(),
-                }
+        return (
+            HydraMsg(
+                sender=DModule.HYDRA_PING_CLIENT,
+                target=DModule.HYDRA_PONG_SERVER,
+                method=DMethod.PING,
             ),
         )
 
@@ -256,33 +251,11 @@ Examples:
     )
 
     parser.add_argument(
-        "--count",
-        "-c",
-        type=int,
-        default=1,
-        help="Number of ping messages to send (default: 1)",
-    )
-
-    parser.add_argument(
-        "--interval",
-        "-i",
-        type=float,
-        default=1.0,
-        help="Interval between pings in seconds (default: 1.0)",
-    )
-    parser.add_argument(
         "--loglevel",
         "-l",
         type=str,
         default=DHydraLog.INFO,
         help=DHydraClientMsg.LOGLEVEL_HELP,
-    )
-
-    parser.add_argument(
-        "--message",
-        "-m",
-        default="ping",
-        help="Custom message payload for pings (default: 'ping')",
     )
 
     parser.add_argument(
@@ -298,9 +271,6 @@ Examples:
         client = HydraClientPing(
             server_hostname=args.hostname,
             server_port=args.port,
-            ping_count=args.count,
-            ping_interval=args.interval,
-            message_payload=args.message,
         )
         client.loglevel(args.loglevel)
 

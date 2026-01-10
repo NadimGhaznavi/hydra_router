@@ -13,6 +13,7 @@ packages = [{include = "hydra_router"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 pyzmq = "^25.0.0"
+textual = "^7.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.0.0"
@@ -26,6 +27,7 @@ isort = "^5.13.0"
 pre-commit = "^3.6.0"
 sphinx = "<8.0"
 sphinx-rtd-theme = "^3.0.2"
+textual-dev = "^1.8.0"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "<8.0"
