@@ -1,0 +1,13 @@
+
+Log {
+    border: round  #0c323e;
+}
+
+.title {
+    text-style: bold;
+}
+
+
+.box {
+    border: round #0c323e;
+}

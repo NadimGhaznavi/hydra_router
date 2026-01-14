@@ -35,47 +35,160 @@ def bad_function(param1: str, param2: int, param3: str, param4: bool) -> Dict[st
 
 ## Constants Organization
 
-### Structure
-- All constants should be organized in dedicated files within the `constants/` directory
-- Use descriptive class names prefixed with `D` (e.g., `DHydraServer`, `DGameConfig`)
-- Group related constants into logical classes within the same file
+### Core Principle: Three Categories of Constants
 
-### Example Structure
+All constants fall into three distinct categories, each serving a different purpose:
+
+#### 1. Default Values (Configuration)
+Numeric values, timeouts, sizes, and other configurable parameters that control behavior.
+
 ```python
-# constants/DModuleName.py
-
-class DModuleDefaults:
+class DHydraServerDef:
     """Default configuration values"""
     HOSTNAME: str = "localhost"
     PORT: int = 5757
     TIMEOUT: int = 30
-
-class DModuleMessages:
-    """User-facing messages with format placeholders"""
-    CONNECTED: str = "Connected to {server_address}"
-    ERROR: str = "Error occurred: {error_details}"
-    CLEANUP: str = "Resources cleaned up successfully"
-
-class DModuleConfig:
-    """Configuration constants"""
     MAX_RETRIES: int = 3
     BUFFER_SIZE: int = 1024
+    HEARTBEAT_INTERVAL: float = 5.0
+```
+
+**Purpose**: Provide sensible defaults that can be overridden by users.
+
+#### 2. Human-Readable Labels (Messages)
+Strings intended for human consumption - log messages, error messages, help text, UI labels.
+
+```python
+class DHydraServerMsg:
+    """User-facing messages with format placeholders"""
+    CONNECTED: str = "Connected to {server_address}"
+    ERROR: str = "HydraServer error: {e}"
+    CLEANUP: str = "Resources cleaned up successfully"
+    STARTING: str = "Starting server on {address}:{port}"
+    STOP_HELP: str = "Press Ctrl+C to stop the server"
+```
+
+**Purpose**: Consistent messaging, easy internationalization, centralized wording.
+
+#### 3. Computer-Readable Labels (Protocol Values)
+Strings used in protocols, APIs, serialization - method names, identifiers, field names.
+
+```python
+class DModule:
+    """Module/component identifiers for routing"""
+    HYDRA_ROUTER: str = "hydra-router"
+    HYDRA_CLIENT: str = "hydra-client"
+    HYDRA_SERVER: str = "hydra-server"
+    GAME_SERVICE: str = "game-service"
+
+class DMethod:
+    """RPC method names"""
+    PING: str = "ping"
+    PONG: str = "pong"
+    HEARTBEAT: str = "heartbeat"
+    REGISTER: str = "register"
+
+class DHydraMsg:
+    """Message field names for JSON serialization"""
+    ID: str = "id"
+    SENDER: str = "sender"
+    TARGET: str = "target"
+    METHOD: str = "method"
+    PAYLOAD: str = "payload"
+    V: str = "version"
+```
+
+**Purpose**: Protocol consistency, eliminate magic strings, enable safe refactoring.
+
+### Naming Convention
+
+Use suffixes to indicate category:
+- `*Def` or `*Defaults` - Default values (configuration)
+- `*Msg` or `*Messages` - Human-readable labels (messages)
+- No suffix - Computer-readable labels (protocol values)
+
+### Complete Example
+
+```python
+# constants/DHydra.py
+
+# Computer-readable: Protocol identifiers
+class DModule:
+    HYDRA_ROUTER: str = "hydra-router"
+    HYDRA_CLIENT: str = "hydra-client"
+
+# Computer-readable: RPC methods
+class DMethod:
+    PING: str = "ping"
+    PONG: str = "pong"
+
+# Default values: Configuration
+class DHydraServerDef:
+    HOSTNAME: str = "localhost"
+    PORT: int = 5757
+    TIMEOUT: int = 30
+
+# Human-readable: User messages
+class DHydraServerMsg:
+    STARTING: str = "Starting server on {address}:{port}"
+    ERROR: str = "HydraServer error: {e}"
+    BIND: str = "Server bound to {bind_address}"
 ```
 
 ### Usage Patterns
+
 ```python
-# Import constants at module level
-from project.constants.DModuleName import DModuleDefaults, DModuleMessages
+from hydra_router.constants.DHydra import (
+    DModule,           # Computer-readable
+    DMethod,           # Computer-readable
+    DHydraServerDef,   # Default values
+    DHydraServerMsg,   # Human-readable
+)
 
-class MyClass:
+class HydraServer:
     def __init__(self, port=None):
-        # Use constants for defaults
-        self.port = port or DModuleDefaults.PORT
-
-    def connect(self):
-        # Use constants for messages with .format()
-        print(DModuleMessages.CONNECTED.format(server_address=f"localhost:{self.port}"))
+        # Use default values for configuration
+        self.port = port or DHydraServerDef.PORT
+        
+        # Use computer-readable labels for protocol
+        self.identity = DModule.HYDRA_SERVER
+        
+    def start(self):
+        # Use human-readable labels for logging
+        self.log.info(
+            DHydraServerMsg.STARTING.format(
+                address=self.address,
+                port=self.port
+            )
+        )
+        
+    def handle_message(self, msg):
+        # Use computer-readable labels for dispatch
+        if msg.method == DMethod.PING:
+            return self.ping(msg)
 ```
+
+### Why This Matters
+
+**Default Values** can change without breaking protocols:
+```python
+# Safe to change: PORT: int = 5757 → PORT: int = 8080
+# Only affects default behavior, not wire protocol
+```
+
+**Human-Readable Labels** can be reworded or translated:
+```python
+# Safe to change: "Starting server" → "Server initializing"
+# Only affects user-facing text, not functionality
+```
+
+**Computer-Readable Labels** define the protocol contract:
+```python
+# Breaking change: PING: str = "ping" → PING: str = "health_check"
+# Changes wire protocol, requires version bump
+```
+
+This categorization makes it clear which constants are part of the API contract versus implementation details.
 
 ## Message Formatting
 
@@ -150,6 +263,128 @@ from project.constants.DModuleName import DModuleDefaults, DModuleMessages
 from project.constants.DLongModuleName import DLongModuleDefaults as Defaults
 ```
 
+## Eliminating Magic Strings
+
+### The Problem with Magic Strings
+Magic strings are hard-coded string literals scattered throughout code that represent important values like method names, identifiers, or configuration keys. They create maintenance nightmares:
+
+```python
+# ❌ Bad - Magic strings everywhere
+msg = HydraMsg(sender="client-123", target="hydra-router", method="ping")
+if msg.method == "ping":
+    return self.handle_ping()
+elif msg.method == "pong":
+    return self.handle_pong()
+
+# What if you typo "ping" as "pign" somewhere? Silent failure!
+# What if you need to rename "ping" to "health_check"? Find/replace nightmare!
+```
+
+### The Constants Solution
+By defining all string literals as constants, you get:
+- **Type safety**: Typos become NameErrors caught immediately
+- **Refactoring safety**: Change once in constants, works everywhere
+- **IDE support**: Autocomplete and go-to-definition
+- **Self-documentation**: Constant names explain purpose
+
+```python
+# ✅ Good - Constants eliminate magic strings
+from hydra_router.constants.DHydra import DModule, DMethod
+
+msg = HydraMsg(
+    sender=DModule.CLIENT,
+    target=DModule.HYDRA_ROUTER,
+    method=DMethod.PING
+)
+
+if msg.method == DMethod.PING:
+    return self.handle_ping()
+elif msg.method == DMethod.PONG:
+    return self.handle_pong()
+
+# Typo "DMethod.PIGN" → NameError caught immediately!
+# Rename DMethod.PING → change once, works everywhere
+```
+
+### Real-World Example from HydraRouter
+
+```python
+# constants/DHydra.py
+class DModule:
+    """Module/component identifiers"""
+    HYDRA_ROUTER: str = "hydra-router"
+    HYDRA_CLIENT: str = "hydra-client"
+    HYDRA_SERVER: str = "hydra-server"
+    GAME_SERVICE: str = "game-service"
+
+class DMethod:
+    """RPC method names"""
+    PING: str = "ping"
+    PONG: str = "pong"
+    HEARTBEAT: str = "heartbeat"
+    REGISTER: str = "register"
+
+class DHydraMsg:
+    """Message field names for serialization"""
+    ID: str = "id"
+    SENDER: str = "sender"
+    TARGET: str = "target"
+    METHOD: str = "method"
+    PAYLOAD: str = "payload"
+    V: str = "version"
+```
+
+### Usage in Code
+
+```python
+# Message creation - no magic strings
+msg = HydraMsg(
+    sender=DModule.HYDRA_CLIENT,
+    target=DModule.HYDRA_ROUTER,
+    method=DMethod.PING,
+    payload={}
+)
+
+# Serialization - field names from constants
+def to_dict(self) -> Dict[str, Any]:
+    return {
+        DHydraMsg.ID: self._id,
+        DHydraMsg.SENDER: self._sender,
+        DHydraMsg.TARGET: self._target,
+        DHydraMsg.METHOD: self._method,
+        DHydraMsg.PAYLOAD: self._payload,
+        DHydraMsg.V: DHydra.PROTOCOL_VERSION,
+    }
+
+# Method dispatch - method names from constants
+async def dispatch(self, msg: HydraMsg) -> HydraMsg:
+    if msg.method == DMethod.PING:
+        return await self.ping(msg)
+    elif msg.method == DMethod.HEARTBEAT:
+        return await self.heartbeat(msg)
+```
+
+### Benefits
+
+1. **Catch errors early**: Typos become NameErrors at import time
+2. **Safe refactoring**: Change constant value once, all uses update
+3. **Protocol versioning**: Easy to see all protocol strings in one place
+4. **IDE support**: Autocomplete shows all available methods/modules
+5. **Grep-friendly**: Find all uses of a method with simple search
+6. **Type hints**: Can use Literal types for validation
+
+### Rule: No String Literals for Protocol Values
+
+**Never use string literals for:**
+- Module/component identifiers
+- RPC method names
+- Message field names
+- Protocol versions
+- Status codes
+- Error types
+
+**Always define them as constants first.**
+
 ## Benefits of This Approach
 
 1. **Maintainability**: All configuration and messages centralized
@@ -158,11 +393,13 @@ from project.constants.DLongModuleName import DLongModuleDefaults as Defaults
 4. **Testability**: Constants can be easily mocked or overridden for testing
 5. **Internationalization**: Message templates ready for translation
 6. **Documentation**: Constants serve as living documentation of configurable values
+7. **No Magic Strings**: Protocol values defined once, used safely everywhere
 
 ## Code Review Checklist
 
 When reviewing code, ensure:
 - [ ] **Line length does not exceed 88 characters**
+- [ ] **No magic strings** - all protocol values use constants
 - [ ] Hard-coded strings are moved to constants
 - [ ] Message formatting uses `.format()` with named placeholders
 - [ ] Default values come from constants, not inline literals

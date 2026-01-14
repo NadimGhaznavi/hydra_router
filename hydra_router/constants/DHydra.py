@@ -21,6 +21,7 @@ class DHydra:
     """
 
     PROTOCOL_VERSION = 1
+    RANDOM_SEED = 1970
     VERSION: str = "0.14.1"
 
 
@@ -87,19 +88,14 @@ class DHydraLog:
     DEFAULT: str = "warning"
 
 
-# HydraLog levels dictionary
-# Mapping of HydraLog level strings to Python logging level integers.
-# Used by HydraLog to convert string-based log level configuration
-# to the integer values expected by Python's logging module.
-LOG_LEVELS: Dict[str, int] = {
-    DHydraLog.INFO: logging.INFO,
-    DHydraLog.DEBUG: logging.DEBUG,
-    DHydraLog.WARNING: logging.WARNING,
-    DHydraLog.ERROR: logging.ERROR,
-    DHydraLog.CRITICAL: logging.CRITICAL,
-    DHydraLog.DEFAULT: logging.WARNING,
-}
+# HydraRouter constants
+class DHydraRouter:
+    """
+    Docstring for DHydraRouter
+    """
 
+    HOSTNAME: str = "localhost"
+    PORT: int = 5757
 
 # HydraServer messages
 class DHydraServerMsg:
@@ -127,6 +123,7 @@ class DHydraServerMsg:
 
 # Hydra ZeroMQ RPC Methods
 class DMethod:
+    HEARTBEAT: str = "heartbeat"
     PING: str = "ping"
 
 
@@ -140,6 +137,24 @@ class DModule:
     """
 
     HYDRA_CLIENT: str = "HydraClient"
+    HYDRA_MQ: str = "HydraMQ"
+    HYDRA_ROUTER: str = "HydraRouter"
     HYDRA_SERVER: str = "HydraServer"
     HYDRA_PING_CLIENT: str = "HydraPingClient"
     HYDRA_PONG_SERVER: str = "HydraPongServer"
+
+
+# HydraLog levels dictionary
+# Mapping of HydraLog level strings to Python logging level integers.
+# Used by HydraLog to convert string-based log level configuration
+# to the integer values expected by Python's logging module.
+LOG_LEVELS: Dict[str, int] = {
+    DHydraLog.INFO: logging.INFO,
+    DHydraLog.DEBUG: logging.DEBUG,
+    DHydraLog.WARNING: logging.WARNING,
+    DHydraLog.ERROR: logging.ERROR,
+    DHydraLog.CRITICAL: logging.CRITICAL,
+    DHydraLog.DEFAULT: logging.WARNING,
+}
+
+

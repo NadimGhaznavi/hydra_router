@@ -51,9 +51,6 @@ class HydraServerPong(HydraServer):
             id=DModule.HYDRA_PONG_SERVER,
         )
 
-        self.ping_count = 0
-        self.pong_count = 0
-
     def parse_ping_message(self, message_bytes: bytes) -> Dict[str, Any]:
         """
         Parse an incoming ping message.

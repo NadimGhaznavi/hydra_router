@@ -82,3 +82,4 @@ ensure_newline_before_comments = true
 [tool.poetry.scripts]
 hydra-ping-client = "hydra_router.client.HydraClientPing:main"
 hydra-pong-server = "hydra_router.server.HydraServerPong:main"
+hydra-server-tui = hyrdra_router.server.HydraServerTui:main"

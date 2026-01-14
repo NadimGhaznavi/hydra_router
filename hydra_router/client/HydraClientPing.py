@@ -55,24 +55,6 @@ class HydraClientPing(HydraClient):
             id=DModule.HYDRA_PING_CLIENT,
         )
 
-    def create_ping_message(self, sequence: int) -> HydraMsg:
-        """
-        Create a structured ping message using HydraMsg.
-
-        Args:
-            sequence (int): Sequence number for the ping
-
-        Returns:
-            HydraMsg: Structured ping message
-        """
-        return (
-            HydraMsg(
-                sender=DModule.HYDRA_PING_CLIENT,
-                target=DModule.HYDRA_PONG_SERVER,
-                method=DMethod.PING,
-            ),
-        )
-
     def parse_pong_message(self, response_bytes: bytes) -> Dict[str, Any]:
         """
         Parse a pong response message.
