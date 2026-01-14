@@ -20,8 +20,9 @@ class DHydra:
     used throughout the HydraRouter package.
     """
 
-    PROTOCOL_VERSION = 1
-    RANDOM_SEED = 1970
+    HEARTBEAT_INTERVAL: float = 5.0
+    PROTOCOL_VERSION: int = 1
+    RANDOM_SEED: int = 1970
     VERSION: str = "0.14.1"
 
 
