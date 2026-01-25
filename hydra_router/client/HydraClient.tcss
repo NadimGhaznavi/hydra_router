@@ -2,10 +2,10 @@ Screen {
     layout: grid;
     grid-size: 1 4;
     grid-rows: 3 3 7 1;
-    grid-columns: 30;
+    grid-columns: 80;
 }
 
-#ping {
+Button {
     background: #3b7735ff;
     padding: 0 1;
     border: none;

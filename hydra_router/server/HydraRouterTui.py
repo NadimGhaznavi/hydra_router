@@ -9,6 +9,7 @@ from textual.widgets import Label, Button, Log
 from textual.containers import Vertical, Horizontal
 from textual.reactive import var
 
+from hydra_router.utils.HydraMsg import HydraMsg
 from hydra_router.constants.DHydra import DHydraServerDef, DMethod
 from hydra_router.constants.DHydraTui import DLabel, DFile
 
@@ -84,16 +85,34 @@ class HydraRouterTui(App):
         try:
             while True:
                 if self.socket is not None:
-                    self.raw_message = await self.socket.recv_multipart()
-                    self.query_one(Log).write_line(f"Received data: {self.raw_message}")
+                    # Receive multipart message
+                    frames = await self.socket.recv_multipart()
+                    
+                    # frames[0] = client identity (bytes)
+                    # frames[1] = message data (JSON bytes)
+                    client_identity = frames[0]
+                    message_data = frames[1]
+                    
+                    # Deserialize to HydraMsg
+                    hydra_msg = HydraMsg.from_json(message_data)
+                    
+                    # Display in log
+                    self.query_one(Log).write_line(
+                        f"From: {hydra_msg.sender}, "
+                        f"Method: {hydra_msg.method}, "
+                        f"Target: {hydra_msg.target}"
+                    )
+                    
+                    # Store for reactive updates if needed
+                    self.raw_message = str(hydra_msg)
                 else:
                     raise RuntimeError("Socket is not initialized")
                 await asyncio.sleep(0.1)
 
         except Exception as e:
-            self.raw_message = f"ERROR: {e}"
             self.query_one(Log).write_line(f"ERROR: {e}")
             exit(1)
+
 
     def watch_raw_message(self, raw_value: str):
         pass #self.query_one("#console", Log).write_line(raw_value)
