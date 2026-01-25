@@ -1,14 +1,17 @@
 class DLabel:
     CLIENT_TITLE: str = "Hydra Client"
+    LISTENING: str = "Listening on"
+    PING: str = "Ping"
     ROUTER_TITLE: str = "Hydra Router"
     SERVER_TITLE: str = "Hydra Server"
-
-    PING: str = "Ping"
+    TARGET: str = "Target"
 
 
 class DField:
     CONSOLE: str = "console"
     TITLE: str = "title"
+    BOX: str = "box"
 
 class DFile:
-    CSS_PATH = "HydraRouter.tcss"
+    CLIENT_CSS_PATH = "HydraClient.tcss"
+    ROUTER_CSS_PATH = "HydraRouter.tcss"

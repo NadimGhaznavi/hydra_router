@@ -36,7 +36,7 @@ class HydraRouterTui(App):
     """A Textual interface to the HydraServer"""
 
     TITLE = DLabel.ROUTER_TITLE
-    CSS_PATH = DFile.CSS_PATH
+    CSS_PATH = DFile.ROUTER_CSS_PATH
 
     raw_message = var("")
 
@@ -63,16 +63,15 @@ class HydraRouterTui(App):
     def compose(self) -> ComposeResult:
         """The TUI is created here"""
 
-        yield Vertical(
-            Label(DLabel.SERVER_TITLE, classes="title"),
-            Label(f"Address: {self._address}:{self._port}"),
-            Log(highlight=True, auto_scroll=True, id="console"),
-            classes="box",
-        )
+        yield Label(DLabel.ROUTER_TITLE, classes="title")
+        yield Label(f"{DLabel.LISTENING}: {self._address}:{self._port}", classes="box")
+        yield Log(highlight=True, auto_scroll=True, id="console")
 
     def listen(self) -> None:
         self.listen_task = asyncio.create_task(self.bg_listen())
 
+    def on_mount(self) -> None:
+        self.query_one(Log).write_line("Listening...")
 
     async def bg_listen(self) -> None:
         if self.socket is None:
@@ -82,7 +81,7 @@ class HydraRouterTui(App):
             while True:
                 if self.socket is not None:
                     self.raw_message = self.socket.recv()
-                    # self.socket.send(response)
+                    self.query_one(Log).write_line("Received data...")
                 else:
                     raise RuntimeError("Socket is not initialized")
                 asyncio.sleep(0.1)

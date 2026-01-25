@@ -131,7 +131,7 @@ class HydraMQ:
         """
         # DEALER socket multipart format: [empty_delimiter, message_data]
         # The socket automatically prepends our identity when sending
-        await self.socket.send_multipart([b"", msg.to_json()])
+        await self.socket.send(msg.to_json())
 
     async def recv(self) -> HydraMsg:
         """
