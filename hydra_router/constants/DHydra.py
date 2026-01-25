@@ -126,6 +126,7 @@ class DHydraServerMsg:
 class DMethod:
     HEARTBEAT: str = "heartbeat"
     PING: str = "ping"
+    START: str = "start"
 
 
 # Hydra Router Modules

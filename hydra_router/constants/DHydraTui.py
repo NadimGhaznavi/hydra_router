@@ -4,6 +4,7 @@ class DLabel:
     PING: str = "Ping"
     ROUTER_TITLE: str = "Hydra Router"
     SERVER_TITLE: str = "Hydra Server"
+    START: str = "Start"
     TARGET: str = "Target"
 
 

@@ -2,13 +2,14 @@ import zmq
 import asyncio
 import zmq.asyncio
 
+from textual import work
 from textual.theme import Theme
 from textual.app import App, ComposeResult
 from textual.widgets import Label, Button, Log
 from textual.containers import Vertical, Horizontal
 from textual.reactive import var
 
-from hydra_router.constants.DHydra import DHydraServerDef
+from hydra_router.constants.DHydra import DHydraServerDef, DMethod
 from hydra_router.constants.DHydraTui import DLabel, DFile
 
 HYDRA_THEME = Theme(
@@ -66,13 +67,16 @@ class HydraRouterTui(App):
         yield Label(DLabel.ROUTER_TITLE, classes="title")
         yield Label(f"{DLabel.LISTENING}: {self._address}:{self._port}", classes="box")
         yield Log(highlight=True, auto_scroll=True, id="console")
+        yield Button(label=DLabel.START, id=DMethod.START, compact=True)
 
-    def listen(self) -> None:
-        self.listen_task = asyncio.create_task(self.bg_listen())
 
-    def on_mount(self) -> None:
-        self.query_one(Log).write_line("Listening...")
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        button_id = event.button.id
 
+        if button_id == DMethod.START:
+            self.bg_listen()
+
+    @work(exclusive=True)
     async def bg_listen(self) -> None:
         if self.socket is None:
             self._init_socket()
@@ -80,14 +84,15 @@ class HydraRouterTui(App):
         try:
             while True:
                 if self.socket is not None:
-                    self.raw_message = self.socket.recv()
-                    self.query_one(Log).write_line("Received data...")
+                    self.raw_message = await self.socket.recv_multipart()
+                    self.query_one(Log).write_line(f"Received data: {self.raw_message}")
                 else:
                     raise RuntimeError("Socket is not initialized")
-                asyncio.sleep(0.1)
+                await asyncio.sleep(0.1)
 
         except Exception as e:
             self.raw_message = f"ERROR: {e}"
+            self.query_one(Log).write_line(f"ERROR: {e}")
             exit(1)
 
     def watch_raw_message(self, raw_value: str):

@@ -1,8 +1,15 @@
 Screen {
     layout: grid;
-    grid-size: 1 3;
+    grid-size: 1 4;
     grid-rows: 3 3 10 1;
-    grid-columns: 30;
+    grid-columns: 80;
+}
+
+Button {
+    background: #3b7735ff;
+    padding: 0 1;
+    border: none;
+    width: 8;
 }
 
 Log {
