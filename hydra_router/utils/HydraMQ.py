@@ -117,8 +117,8 @@ class HydraMQ:
         """
         Send a HydraMsg through the router.
 
-        Serializes the message to JSON and sends it as a multipart
-        message with proper ZeroMQ envelope format.
+        Serializes the message to JSON and sends it through the
+        DEALER socket to the connected ROUTER.
 
         Args:
             msg: HydraMsg instance to send
@@ -129,8 +129,7 @@ class HydraMQ:
         Raises:
             zmq.ZMQError: If send operation fails
         """
-        # DEALER socket multipart format: [empty_delimiter, message_data]
-        # The socket automatically prepends our identity when sending
+        # DEALER socket automatically prepends identity when sending to ROUTER
         await self.socket.send(msg.to_json())
 
     async def recv(self) -> HydraMsg:
@@ -147,13 +146,11 @@ class HydraMQ:
             zmq.ZMQError: If receive operation fails
             json.JSONDecodeError: If message is not valid JSON
         """
-        # DEALER socket receives: [empty_delimiter, message_data]
-        # The router prepends sender identity, but DEALER strips it
-        frames = await self.socket.recv_multipart()
-
-        # frames[0] = empty delimiter
-        # frames[1] = actual message data
-        return HydraMsg.from_json(frames[1])
+        # DEALER socket receives single frame from ROUTER
+        # ROUTER sends [client_identity, message], but DEALER
+        # automatically strips the identity, leaving just [message]
+        message_data = await self.socket.recv()
+        return HydraMsg.from_json(message_data)
 
     async def _send_heartbeat_loop(self) -> None:
         """

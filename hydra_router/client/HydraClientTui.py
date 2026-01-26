@@ -69,8 +69,8 @@ class HydraClientTui(App):
             msg = HydraMsg(sender=DModule.HYDRA_CLIENT, target=DModule.HYDRA_ROUTER, method=DMethod.PING)            
             self.query_one(Log).write_line("Sending ping...")
             await self.mq.send(msg)
-            #results = await self.mq.recv()
-            #self.query_one(Log).write_line(f"Received: {results}")
+            results = await self.mq.recv()
+            self.query_one(Log).write_line(f"Received: {results}")
             
                            
 

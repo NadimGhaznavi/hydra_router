@@ -10,7 +10,7 @@ from textual.containers import Vertical, Horizontal
 from textual.reactive import var
 
 from hydra_router.utils.HydraMsg import HydraMsg
-from hydra_router.constants.DHydra import DHydraServerDef, DMethod
+from hydra_router.constants.DHydra import DHydraServerDef, DMethod, DModule
 from hydra_router.constants.DHydraTui import DLabel, DFile
 
 HYDRA_THEME = Theme(
@@ -105,6 +105,24 @@ class HydraRouterTui(App):
                     
                     # Store for reactive updates if needed
                     self.raw_message = str(hydra_msg)
+
+                    # Create and send reply
+                    reply_msg = HydraMsg(
+                        sender=DModule.HYDRA_ROUTER,
+                        target=hydra_msg.sender,
+                        method="pong" if hydra_msg.method == DMethod.PING else "response",
+                        payload={"status": "received", "echo": hydra_msg.method}
+                    )
+
+                    # Send reply using ROUTER multipart format
+                    await self.socket.send_multipart([
+                        client_identity,
+                        reply_msg.to_json()
+                    ])
+
+                    self.query_one(Log).write_line(f"Sent reply to {hydra_msg.sender}")
+
+
                 else:
                     raise RuntimeError("Socket is not initialized")
                 await asyncio.sleep(0.1)
