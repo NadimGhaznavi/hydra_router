@@ -64,8 +64,7 @@ class HydraMQ:
         self,
         router_address: str = DHydraRouter.HOSTNAME,
         router_port: int = DHydraRouter.PORT,
-        id: str = DModule.HYDRA_MQ,
-        heartbeat_enabled: bool = True,
+        id: str = DModule.HYDRA_MQ
     ) -> None:
         """
         Initialize HydraMQ client.
@@ -81,7 +80,6 @@ class HydraMQ:
         """
         self.router = router_address
         self.port = router_port
-        self.heartbeat_enabled = heartbeat_enabled
 
         # Create async ZeroMQ context and DEALER socket
         self.ctx = zmq.asyncio.Context()
@@ -107,11 +105,7 @@ class HydraMQ:
         self.socket.connect(self.router_addr)
 
         # Start heartbeat task if enabled
-        self.heartbeat_task: Optional[asyncio.Task] = None
-        if self.heartbeat_enabled:
-            self.heartbeat_task = asyncio.create_task(
-                self._send_heartbeat_loop()
-            )
+        self.heartbeat_task = asyncio.create_task(self._send_heartbeat_loop())
 
     async def send(self, msg: HydraMsg) -> None:
         """
@@ -167,7 +161,6 @@ class HydraMQ:
                 sender=self.identity,
                 target=DModule.HYDRA_ROUTER,
                 method=DMethod.HEARTBEAT,
-                payload={},
             )
             await self.send(msg)
             await asyncio.sleep(DHydra.HEARTBEAT_INTERVAL)

@@ -1,3 +1,4 @@
+import sys
 import zmq
 import asyncio
 import zmq.asyncio
@@ -10,8 +11,8 @@ from textual.containers import Vertical, Horizontal
 from textual.reactive import var
 
 from hydra_router.utils.HydraMsg import HydraMsg
-from hydra_router.constants.DHydra import DHydraServerDef, DMethod, DModule
-from hydra_router.constants.DHydraTui import DLabel, DFile
+from hydra_router.constants.DHydra import DHydra, DHydraServerDef, DMethod, DModule
+from hydra_router.constants.DHydraTui import DLabel, DFile, DField
 
 HYDRA_THEME = Theme(
     name="hydra_theme",
@@ -65,10 +66,51 @@ class HydraRouterTui(App):
     def compose(self) -> ComposeResult:
         """The TUI is created here"""
 
-        yield Label(DLabel.ROUTER_TITLE, classes="title")
-        yield Label(f"{DLabel.LISTENING}: {self._address}:{self._port}", classes="box")
+        # Title
+        yield Label(DLabel.ROUTER_TITLE, id=DField.TITLE)
+
+        # Configuration
+        yield Vertical(
+            Label(f"{DLabel.LISTEN_PORT}: {self._port}"),
+            id=DField.CONFIG
+        )
+
+        # Console
         yield Log(highlight=True, auto_scroll=True, id="console")
-        yield Button(label=DLabel.START, id=DMethod.START, compact=True)
+
+        # Buttons
+        yield Horizontal(
+            Button(label=DLabel.START, id=DMethod.START, compact=True),
+            Label(" "),
+            Button(label="Quit", id="quit", compact=True),
+            id="buttons"
+        )
+            
+
+    async def handle_message(self, sender: str, msg: HydraMsg) -> None:
+        # Display in log
+        self.query_one(Log).write_line(
+            f"From: {msg.sender}, "
+            f"Method: {msg.method}, "
+            f"Target: {msg.target}"
+        )
+        
+        # Create and send reply
+        reply_msg = HydraMsg(
+            sender=DModule.HYDRA_ROUTER,
+            target=msg.sender,
+            method="pong" if msg.method == DMethod.PING else "response",
+            payload={"status": "received", "echo": msg.method}
+        )
+
+        # Send reply using ROUTER multipart format
+        await self.socket.send_multipart([
+            sender,
+            reply_msg.to_json()
+        ])
+
+        self.query_one(Log).write_line(f"Sent reply to {msg.sender} (id: {reply_msg.id})")
+
 
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -76,6 +118,16 @@ class HydraRouterTui(App):
 
         if button_id == DMethod.START:
             self.bg_listen()
+
+        elif button_id == "quit":
+            await self.on_quit()
+
+    def on_mount(self):
+        self.query_one(f"#{DField.TITLE}").border_subtitle = DLabel.VERSION + " " + DHydra.VERSION
+        self.query_one(f"#{DField.CONFIG}").border_subtitle = DLabel.CONFIG
+
+    async def on_quit(self):
+        sys.exit(0)
 
     @work(exclusive=True)
     async def bg_listen(self) -> None:
@@ -90,38 +142,14 @@ class HydraRouterTui(App):
                     
                     # frames[0] = client identity (bytes)
                     # frames[1] = message data (JSON bytes)
-                    client_identity = frames[0]
+                    sender = frames[0]
                     message_data = frames[1]
                     
                     # Deserialize to HydraMsg
                     hydra_msg = HydraMsg.from_json(message_data)
                     
-                    # Display in log
-                    self.query_one(Log).write_line(
-                        f"From: {hydra_msg.sender}, "
-                        f"Method: {hydra_msg.method}, "
-                        f"Target: {hydra_msg.target}"
-                    )
-                    
-                    # Store for reactive updates if needed
-                    self.raw_message = str(hydra_msg)
-
-                    # Create and send reply
-                    reply_msg = HydraMsg(
-                        sender=DModule.HYDRA_ROUTER,
-                        target=hydra_msg.sender,
-                        method="pong" if hydra_msg.method == DMethod.PING else "response",
-                        payload={"status": "received", "echo": hydra_msg.method}
-                    )
-
-                    # Send reply using ROUTER multipart format
-                    await self.socket.send_multipart([
-                        client_identity,
-                        reply_msg.to_json()
-                    ])
-
-                    self.query_one(Log).write_line(f"Sent reply to {hydra_msg.sender}")
-
+                    # Handle the message
+                    await self.handle_message(sender, hydra_msg)
 
                 else:
                     raise RuntimeError("Socket is not initialized")

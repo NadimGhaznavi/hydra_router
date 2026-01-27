@@ -1,3 +1,4 @@
+import sys
 import zmq
 import asyncio
 import zmq.asyncio
@@ -10,7 +11,7 @@ from textual.reactive import var
 
 from hydra_router.utils.HydraMQ import HydraMQ
 from hydra_router.utils.HydraMsg import HydraMsg
-from hydra_router.constants.DHydra import DHydraRouter, DModule, DMethod
+from hydra_router.constants.DHydra import DHydra, DHydraRouter, DModule, DMethod
 from hydra_router.constants.DHydraTui import DLabel, DField, DFile
 
 
@@ -52,15 +53,39 @@ class HydraClientTui(App):
         self._address = address
         self._port = port
         self._id = str = DModule.HYDRA_CLIENT
-        self.mq = HydraMQ(router_address=self._address, router_port=self._port, id=self._id, heartbeat_enabled=False)
+        self.mq = None
 
     def compose(self) -> ComposeResult:
         """The TUI is created here"""
 
-        yield Label(DLabel.CLIENT_TITLE, classes=DField.TITLE)
-        yield Label(f"{DLabel.TARGET}: {self._address}:{self._port}", classes=DField.BOX)
+        # Title
+        yield Label(DLabel.CLIENT_TITLE, id=DField.TITLE)
+
+        # Configuration
+        yield Vertical(
+            Label(f"{DLabel.TARGET_HOST}: {self._address}"),
+            Label(f"{DLabel.TARGET_PORT}: {self._port}"),
+            id=DField.CONFIG
+        )
+
+        # Runtime status
+        yield Vertical(
+            Label(f"{DLabel.CONNECTED}: N/A"),
+            id=DField.STATUS
+        )
+
+        # Console
         yield Log(highlight=True, auto_scroll=True, id=DField.CONSOLE)
-        yield Button(label=DLabel.PING, id=DMethod.PING, compact=True)
+
+        # Buttons
+        yield Horizontal(
+            Button(label=DLabel.PING, id=DMethod.PING, compact=True),
+            Label(" "),
+            Button(label="Quit", id="quit", compact=True),
+            id="buttons"
+        )
+
+
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
@@ -71,10 +96,20 @@ class HydraClientTui(App):
             await self.mq.send(msg)
             results = await self.mq.recv()
             self.query_one(Log).write_line(f"Received: {results}")
+
+        elif button_id == "quit":
+            await self.on_quit()
             
-                           
+    def on_mount(self):
+        self.mq = HydraMQ(router_address=self._address, router_port=self._port, id=self._id)
+        self.query_one(f"#{DField.TITLE}").border_subtitle = DLabel.VERSION + " " + DHydra.VERSION
+        self.query_one(f"#{DField.CONFIG}").border_subtitle = DLabel.CONFIG
+        self.query_one(f"#{DField.STATUS}").border_subtitle = DLabel.STATUS
+        self.query_one(f"#{DField.CONSOLE}", Log).write_line("Initialization complete")
 
-
+    async def on_quit(self):
+        await self.mq.quit()
+        sys.exit(0)
 
 def main():
     router = HydraClientTui()
