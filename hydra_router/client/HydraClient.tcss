@@ -11,11 +11,6 @@ Button {
     border: none;
 }
 
-#console {
-    border: round #0c323e;
-    background: black;
-}
-
 #buttons {
     background: black;
     border: round #0c323e;
@@ -34,6 +29,11 @@ Button {
     color: #acac59ff;
     text-style: bold;
     width: 100%;
+}
+
+#console {
+    border: round #0c323e;
+    background: black;
 }
 
 #status {

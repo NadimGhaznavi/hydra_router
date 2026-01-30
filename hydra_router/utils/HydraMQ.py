@@ -105,7 +105,7 @@ class HydraMQ:
         self.socket.connect(self.router_addr)
 
         # Start heartbeat task if enabled
-        self.heartbeat_task = asyncio.create_task(self._send_heartbeat_loop())
+        self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
 
     async def send(self, msg: HydraMsg) -> None:
         """
@@ -146,7 +146,7 @@ class HydraMQ:
         message_data = await self.socket.recv()
         return HydraMsg.from_json(message_data)
 
-    async def _send_heartbeat_loop(self) -> None:
+    async def start_heartbeat(self) -> None:
         """
         Periodic heartbeat loop to keep connection alive.
 
