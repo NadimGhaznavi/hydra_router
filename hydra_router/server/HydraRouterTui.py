@@ -75,7 +75,7 @@ class HydraRouterTui(App):
 
         # Console
         yield Vertical(
-            Label(f"[b]{'Sender':<10s} > {'Target':>10s} : {'Method':<10s}[/]"),
+            Label(f"[b]{'Sender':<12s} > {'Target':>12s} : {'Method':<10s}[/]"),
             Log(highlight=True, auto_scroll=True),
             id="console")
 
@@ -87,12 +87,13 @@ class HydraRouterTui(App):
             id="buttons"
         )
             
-    def console_line(self, msg: str):
-        self.query_one(Log).write_line(msg)
+    def console_msg(self, msg: HydraMsg):
+        line = f"{msg.sender:<12s} > {msg.target:>12s} : {msg.method:<10s}"
+        self.query_one(Log).write_line(line)
 
     async def handle_message(self, sender: str, msg: HydraMsg) -> None:
         # Display in log
-        self.console_line(f"{msg.sender:<10s} > {msg.target:>10s}:{msg.method:<10s}")
+        self.console_msg(msg=msg)
 
         if msg.target == DModule.HYDRA_ROUTER:
         
@@ -109,8 +110,7 @@ class HydraRouterTui(App):
                 sender,
                 reply_msg.to_json()
             ])
-
-            self.console(msg=f"Sent reply to {msg.sender} (id: {reply_msg.id})")
+            self.console_msg(msg=reply_msg)
 
 
 
@@ -126,9 +126,6 @@ class HydraRouterTui(App):
     def on_mount(self):
         self.query_one(f"#{DField.TITLE}").border_subtitle = DLabel.VERSION + " " + DHydra.VERSION
         self.query_one(f"#{DField.CONFIG}").border_subtitle = DLabel.CONFIG
-        sender = "Sender"
-        target = "Target"
-        method = "Method"
 
     async def on_quit(self):
         sys.exit(0)
@@ -145,8 +142,9 @@ class HydraRouterTui(App):
                     frames = await self.socket.recv_multipart()
                     
                     # frames[0] = client identity (bytes)
-                    # frames[1] = message data (JSON bytes)
                     sender = frames[0]
+
+                    # frames[1] = message data (JSON bytes)
                     message_data = frames[1]
                     
                     # Deserialize to HydraMsg

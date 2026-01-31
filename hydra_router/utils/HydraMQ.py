@@ -104,8 +104,8 @@ class HydraMQ:
         # Connect to router
         self.socket.connect(self.router_addr)
 
-        # Start heartbeat task if enabled
-        self.heartbeat_task = asyncio.create_task(self.start_heartbeat())
+        # Placeholder for heartbeat task
+        self.heartbeat_task = None
 
     async def send(self, msg: HydraMsg) -> None:
         """
@@ -125,6 +125,11 @@ class HydraMQ:
         """
         # DEALER socket automatically prepends identity when sending to ROUTER
         await self.socket.send(msg.to_json())
+
+
+    def start_heartbeat(self):
+        # Start heartbeat task
+        self.heartbeat_task = asyncio.create_task(self.start_heartbeat_bg())
 
     async def recv(self) -> HydraMsg:
         """
@@ -146,7 +151,7 @@ class HydraMQ:
         message_data = await self.socket.recv()
         return HydraMsg.from_json(message_data)
 
-    async def start_heartbeat(self) -> None:
+    async def start_heartbeat_bg(self) -> None:
         """
         Periodic heartbeat loop to keep connection alive.
 
@@ -163,6 +168,8 @@ class HydraMQ:
                 method=DMethod.HEARTBEAT,
             )
             await self.send(msg)
+            results = await self.recv()
+
             await asyncio.sleep(DHydra.HEARTBEAT_INTERVAL)
 
     async def quit(self) -> None:

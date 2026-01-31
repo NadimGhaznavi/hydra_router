@@ -102,6 +102,7 @@ class HydraClientTui(App):
             
     def on_mount(self):
         self.mq = HydraMQ(router_address=self._address, router_port=self._port, id=self._id)
+        self.mq.start_heartbeat()
         self.query_one(f"#{DField.TITLE}").border_subtitle = DLabel.VERSION + " " + DHydra.VERSION
         self.query_one(f"#{DField.CONFIG}").border_subtitle = DLabel.CONFIG
         self.query_one(f"#{DField.STATUS}").border_subtitle = DLabel.STATUS
