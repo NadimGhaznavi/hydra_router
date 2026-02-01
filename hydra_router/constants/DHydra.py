@@ -125,7 +125,9 @@ class DHydraServerMsg:
 # Hydra ZeroMQ RPC Methods
 class DMethod:
     HEARTBEAT: str = "heartbeat"
+    HEARTBEAT_REPLY: str = "heartbeat_reply"
     PING: str = "ping"
+    PONG: str = "pong"
     START: str = "start"
 
 

@@ -97,19 +97,36 @@ class HydraRouterTui(App):
 
         if msg.target == DModule.HYDRA_ROUTER:
         
-            # Create and send reply
-            reply_msg = HydraMsg(
-                sender=DModule.HYDRA_ROUTER,
-                target=msg.sender,
-                method="pong" if msg.method == DMethod.PING else "response",
-                payload={"status": "received", "echo": msg.method}
-            )
 
-            # Send reply using ROUTER multipart format
-            await self.socket.send_multipart([
-                sender,
-                reply_msg.to_json()
-            ])
+            if msg.method == DMethod.HEARTBEAT:
+                # Create and send reply
+                reply_msg = HydraMsg(
+                    sender=DModule.HYDRA_ROUTER,
+                    target=msg.sender,
+                    method=DMethod.HEARTBEAT_REPLY
+                )
+
+                # Send reply using ROUTER multipart format
+                await self.socket.send_multipart([
+                    sender,
+                    reply_msg.to_json()
+                ])
+
+            elif msg.method == DMethod.PING:
+            # Create and send reply
+                reply_msg = HydraMsg(
+                    sender=DModule.HYDRA_ROUTER,
+                    target=msg.sender,
+                    method=DMethod.PONG,
+                    payload={"status": "received", "echo": msg.method}
+                )
+
+                # Send reply using ROUTER multipart format
+                await self.socket.send_multipart([
+                    sender,
+                    reply_msg.to_json()
+                ])
+
             self.console_msg(msg=reply_msg)
 
 

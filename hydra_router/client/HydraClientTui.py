@@ -85,17 +85,19 @@ class HydraClientTui(App):
             id="buttons"
         )
 
-
+    def console_msg(self, msg: str):
+        self.query_one(Log).write_line(msg)
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
 
         if button_id == DMethod.PING:
             msg = HydraMsg(sender=DModule.HYDRA_CLIENT, target=DModule.HYDRA_ROUTER, method=DMethod.PING)            
-            self.query_one(Log).write_line("Sending ping...")
+            self.console_msg("Sending ping")
             await self.mq.send(msg)
-            results = await self.mq.recv()
-            self.query_one(Log).write_line(f"Received: {results}")
+            reply = await self.mq.recv()
+            if reply.method == DMethod.PONG:
+                self.console_msg("Received pong")
 
         elif button_id == "quit":
             await self.on_quit()
