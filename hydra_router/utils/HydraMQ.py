@@ -86,10 +86,7 @@ class HydraMQ:
         self.socket = self.ctx.socket(zmq.DEALER)
 
         # Generate unique identity: base-id + random 4-char suffix
-        random.seed(DHydra.RANDOM_SEED)
-        chars = string.ascii_letters + string.digits
-        rand_suffix = "".join(random.choice(chars) for _ in range(4))
-        self.identity = f"{id}-{rand_suffix}"
+        self.identity = id
 
         # Set ZeroMQ socket identity (must be bytes)
         self.socket.setsockopt(zmq.IDENTITY, self.identity.encode("utf-8"))
