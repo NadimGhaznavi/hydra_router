@@ -48,6 +48,7 @@ class HydraRouterTui(App):
         self._address = address
         self._port = port
         self._listening = False
+        self._num_msgs = 0
         self.socket = None
         self._init_socket()
 
@@ -73,12 +74,6 @@ class HydraRouterTui(App):
             id=DField.CONFIG
         )
 
-        # Console
-        yield Vertical(
-            Label(f"[b]{'Sender':<12s} > {'Target':>12s} : {'Method':<10s}[/]"),
-            Log(highlight=True, auto_scroll=True),
-            id="console")
-
         # Buttons
         yield Horizontal(
             Button(label=DLabel.START, id=DMethod.START, compact=True),
@@ -87,8 +82,15 @@ class HydraRouterTui(App):
             id="buttons"
         )
             
+        # Console
+        yield Vertical(
+            Label(f"[b]   # {'Sender':>12s} > {'Target':>12s} : {'Method':<10s}[/]"),
+            Log(highlight=True, auto_scroll=True),
+            id="console")
+
     def console_msg(self, msg: HydraMsg):
-        line = f"{msg.sender:<12s} > {msg.target:>12s} : {msg.method:<10s}"
+        self._num_msgs += 1
+        line = f"{self._num_msgs:>4d} {msg.sender:>12s} > {msg.target:>12s} : {msg.method:<10s}"
         self.query_one(Log).write_line(line)
 
     async def handle_message(self, sender: str, msg: HydraMsg) -> None:

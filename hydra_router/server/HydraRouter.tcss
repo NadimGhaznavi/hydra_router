@@ -1,7 +1,7 @@
 Screen {
     layout: grid;
     grid-size: 1 4;
-    grid-rows: 3 3 12 3;
+    grid-rows: 3 3 3 12;
     grid-columns: 80;
 }
 
