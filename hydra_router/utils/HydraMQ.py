@@ -9,10 +9,7 @@
 #
 
 import asyncio
-import random
-import string
-from typing import Optional
-
+import time
 import zmq
 import zmq.asyncio
 
@@ -104,6 +101,47 @@ class HydraMQ:
         # Placeholder for heartbeat task
         self.heartbeat_task = None
 
+        # A float holding time.time() for when the last heartbeat reply was received
+        self._last_heartbeat = 0
+
+    def connected(self) -> bool:
+        if self._last_heartbeat == 0:
+            return False
+
+        interval = time.time() - self._last_heartbeat
+        if interval > (2 * DHydra.HEARTBEAT_INTERVAL):
+            return False
+        
+        return True
+        
+
+    async def quit(self) -> None:
+        """
+        Cleanly shutdown the HydraMQ client.
+
+        Stops heartbeat task, disconnects from router, and cleans up
+        ZeroMQ resources.
+
+        Returns:
+            None
+        """
+        # Stop heartbeat task
+        if self.heartbeat_task is not None:
+            self.heartbeat_stop_event.set()
+            await asyncio.sleep(0.1)  # Give task time to exit
+            self.heartbeat_task.cancel()
+            try:
+                await self.heartbeat_task
+            except asyncio.CancelledError:
+                pass
+
+        # Disconnect and cleanup
+        try:
+            self.socket.disconnect(self.router_addr)
+            self.socket.close(linger=0)
+        finally:
+            self.ctx.term()
+
     async def send(self, msg: HydraMsg) -> None:
         """
         Send a HydraMsg through the router.
@@ -165,33 +203,10 @@ class HydraMQ:
                 method=DMethod.HEARTBEAT,
             )
             await self.send(msg)
-            results = await self.recv()
+            reply = await self.recv()
+
+            if reply.method == DMethod.HEARTBEAT_REPLY:
+                self._last_heartbeat = time.time()
 
             await asyncio.sleep(DHydra.HEARTBEAT_INTERVAL)
 
-    async def quit(self) -> None:
-        """
-        Cleanly shutdown the HydraMQ client.
-
-        Stops heartbeat task, disconnects from router, and cleans up
-        ZeroMQ resources.
-
-        Returns:
-            None
-        """
-        # Stop heartbeat task
-        if self.heartbeat_task is not None:
-            self.heartbeat_stop_event.set()
-            await asyncio.sleep(0.1)  # Give task time to exit
-            self.heartbeat_task.cancel()
-            try:
-                await self.heartbeat_task
-            except asyncio.CancelledError:
-                pass
-
-        # Disconnect and cleanup
-        try:
-            self.socket.disconnect(self.router_addr)
-            self.socket.close(linger=0)
-        finally:
-            self.ctx.term()
