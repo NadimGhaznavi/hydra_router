@@ -74,9 +74,6 @@ class HydraClientTui(App):
             id=DField.STATUS
         )
 
-        # Console
-        yield Log(highlight=True, auto_scroll=True, id=DField.CONSOLE)
-
         # Buttons
         yield Horizontal(
             Button(label=DLabel.PING, id=DMethod.PING, compact=True),
@@ -84,6 +81,10 @@ class HydraClientTui(App):
             Button(label="Quit", id="quit", compact=True),
             id="buttons"
         )
+
+        # Console
+        yield Log(highlight=True, auto_scroll=True, id=DField.CONSOLE)
+
 
     async def check_connection(self) -> None:
         while not self.check_connection_stop_event.is_set():
