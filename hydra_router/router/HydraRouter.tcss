@@ -1,7 +1,7 @@
 Screen {
     layout: grid;
-    grid-size: 1 4;
-    grid-rows: 3 3 3 12;
+    grid-size: 1 5;
+    grid-rows: 3 3 3 12 8;
     grid-columns: 80;
 }
 
@@ -19,6 +19,15 @@ Button {
     text-style: bold;
     width: 100%;
     padding: 0 1;
+}
+
+#clients {
+    background: black;
+    border: round #0c323e;
+    border-subtitle-color: #3b7735ff;
+    color: #3b7735ff;
+    text-style: bold;
+    width: 100%;
 }
 
 #config {

@@ -1,4 +1,5 @@
 import sys
+import time
 import zmq
 import asyncio
 import zmq.asyncio
@@ -51,6 +52,7 @@ class HydraRouterTui(App):
         self._num_msgs = 0
         self.socket = None
         self._init_socket()
+        self._clients = {}
 
     def _init_socket(self) -> None:
         try:
@@ -59,7 +61,7 @@ class HydraRouterTui(App):
             self.socket = self.context.socket(zmq.ROUTER)
             self.socket.bind(bind_address)
         except Exception as e:
-            print(f"ERROR: {e}")
+            print(f"{DLabel.ERROR}: {e}")
             exit(1)
 
     def compose(self) -> ComposeResult:
@@ -77,16 +79,24 @@ class HydraRouterTui(App):
         # Buttons
         yield Horizontal(
             Button(label=DLabel.START, id=DMethod.START, compact=True),
-            Label(" "),
-            Button(label="Quit", id="quit", compact=True),
-            id="buttons"
+            Label(DLabel.SPACE),
+            Button(label=DLabel.QUIT, id=DField.QUIT, compact=True),
+            id=DField.BUTTONS
         )
             
         # Console
         yield Vertical(
             Label(f"[b]   # {'Sender':>12s} > {'Target':>12s} : {'Method':<10s}[/]"),
             Log(highlight=True, auto_scroll=True),
-            id="console")
+            id=DField.CONSOLE
+        )
+
+        # Clients
+        yield Vertical(
+            Label(f"[b]{'Client':>12s} : {'Status'}"),
+            Log(highlight=True, auto_scroll=True),
+            id=DField.CLIENTS
+        )
 
     def console_msg(self, msg: HydraMsg):
         self._num_msgs += 1
@@ -145,6 +155,7 @@ class HydraRouterTui(App):
     def on_mount(self):
         self.query_one(f"#{DField.TITLE}").border_subtitle = DLabel.VERSION + " " + DHydra.VERSION
         self.query_one(f"#{DField.CONFIG}").border_subtitle = DLabel.CONFIG
+        self.query_one(f"#{DField.CLIENTS}").border_subtitle = DLabel.CLIENTS
 
     async def on_quit(self):
         sys.exit(0)
@@ -162,6 +173,7 @@ class HydraRouterTui(App):
                     
                     # frames[0] = client identity (bytes)
                     sender = frames[0]
+                    self._clients[sender] = time.time()
 
                     # frames[1] = message data (JSON bytes)
                     message_data = frames[1]
