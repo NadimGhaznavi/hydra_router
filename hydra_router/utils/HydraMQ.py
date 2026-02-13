@@ -61,6 +61,7 @@ class HydraMQ:
         self,
         router_address: str = DHydraRouter.HOSTNAME,
         router_port: int = DHydraRouter.PORT,
+        router_hb_port: int = DHydraRouter.HEARTBEAT_PORT,
         id: str = DModule.HYDRA_MQ
     ) -> None:
         """
@@ -77,19 +78,23 @@ class HydraMQ:
         """
         self.router = router_address
         self.port = router_port
+        self.hb_port = router_hb_port
 
         # Create async ZeroMQ context and DEALER socket
         self.ctx = zmq.asyncio.Context()
         self.socket = self.ctx.socket(zmq.DEALER)
+        self.hb_socket = self.ctx.socket(zmq.DEALER)
 
         # Generate unique identity: base-id + random 4-char suffix
         self.identity = id
 
         # Set ZeroMQ socket identity (must be bytes)
         self.socket.setsockopt(zmq.IDENTITY, self.identity.encode("utf-8"))
+        self.hb_socket.setsockopt(zmq.IDENTITY, self.identity.encode("utf-8"))
 
         # Build router address
         self.router_addr = f"tcp://{self.router}:{self.port}"
+        self.router_hb_addr = f"tcp://{self.router}:{self.hb_port}"
 
         # Asyncio control events
         self.stop_event = asyncio.Event()
@@ -97,6 +102,7 @@ class HydraMQ:
 
         # Connect to router
         self.socket.connect(self.router_addr)
+        self.hb_socket.connect(self.router_hb_addr)
 
         # Placeholder for heartbeat task
         self.heartbeat_task = None
@@ -202,8 +208,9 @@ class HydraMQ:
                 target=DModule.HYDRA_ROUTER,
                 method=DMethod.HEARTBEAT,
             )
-            await self.send(msg)
-            reply = await self.recv()
+            await self.heartbeat_socket.send(msg.to_json())
+            message_data = await self.heartbeat_socket.recv()
+            reply = HydraMsg.from_json(message_data)
 
             if reply.method == DMethod.HEARTBEAT_REPLY:
                 self._last_heartbeat = time.time()

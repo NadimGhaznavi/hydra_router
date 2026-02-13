@@ -97,6 +97,7 @@ class DHydraRouter:
 
     HOSTNAME: str = "localhost"
     PORT: int = 5757
+    HEARTBEAT_PORT: int = 5758
 
 # HydraServer messages
 class DHydraServerMsg:

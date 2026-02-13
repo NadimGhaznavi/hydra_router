@@ -20,14 +20,17 @@ class DLabel:
 class DStatus:
     GOOD: str = "🟢"
     BAD: str = "🔴"
+    OK: str = "🟡"
 
 
 class DField:
     BUTTONS: str = "buttons"
     CLIENTS: str = "clients"
+    CLIENTS_SCREEN: str = "clients_screen"
     CONFIG: str = "config"
     CONNECTED: str = "connected"
     CONSOLE: str = "console"
+    CONSOLE_SCREEN: str = "console_screen"
     QUIT: str = "quit"
     STATUS: str = "status"
     TITLE: str = "title"
