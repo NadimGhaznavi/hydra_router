@@ -217,7 +217,6 @@ class HydraMQ:
                 target=DModule.HYDRA_ROUTER,
                 method=DMethod.HEARTBEAT,
             )
-            print(f"DEBUG: Sending heartbeat from {self.identity} to {self.router_hb_addr}")
             await self.hb_socket.send(msg.to_json())
 
             try:

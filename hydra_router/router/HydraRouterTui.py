@@ -87,13 +87,9 @@ class HydraRouterTui(App):
                             self.hb_socket.recv_multipart(),
                             timeout = DHydra.NETWORK_TIMEOUT
                         )
-                        print(f"DEBUG: Received {len(frames)} frames")
-                        # frames[0] = client identity (bytes)
-                        sender = frames[0]
-                        self._clients[sender] = time.time()
 
-                        # frames[1] = message data (JSON bytes)
-                        message_data = frames[1]
+                        sender, message_data, route = self._split_router_frames(frames)
+                        self._clients[sender] = time.time()
                         
                         # Deserialize to HydraMsg
                         hydra_msg = HydraMsg.from_json(message_data)
