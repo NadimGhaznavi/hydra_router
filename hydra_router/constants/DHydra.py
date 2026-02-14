@@ -21,6 +21,7 @@ class DHydra:
     """
 
     HEARTBEAT_INTERVAL: float = 5.0
+    NETWORK_TIMEOUT: float = 2.0
     PROTOCOL_VERSION: int = 1
     RANDOM_SEED: int = 1970
     VERSION: str = "0.14.1"

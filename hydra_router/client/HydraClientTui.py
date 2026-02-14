@@ -7,7 +7,7 @@ from textual.theme import Theme
 from textual.app import App, ComposeResult
 from textual.widgets import Label, Button, Log
 from textual.containers import Vertical, Horizontal
-from textual.reactive import reactive
+from textual import work
 
 from hydra_router.utils.HydraMQ import HydraMQ
 from hydra_router.utils.HydraMsg import HydraMsg
@@ -50,10 +50,9 @@ class HydraClientTui(App):
 
         self._address = address
         self._port = port
-        self._id = str = DModule.HYDRA_CLIENT
+        self._id = DModule.HYDRA_CLIENT
         self._connected_msg = DStatus.BAD + " " + DLabel.DISCONNECTED
         self.mq = None
-        self.check_connection_stop_event = asyncio.Event()
 
     def compose(self) -> ComposeResult:
         """The TUI is created here"""
@@ -86,8 +85,9 @@ class HydraClientTui(App):
         yield Log(highlight=True, auto_scroll=True, id=DField.CONSOLE)
 
 
-    async def check_connection(self) -> None:
-        while not self.check_connection_stop_event.is_set():
+    @work(exclusive=True)
+    async def check_connection_bg(self) -> None:
+        while True:
             if self.mq.connected():
                 self._connected_msg = DStatus.GOOD + " " + DLabel.CONNECTED
             else:
@@ -108,34 +108,27 @@ class HydraClientTui(App):
             msg = HydraMsg(sender=DModule.HYDRA_CLIENT, target=DModule.HYDRA_ROUTER, method=DMethod.PING)            
             self.console_msg("Sending ping")
             await self.mq.send(msg)
-            reply = await self.mq.recv()
-            if reply.method == DMethod.PONG:
-                self.console_msg("Received pong")
+
+            try:
+                reply = await self.mq.recv()
+                if reply.method == DMethod.PONG:
+                    self.console_msg("Received pong")
+            except asyncio.TimeoutError:
+                self.console_msg("Ping timed out...")
 
         elif button_id == "quit":
             await self.on_quit()
             
     def on_mount(self):
         self.mq = HydraMQ(router_address=self._address, router_port=self._port, id=self._id)
-        self.mq.start_heartbeat()
-        self.check_connection_task = asyncio.create_task(self.check_connection())
+        self.mq.start()
+        self.check_connection_bg()
         self.query_one(f"#{DField.TITLE}").border_subtitle = DLabel.VERSION + " " + DHydra.VERSION
         self.query_one(f"#{DField.CONFIG}").border_subtitle = DLabel.CONFIG
         self.query_one(f"#{DField.STATUS}").border_subtitle = DLabel.STATUS
         self.query_one(f"#{DField.CONSOLE}", Log).write_line("Initialization complete")
 
     async def on_quit(self):
-        await self.mq.quit()
-
-        if self.check_connection_task is not None:
-            self.check_connection_stop_event.set()
-            await asyncio.sleep(0.1)
-            self.check_connection_task.cancel()
-            try:
-                await self.check_connection_task
-            except asyncio.CancelledError:
-                pass
-
         sys.exit(0)
 
 def main():

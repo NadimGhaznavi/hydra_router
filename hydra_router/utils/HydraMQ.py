@@ -168,7 +168,7 @@ class HydraMQ:
         await self.socket.send(msg.to_json())
 
 
-    def start_heartbeat(self):
+    def start(self):
         # Start heartbeat task
         self.heartbeat_task = asyncio.create_task(self.start_heartbeat_bg())
 
@@ -179,18 +179,27 @@ class HydraMQ:
         Waits for an incoming message, deserializes it, and returns
         a HydraMsg instance.
 
+        Args:
+            timeout: Maximum time to wait for a message in seconds
+
         Returns:
             HydraMsg instance
 
         Raises:
+            asyncio.TimeoutError: If no message received within timeout
             zmq.ZMQError: If receive operation fails
             json.JSONDecodeError: If message is not valid JSON
         """
         # DEALER socket receives single frame from ROUTER
         # ROUTER sends [client_identity, message], but DEALER
         # automatically strips the identity, leaving just [message]
-        message_data = await self.socket.recv()
-        return HydraMsg.from_json(message_data)
+        message_data = None
+        message_data = await asyncio.wait_for(
+            self.socket.recv(),
+            timeout = DHydra.NETWORK_TIMEOUT
+        )
+        if message_data is not None:
+            return HydraMsg.from_json(message_data)
 
     async def start_heartbeat_bg(self) -> None:
         """
@@ -208,12 +217,22 @@ class HydraMQ:
                 target=DModule.HYDRA_ROUTER,
                 method=DMethod.HEARTBEAT,
             )
-            await self.heartbeat_socket.send(msg.to_json())
-            message_data = await self.heartbeat_socket.recv()
-            reply = HydraMsg.from_json(message_data)
+            print(f"DEBUG: Sending heartbeat from {self.identity} to {self.router_hb_addr}")
+            await self.hb_socket.send(msg.to_json())
 
-            if reply.method == DMethod.HEARTBEAT_REPLY:
-                self._last_heartbeat = time.time()
+            try:
+                message_data = await asyncio.wait_for(
+                    self.hb_socket.recv(),
+                    timeout = DHydra.NETWORK_TIMEOUT
+                )
+                reply = HydraMsg.from_json(message_data)
+
+                if reply.method == DMethod.HEARTBEAT_REPLY:
+                    self._last_heartbeat = time.time()
+
+            except asyncio.TimeoutError:
+                # Just continue and try again
+                pass
 
             await asyncio.sleep(DHydra.HEARTBEAT_INTERVAL)
 

@@ -73,66 +73,77 @@ class HydraRouterTui(App):
             print(f"{DLabel.ERROR}: {e}")
             exit(1)
 
-    @work(exclusive=True)
+    @work(group="hb", exclusive=True)
     async def bg_hb_listen(self) -> None:
         if self.hb_socket is None:
             self._init_socket()
 
         try:
             while True:
-                if self.socket is not None:
-                    # Receive multipart message
-                    frames = await self.hb_socket.recv_multipart()
-                    
-                    # frames[0] = client identity (bytes)
-                    sender = frames[0]
-                    self._clients[sender] = time.time()
+                if self.hb_socket is not None:
 
-                    # frames[1] = message data (JSON bytes)
-                    message_data = frames[1]
+                    try:
+                        frames = await asyncio.wait_for(
+                            self.hb_socket.recv_multipart(),
+                            timeout = DHydra.NETWORK_TIMEOUT
+                        )
+                        print(f"DEBUG: Received {len(frames)} frames")
+                        # frames[0] = client identity (bytes)
+                        sender = frames[0]
+                        self._clients[sender] = time.time()
+
+                        # frames[1] = message data (JSON bytes)
+                        message_data = frames[1]
+                        
+                        # Deserialize to HydraMsg
+                        hydra_msg = HydraMsg.from_json(message_data)
+                        
+                        # Handle the message
+                        await self.handle_hb(sender, hydra_msg)
                     
-                    # Deserialize to HydraMsg
-                    hydra_msg = HydraMsg.from_json(message_data)
-                    
-                    # Handle the message
-                    await self.handle_hb(sender, hydra_msg)
+                    except asyncio.TimeoutError:
+                        # No message received, continue
+                        pass
 
                 else:
                     raise RuntimeError("Socket is not initialized")
-                await asyncio.sleep(0.1)
 
         except Exception as e:
             self.query_one(f"#{DField.CONSOLE_SCREEN}", Log).write_line(f"ERROR: {e}")
             exit(1)
         
 
-    @work(exclusive=True)
+    @work(group="main", exclusive=True)
     async def bg_listen(self) -> None:
+        print(f"In bg_listen()...")
         if self.socket is None:
             self._init_socket()
 
         try:
             while True:
                 if self.socket is not None:
-                    # Receive multipart message
-                    frames = await self.socket.recv_multipart()
-                    
-                    # frames[0] = client identity (bytes)
-                    sender = frames[0]
-                    self._clients[sender] = time.time()
 
-                    # frames[1] = message data (JSON bytes)
-                    message_data = frames[1]
+                    try:
+                        frames = await asyncio.wait_for(
+                            self.socket.recv_multipart(),
+                            timeout = DHydra.NETWORK_TIMEOUT
+                        )
+
+                        sender, message_data, route = self._split_router_frames(frames)
+                        self._clients[sender] = time.time()
+                        
+                        # Deserialize to HydraMsg
+                        hydra_msg = HydraMsg.from_json(message_data)
+                        
+                        # Handle the message
+                        await self.handle_message(sender, hydra_msg)
                     
-                    # Deserialize to HydraMsg
-                    hydra_msg = HydraMsg.from_json(message_data)
-                    
-                    # Handle the message
-                    await self.handle_message(sender, hydra_msg)
+                    except asyncio.TimeoutError:
+                        # No message received, continue
+                        pass
 
                 else:
                     raise RuntimeError("Socket is not initialized")
-                await asyncio.sleep(0.1)
 
         except Exception as e:
             self.query_one(f"#{DField.CONSOLE_SCREEN}", Log).write_line(f"ERROR: {e}")
@@ -176,11 +187,12 @@ class HydraRouterTui(App):
     def console_msg(self, msg: HydraMsg):
         self._num_msgs += 1
         line = f"{self._num_msgs:>4d} {msg.sender:>12s} > {msg.target:>12s} : {msg.method:<10s}"
-        self.query_one(f"{DField.CONSOLE_SCREEN}", Log).write_line(line)
+        self.query_one(f"#{DField.CONSOLE_SCREEN}", Log).write_line(line)
 
     async def handle_hb(self, sender: str, msg: HydraMsg) -> None:
         # Display the message
         self.console_msg(msg=msg)
+
         if msg.target == DModule.HYDRA_ROUTER:
             if msg.method == DMethod.HEARTBEAT:
                 # Create and send reply
@@ -191,7 +203,7 @@ class HydraRouterTui(App):
                 )
 
                 # Send reply using ROUTER multipart format
-                await self.socket.send_multipart([
+                await self.hb_socket.send_multipart([
                     sender,
                     reply_msg.to_json()
                 ])
@@ -206,7 +218,6 @@ class HydraRouterTui(App):
                     sender=DModule.HYDRA_ROUTER,
                     target=msg.sender,
                     method=DMethod.PONG,
-                    payload={"status": "received", "echo": msg.method}
                 )
 
                 # Send reply using ROUTER multipart format
@@ -215,17 +226,18 @@ class HydraRouterTui(App):
                     reply_msg.to_json()
                 ])
 
-            self.console_msg(msg=reply_msg)
+                self.console_msg(msg=reply_msg)
 
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
 
         if button_id == DMethod.START:
+            self.bg_hb_listen()
             self.bg_listen()
             self.update_client_table()
 
-        elif button_id == "quit":
+        elif button_id == DField.QUIT:
             await self.on_quit()
 
     def on_mount(self):
@@ -237,7 +249,23 @@ class HydraRouterTui(App):
         sys.exit(0)
 
 
-    @work(exclusive=True)
+    def _split_router_frames(self, frames: list[bytes]) -> tuple[bytes, bytes, list[bytes]]:
+        """
+        Returns (sender, payload, routing_prefix)
+        routing_prefix is what you should echo back before payload.
+        """
+        if len(frames) < 2:
+            raise ValueError(f"Expected >=2 frames, got {len(frames)}")
+
+        sender = frames[0]
+
+        # If there's an empty delimiter frame, payload is last and prefix is [sender, b""]
+        if len(frames) >= 3 and frames[1] == b"":
+            return sender, frames[-1], [sender, b""]
+        else:
+            return sender, frames[-1], [sender]
+
+    @work(group="clients", exclusive=True)
     async def update_client_table(self) -> None:
         while True:
             now = time.time()
@@ -245,12 +273,14 @@ class HydraRouterTui(App):
             screen.clear()
             for client in self._clients.keys():
                 interval = now - self._clients[client]
+                client_str = client.decode("utf-8", "replace")
+                client_str = f"{client_str:>12s}"
                 if interval > (3 * DHydra.HEARTBEAT_INTERVAL):
-                    screen.write_line(f"{client} : {DStatus.BAD}")
+                    screen.write_line(f"{client_str} : {DStatus.BAD}")
                 elif interval > (2 * DHydra.HEARTBEAT_INTERVAL):
-                    screen.write_line(f"{client} : {DStatus.OK}")
+                    screen.write_line(f"{client_str} : {DStatus.OK}")
                 else:
-                    screen.write_line(f"{client} : {DStatus.GOOD}")
+                    screen.write_line(f"{client_str} : {DStatus.GOOD}")
             
             await asyncio.sleep(DHydra.HEARTBEAT_INTERVAL + 1)
 
