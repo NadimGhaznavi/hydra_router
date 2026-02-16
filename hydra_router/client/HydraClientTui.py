@@ -78,7 +78,9 @@ class HydraClientTui(App):
 
         # Buttons
         yield Horizontal(
-            Button(label=DLabel.PING, id=DMethod.PING, compact=True),
+            Button(label=DLabel.PING_ROUTER, id=DMethod.PING_ROUTER, compact=True),
+            Label(" "),
+            Button(label=DLabel.PING_SERVER, id=DMethod.PING_SERVER, compact=True),
             Label(" "),
             Button(label="Quit", id="quit", compact=True),
             id="buttons"
@@ -107,9 +109,21 @@ class HydraClientTui(App):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
 
-        if button_id == DMethod.PING:
+        if button_id == DMethod.PING_ROUTER:
             msg = HydraMsg(sender=DModule.HYDRA_CLIENT, target=DModule.HYDRA_ROUTER, method=DMethod.PING)            
-            self.console_msg("Sending ping")
+            self.console_msg("Sending ping to router")
+            await self.mq.send(msg)
+
+            try:
+                reply = await self.mq.recv()
+                if reply.method == DMethod.PONG:
+                    self.console_msg("Received pong")
+            except asyncio.TimeoutError:
+                self.console_msg("Ping timed out...")
+
+        if button_id == DMethod.PING_SERVER:
+            msg = HydraMsg(sender=DModule.HYDRA_CLIENT, target=DModule.HYDRA_SERVER, method=DMethod.PING)            
+            self.console_msg("Sending ping to server")
             await self.mq.send(msg)
 
             try:

@@ -7,6 +7,8 @@ class DLabel:
     ERROR: str = "ERROR"
     LISTEN_PORT: str = "Listening Port"
     PING: str = "Ping"
+    PING_ROUTER: str = "Ping Router"
+    PING_SERVER: str = "Ping Server"
     QUIT: str = "Quit"
     ROUTER_TITLE: str = "Hydra Router"
     SERVER_TITLE: str = "Hydra Server"

@@ -207,9 +207,10 @@ class HydraRouterTui(App):
     async def handle_message(self, sender: str, msg: HydraMsg) -> None:
         # Display in log
         self.console_msg(msg=msg)
+
         if msg.target == DModule.HYDRA_ROUTER:
             if msg.method == DMethod.PING:
-            # Create and send reply
+                # Create and send reply
                 reply_msg = HydraMsg(
                     sender=DModule.HYDRA_ROUTER,
                     target=msg.sender,
@@ -223,6 +224,16 @@ class HydraRouterTui(App):
                 ])
 
                 self.console_msg(msg=reply_msg)
+            return
+
+        if not msg.target:
+            self.query_one(f"#{DField.CONSOLE_SCREEN}", Log).write_line(
+                "ERROR: message missing target"
+            )
+            return
+
+        # Generic routing: route to whichever identity matches msg.target.
+        await self.socket.send_multipart([msg.target.encode(), msg.to_json()])
 
 
     async def on_button_pressed(self, event: Button.Pressed) -> None:

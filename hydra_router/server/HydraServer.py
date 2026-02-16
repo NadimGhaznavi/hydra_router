@@ -75,8 +75,6 @@ class HydraServer:
             router_address=self.router_address,
             router_port=self.router_port,
             id=self.id,
-            srv_bind_address=self.address,
-            srv_bind_port=self.port,
             srv_methods=self._methods,
         )
         self.mq.start()

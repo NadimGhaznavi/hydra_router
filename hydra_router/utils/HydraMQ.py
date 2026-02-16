@@ -86,6 +86,7 @@ class HydraMQ:
         self.router = router_address
         self.port = router_port
         self.hb_port = router_hb_port
+        # Legacy parameters retained for compatibility with existing callers.
         self.srv_bind_address = srv_bind_address
         self.srv_bind_port = srv_bind_port
         self.srv_methods = srv_methods or {}
@@ -119,16 +120,8 @@ class HydraMQ:
         self.srv_task = None
 
         if self.srv_methods:
-            try:
-                srv_bind_addr = f"tcp://{self.srv_bind_address}:{self.srv_bind_port}"
-                self.srv_socket = self.ctx.socket(zmq.DEALER)
-                self.srv_socket.setsockopt(zmq.IDENTITY, self.identity.encode("utf-8"))
-                self.srv_socket.bind(srv_bind_addr)
-                self.srv_stop_event = asyncio.Event()
-                self.srv_pause_event = asyncio.Event()
-            except Exception as e:
-                print(f"{DLabel.ERROR}: {e}")
-                sys.exit(1)
+            self.srv_stop_event = asyncio.Event()
+            self.srv_pause_event = asyncio.Event()
             
         # A float holding time.time() for when the last heartbeat reply was received
         self._last_heartbeat = 0
@@ -145,12 +138,9 @@ class HydraMQ:
                     continue
 
                 try:
-                    frames = await asyncio.wait_for(
-                        self.srv_socket.recv_multipart(),
-                        timeout=DHydra.NETWORK_TIMEOUT,
+                    message_data = await asyncio.wait_for(
+                        self.socket.recv(), timeout=DHydra.NETWORK_TIMEOUT
                     )
-
-                    _sender, message_data, _route = self._split_router_frames(frames)
                     hydra_msg = HydraMsg.from_json(message_data)
                     method = hydra_msg.method
                     handler = self.srv_methods.get(method)
@@ -216,8 +206,6 @@ class HydraMQ:
             self.socket.close(linger=0)
             self.hb_socket.disconnect(self.router_hb_addr)
             self.hb_socket.close(linger=0)
-            if self.srv_methods:
-                self.srv_socket.close(linger=0)
         finally:
             self.ctx.term()
 

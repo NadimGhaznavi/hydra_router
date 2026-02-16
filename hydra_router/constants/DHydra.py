@@ -137,6 +137,8 @@ class DMethod:
     HEARTBEAT: str = "heartbeat"
     HEARTBEAT_REPLY: str = "heartbeat_reply"
     PING: str = "ping"
+    PING_ROUTER: str = "ping_router"
+    PING_SERVER: str = "ping_server"
     PONG: str = "pong"
     START: str = "start"
     STOP: str = "stop"
@@ -155,8 +157,6 @@ class DModule:
     HYDRA_MQ: str = "HydraMQ"
     HYDRA_ROUTER: str = "HydraRouter"
     HYDRA_SERVER: str = "HydraServer"
-    HYDRA_PING_CLIENT: str = "HydraPingClient"
-    HYDRA_PONG_SERVER: str = "HydraPongServer"
 
 
 # HydraLog levels dictionary
