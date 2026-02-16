@@ -90,15 +90,23 @@ class DHydraLog:
     DEFAULT: str = "warning"
 
 
-# HydraRouter constants
-class DHydraRouter:
+# HydraRouter defauolts
+class DHydraRouterDef:
     """
-    Docstring for DHydraRouter
+    Hydra Router defaults.
     """
 
     HOSTNAME: str = "localhost"
     PORT: int = 5757
     HEARTBEAT_PORT: int = 5758
+
+# HydraServer defaults
+class DHydraServerDef:
+    """
+    Hydra Server defaults.
+    """
+    HOSTNAME: str = "localhost"
+    PORT: int = 5759
 
 # HydraServer messages
 class DHydraServerMsg:
@@ -131,6 +139,7 @@ class DMethod:
     PING: str = "ping"
     PONG: str = "pong"
     START: str = "start"
+    STOP: str = "stop"
 
 
 # Hydra Router Modules

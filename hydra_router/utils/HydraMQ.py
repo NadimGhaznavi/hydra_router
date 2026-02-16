@@ -12,15 +12,18 @@ import asyncio
 import time
 import zmq
 import zmq.asyncio
+import sys
+from typing import Callable, Optional
 
 from hydra_router.constants.DHydra import (
     DHydra,
-    DHydraRouter,
+    DHydraRouterDef,
+    DHydraServerDef,
     DMethod,
     DModule,
 )
 from hydra_router.utils.HydraMsg import HydraMsg
-
+from hydra_router.constants.DHydraTui import DLabel
 
 class HydraMQ:
     """
@@ -59,10 +62,14 @@ class HydraMQ:
 
     def __init__(
         self,
-        router_address: str = DHydraRouter.HOSTNAME,
-        router_port: int = DHydraRouter.PORT,
-        router_hb_port: int = DHydraRouter.HEARTBEAT_PORT,
-        id: str = DModule.HYDRA_MQ
+        router_address: str = DHydraRouterDef.HOSTNAME,
+        router_port: int = DHydraRouterDef.PORT,
+        router_hb_port: int = DHydraRouterDef.HEARTBEAT_PORT,
+        id: str = DModule.HYDRA_MQ,
+        srv_bind_address: str = "*",
+        srv_bind_port: int = DHydraServerDef.PORT,
+        srv_methods: Optional[dict[str, Callable[[HydraMsg], object]]] = None,
+
     ) -> None:
         """
         Initialize HydraMQ client.
@@ -79,6 +86,9 @@ class HydraMQ:
         self.router = router_address
         self.port = router_port
         self.hb_port = router_hb_port
+        self.srv_bind_address = srv_bind_address
+        self.srv_bind_port = srv_bind_port
+        self.srv_methods = srv_methods or {}
 
         # Create async ZeroMQ context and DEALER socket
         self.ctx = zmq.asyncio.Context()
@@ -106,9 +116,60 @@ class HydraMQ:
 
         # Placeholder for heartbeat task
         self.heartbeat_task = None
+        self.srv_task = None
 
+        if self.srv_methods:
+            try:
+                srv_bind_addr = f"tcp://{self.srv_bind_address}:{self.srv_bind_port}"
+                self.srv_socket = self.ctx.socket(zmq.DEALER)
+                self.srv_socket.setsockopt(zmq.IDENTITY, self.identity.encode("utf-8"))
+                self.srv_socket.bind(srv_bind_addr)
+                self.srv_stop_event = asyncio.Event()
+                self.srv_pause_event = asyncio.Event()
+            except Exception as e:
+                print(f"{DLabel.ERROR}: {e}")
+                sys.exit(1)
+            
         # A float holding time.time() for when the last heartbeat reply was received
         self._last_heartbeat = 0
+
+        # Flag to determine if start() has been called
+        self._started = False
+
+    async def bg_listen(self) -> None:
+        try:
+            while not self.srv_stop_event.is_set():
+                # Handle pause
+                if self.srv_pause_event.is_set():
+                    await asyncio.sleep(0.1)
+                    continue
+
+                try:
+                    frames = await asyncio.wait_for(
+                        self.srv_socket.recv_multipart(),
+                        timeout=DHydra.NETWORK_TIMEOUT,
+                    )
+
+                    _sender, message_data, _route = self._split_router_frames(frames)
+                    hydra_msg = HydraMsg.from_json(message_data)
+                    method = hydra_msg.method
+                    handler = self.srv_methods.get(method)
+                    if handler is not None:
+                        result = handler(hydra_msg)
+                        if asyncio.iscoroutine(result):
+                            await result
+                    else:
+                        print(f"{DLabel.ERROR}: Unhandled method {method}")
+
+                except asyncio.TimeoutError:
+                    # No message was received, continue...
+                    pass
+                except Exception as e:
+                    print(f"{DLabel.ERROR}: {e}")
+
+        except Exception as e:
+            print(f"{DLabel.ERROR}: {e}")
+            sys.exit(1)
 
     def connected(self) -> bool:
         if self._last_heartbeat == 0:
@@ -140,37 +201,25 @@ class HydraMQ:
                 await self.heartbeat_task
             except asyncio.CancelledError:
                 pass
+        if self.srv_task is not None:
+            self.srv_stop_event.set()
+            await asyncio.sleep(0.1)
+            self.srv_task.cancel()
+            try:
+                await self.srv_task
+            except asyncio.CancelledError:
+                pass
 
         # Disconnect and cleanup
         try:
             self.socket.disconnect(self.router_addr)
             self.socket.close(linger=0)
+            self.hb_socket.disconnect(self.router_hb_addr)
+            self.hb_socket.close(linger=0)
+            if self.srv_methods:
+                self.srv_socket.close(linger=0)
         finally:
             self.ctx.term()
-
-    async def send(self, msg: HydraMsg) -> None:
-        """
-        Send a HydraMsg through the router.
-
-        Serializes the message to JSON and sends it through the
-        DEALER socket to the connected ROUTER.
-
-        Args:
-            msg: HydraMsg instance to send
-
-        Returns:
-            None
-
-        Raises:
-            zmq.ZMQError: If send operation fails
-        """
-        # DEALER socket automatically prepends identity when sending to ROUTER
-        await self.socket.send(msg.to_json())
-
-
-    def start(self):
-        # Start heartbeat task
-        self.heartbeat_task = asyncio.create_task(self.start_heartbeat_bg())
 
     async def recv(self) -> HydraMsg:
         """
@@ -200,6 +249,53 @@ class HydraMQ:
         )
         if message_data is not None:
             return HydraMsg.from_json(message_data)
+
+    async def send(self, msg: HydraMsg) -> None:
+        """
+        Send a HydraMsg through the router.
+
+        Serializes the message to JSON and sends it through the
+        DEALER socket to the connected ROUTER.
+
+        Args:
+            msg: HydraMsg instance to send
+
+        Returns:
+            None
+
+        Raises:
+            zmq.ZMQError: If send operation fails
+        """
+        # DEALER socket automatically prepends identity when sending to ROUTER
+        await self.socket.send(msg.to_json())
+
+    def _split_router_frames(self, frames: list[bytes]) -> tuple[bytes, bytes, list[bytes]]:
+        """
+        Returns (sender, payload, routing_prefix)
+        routing_prefix is what you should echo back before payload.
+        """
+        if len(frames) < 2:
+            raise ValueError(f"Expected >=2 frames, got {len(frames)}")
+
+        sender = frames[0]
+
+        # If there's an empty delimiter frame, payload is last and prefix is [sender, b""]
+        if len(frames) >= 3 and frames[1] == b"":
+            return sender, frames[-1], [sender, b""]
+        else:
+            return sender, frames[-1], [sender]
+        
+    def start(self):
+        if self._started:
+            return
+        if self.srv_methods and self.srv_task is None:
+            self.srv_task = asyncio.create_task(self.bg_listen())
+        # Start heartbeat task
+        self.heartbeat_task = asyncio.create_task(self.start_heartbeat_bg())
+        self._started = True
+
+    def started(self) -> bool:
+        return self._started
 
     async def start_heartbeat_bg(self) -> None:
         """
@@ -234,4 +330,3 @@ class HydraMQ:
                 pass
 
             await asyncio.sleep(DHydra.HEARTBEAT_INTERVAL)
-

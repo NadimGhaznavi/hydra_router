@@ -12,7 +12,7 @@ from textual.containers import Vertical, Horizontal
 from textual.reactive import var
 
 from hydra_router.utils.HydraMsg import HydraMsg
-from hydra_router.constants.DHydra import DHydra, DHydraServerDef, DMethod, DModule, DHydraRouter
+from hydra_router.constants.DHydra import DHydra, DHydraServerDef, DMethod, DModule, DHydraRouterDef
 from hydra_router.constants.DHydraTui import DLabel, DFile, DField, DStatus
 
 HYDRA_THEME = Theme(
@@ -45,8 +45,8 @@ class HydraRouterTui(App):
     def __init__(
             self, 
             address: str = "*", 
-            port: int = DHydraRouter.PORT, 
-            heartbeat_port: int = DHydraRouter.HEARTBEAT_PORT) -> None:
+            port: int = DHydraRouterDef.PORT, 
+            heartbeat_port: int = DHydraRouterDef.HEARTBEAT_PORT) -> None:
         """Constructor"""
         super().__init__()
 

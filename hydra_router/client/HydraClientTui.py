@@ -11,7 +11,7 @@ from textual import work
 
 from hydra_router.utils.HydraMQ import HydraMQ
 from hydra_router.utils.HydraMsg import HydraMsg
-from hydra_router.constants.DHydra import DHydra, DHydraRouter, DModule, DMethod
+from hydra_router.constants.DHydra import DHydra, DHydraRouterDef, DModule, DMethod
 from hydra_router.constants.DHydraTui import DLabel, DField, DFile, DStatus
 
 
@@ -43,7 +43,10 @@ class HydraClientTui(App):
     TITLE = DLabel.CLIENT_TITLE
     CSS_PATH = DFile.CLIENT_CSS_PATH
 
-    def __init__(self, address: str = DHydraRouter.HOSTNAME, port: int = DHydraRouter.PORT) -> None:
+    def __init__(
+            self, 
+            address: str = DHydraRouterDef.HOSTNAME, 
+            port: int = DHydraRouterDef.PORT) -> None:
         """Constructor"""
         super().__init__()
 
