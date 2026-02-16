@@ -24,7 +24,7 @@ class DHydra:
     NETWORK_TIMEOUT: float = 2.0
     PROTOCOL_VERSION: int = 1
     RANDOM_SEED: int = 1970
-    VERSION: str = "0.14.1"
+    VERSION: str = "0.15.0"
 
 
 # HydraMsg class constants
