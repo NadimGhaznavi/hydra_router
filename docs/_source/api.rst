@@ -5,15 +5,7 @@ API
 HydraServer
 -----------
 
-.. autoclass:: hydra_router.server.HydraServer.HydraServer
-    :no-index:
-    :members:
-    :show-inheritance:
-
-HydraServerPong
----------------
-
-.. autoclass:: hydra_router.server.HydraServerPong.HydraServerPong
+.. autoclass:: hydra_router.server.HydraServerTui.HydraServerTui
     :no-index:
     :members:
     :show-inheritance:
@@ -21,15 +13,15 @@ HydraServerPong
 HydraClient
 -----------
 
-.. autoclass:: hydra_router.client.HydraClient.HydraClient
+.. autoclass:: hydra_router.client.HydraClientTui.HydraClientTui
     :no-index:
     :members:
     :show-inheritance:
 
-HydraClientPing
----------------
+HydraRouter
+-----------
 
-.. autoclass:: hydra_router.client.HydraClientPing.HydraClientPing
+.. autoclass:: hydra_router.router.HydraRouterTui.HydraRouterTui
     :no-index:
     :members:
     :show-inheritance:
@@ -38,6 +30,14 @@ HydraMsg
 --------
 
 .. autoclass:: hydra_router.utils.HydraMsg.HydraMsg
+    :no-index:
+    :members:
+    :show-inheritance:
+
+HydraMQ
+-------
+
+.. autoclass:: hydra_router.utils.HydraMQ.HydraMQ
     :no-index:
     :members:
     :show-inheritance:
