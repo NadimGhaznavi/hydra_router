@@ -62,3 +62,5 @@ Button {
     width: 100%;
 }
 
+.running #start {
+    display: none; }

@@ -34,7 +34,9 @@ class DField:
     CONSOLE: str = "console"
     CONSOLE_SCREEN: str = "console_screen"
     QUIT: str = "quit"
+    RUNNING: str = "running"
     STATUS: str = "status"
+    STOPPED: str = "stopped"
     TITLE: str = "title"
 
 class DFile:

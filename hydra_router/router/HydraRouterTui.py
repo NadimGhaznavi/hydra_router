@@ -243,6 +243,7 @@ class HydraRouterTui(App):
             self.bg_hb_listen()
             self.bg_listen()
             self.update_client_table()
+            self.add_class(DField.RUNNING)
 
         elif button_id == DField.QUIT:
             await self.on_quit()
