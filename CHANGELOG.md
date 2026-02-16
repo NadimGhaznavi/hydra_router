@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Release 0.15.1] - 2026-02-16 14:29
+
+### Fixed
+- Fixed syntax error in pyproject.toml
+- Upgraded Textual to 8.0.0
+
+---
+
 ## [Release 0.15.0] - 2026-02-16 14:07
 
 ### Fixed
