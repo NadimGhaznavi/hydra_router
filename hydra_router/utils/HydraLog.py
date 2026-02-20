@@ -10,7 +10,7 @@
 import logging
 from typing import Any, Dict, Optional
 
-from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLogDef
+from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLogDef, DHydraLog
 
 
 class HydraLog:
@@ -28,7 +28,7 @@ class HydraLog:
         client_id: str,
         log_file: Optional[str] = None,
         to_console: bool = True,
-        log_level: str = DHydraLogDef.DEFAULT_LOG_LEVEL,
+        log_level: DHydraLog = DHydraLogDef.DEFAULT_LOG_LEVEL,
     ) -> None:
         """
         Initialize the HydraLog instance with specified configuration.
@@ -44,9 +44,6 @@ class HydraLog:
 
         # Get a logging object
         self._logger = logging.getLogger(client_id)
-
-        # Lowercase the log level
-        log_level = log_level.lower()
 
         # The default logger log level
         self._logger.setLevel(LOG_LEVELS[log_level])
@@ -72,7 +69,7 @@ class HydraLog:
 
         self._logger.propagate = False
 
-    def loglevel(self, loglevel: str) -> None:
+    def loglevel(self, loglevel: DHydraLog) -> None:
         """
         Set the logging level for this logger instance.
 

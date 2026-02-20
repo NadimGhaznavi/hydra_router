@@ -12,6 +12,7 @@ import asyncio
 import time
 import zmq
 import zmq.asyncio
+from zmq.sugar.frame import Frame
 import sys
 from typing import Callable, Optional
 
@@ -24,6 +25,10 @@ from hydra_router.constants.DHydra import (
 )
 from hydra_router.utils.HydraMsg import HydraMsg
 from hydra_router.constants.DHydraTui import DLabel
+
+
+def _ensure_bytes(data: bytes | Frame) -> bytes:
+    return data.bytes if isinstance(data, Frame) else data
 
 
 class HydraMQ:
@@ -116,15 +121,15 @@ class HydraMQ:
         self.hb_socket.connect(self.router_hb_addr)
 
         # Placeholder for heartbeat task
-        self.heartbeat_task = None
-        self.srv_task = None
+        self.heartbeat_task: asyncio.Task[None] | None = None
+        self.srv_task: asyncio.Task[None] | None = None
 
         if self.srv_methods:
             self.srv_stop_event = asyncio.Event()
             self.srv_pause_event = asyncio.Event()
 
         # A float holding time.time() for when the last heartbeat reply was received
-        self._last_heartbeat = 0
+        self._last_heartbeat: float = 0.0
 
         # Flag to determine if start() has been called
         self._started = False
@@ -141,7 +146,7 @@ class HydraMQ:
                     message_data = await asyncio.wait_for(
                         self.socket.recv(copy=True), timeout=DHydra.NETWORK_TIMEOUT
                     )
-                    hydra_msg = HydraMsg.from_json(message_data)
+                    hydra_msg = HydraMsg.from_json(_ensure_bytes(message_data))
                     method = hydra_msg.method
                     handler = self.srv_methods.get(method)
                     if handler is not None:
@@ -234,7 +239,7 @@ class HydraMQ:
             self.socket.recv(copy=True), timeout=DHydra.NETWORK_TIMEOUT
         )
         if message_data is not None:
-            return HydraMsg.from_json(message_data)
+            return HydraMsg.from_json(_ensure_bytes(message_data))
 
     async def send(self, msg: HydraMsg) -> None:
         """
@@ -306,7 +311,7 @@ class HydraMQ:
                 message_data = await asyncio.wait_for(
                     self.hb_socket.recv(copy=True), timeout=DHydra.NETWORK_TIMEOUT
                 )
-                reply = HydraMsg.from_json(message_data)
+                reply = HydraMsg.from_json(_ensure_bytes(message_data))
 
                 if reply.method == DMethod.HEARTBEAT_REPLY:
                     self._last_heartbeat = time.time()
