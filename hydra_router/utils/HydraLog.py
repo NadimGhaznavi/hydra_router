@@ -10,7 +10,7 @@
 import logging
 from typing import Any, Dict, Optional
 
-from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLog
+from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLogDef
 
 
 class HydraLog:
@@ -28,7 +28,7 @@ class HydraLog:
         client_id: str,
         log_file: Optional[str] = None,
         to_console: bool = True,
-        log_level: Optional[str] = DHydraLog.DEFAULT,
+        log_level: str = DHydraLogDef.DEFAULT_LOG_LEVEL,
     ) -> None:
         """
         Initialize the HydraLog instance with specified configuration.

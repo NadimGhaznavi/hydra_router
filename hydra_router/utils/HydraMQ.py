@@ -25,6 +25,7 @@ from hydra_router.constants.DHydra import (
 from hydra_router.utils.HydraMsg import HydraMsg
 from hydra_router.constants.DHydraTui import DLabel
 
+
 class HydraMQ:
     """
     Async ZeroMQ client for HydraRouter communication.
@@ -69,7 +70,6 @@ class HydraMQ:
         srv_bind_address: str = "*",
         srv_bind_port: int = DHydraServerDef.PORT,
         srv_methods: Optional[dict[str, Callable[[HydraMsg], object]]] = None,
-
     ) -> None:
         """
         Initialize HydraMQ client.
@@ -122,7 +122,7 @@ class HydraMQ:
         if self.srv_methods:
             self.srv_stop_event = asyncio.Event()
             self.srv_pause_event = asyncio.Event()
-            
+
         # A float holding time.time() for when the last heartbeat reply was received
         self._last_heartbeat = 0
 
@@ -139,7 +139,7 @@ class HydraMQ:
 
                 try:
                     message_data = await asyncio.wait_for(
-                        self.socket.recv(), timeout=DHydra.NETWORK_TIMEOUT
+                        self.socket.recv(copy=True), timeout=DHydra.NETWORK_TIMEOUT
                     )
                     hydra_msg = HydraMsg.from_json(message_data)
                     method = hydra_msg.method
@@ -168,9 +168,8 @@ class HydraMQ:
         interval = time.time() - self._last_heartbeat
         if interval > (2 * DHydra.HEARTBEAT_INTERVAL):
             return False
-        
+
         return True
-        
 
     async def quit(self) -> None:
         """
@@ -232,8 +231,7 @@ class HydraMQ:
         # automatically strips the identity, leaving just [message]
         message_data = None
         message_data = await asyncio.wait_for(
-            self.socket.recv(),
-            timeout = DHydra.NETWORK_TIMEOUT
+            self.socket.recv(copy=True), timeout=DHydra.NETWORK_TIMEOUT
         )
         if message_data is not None:
             return HydraMsg.from_json(message_data)
@@ -257,7 +255,9 @@ class HydraMQ:
         # DEALER socket automatically prepends identity when sending to ROUTER
         await self.socket.send(msg.to_json())
 
-    def _split_router_frames(self, frames: list[bytes]) -> tuple[bytes, bytes, list[bytes]]:
+    def _split_router_frames(
+        self, frames: list[bytes]
+    ) -> tuple[bytes, bytes, list[bytes]]:
         """
         Returns (sender, payload, routing_prefix)
         routing_prefix is what you should echo back before payload.
@@ -267,12 +267,11 @@ class HydraMQ:
 
         sender = frames[0]
 
-        # If there's an empty delimiter frame, payload is last and prefix is [sender, b""]
         if len(frames) >= 3 and frames[1] == b"":
             return sender, frames[-1], [sender, b""]
         else:
             return sender, frames[-1], [sender]
-        
+
     def start(self):
         if self._started:
             return
@@ -305,8 +304,7 @@ class HydraMQ:
 
             try:
                 message_data = await asyncio.wait_for(
-                    self.hb_socket.recv(),
-                    timeout = DHydra.NETWORK_TIMEOUT
+                    self.hb_socket.recv(copy=True), timeout=DHydra.NETWORK_TIMEOUT
                 )
                 reply = HydraMsg.from_json(message_data)
 

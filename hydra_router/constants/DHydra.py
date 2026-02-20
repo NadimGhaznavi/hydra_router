@@ -1,6 +1,6 @@
 # hydra_router/constants/DHydra.py
 #
-#   Hydra Router
+#    Hydra Router
 #    Author: Nadim-Daniel Ghaznavi
 #    Copyright: (c) 2025-2026 Nadim-Daniel Ghaznavi
 #    GitHub: https://github.com/NadimGhaznavi/hydra_router
@@ -8,7 +8,8 @@
 #    License: GPL 3.0
 
 import logging
-from typing import Dict
+from typing import Mapping, Final
+from enum import StrEnum
 
 
 # Project globals
@@ -20,38 +21,24 @@ class DHydra:
     used throughout the HydraRouter package.
     """
 
-    HEARTBEAT_INTERVAL: float = 5.0
-    NETWORK_TIMEOUT: float = 2.0
-    PROTOCOL_VERSION: int = 1
-    RANDOM_SEED: int = 1970
-    VERSION: str = "0.15.1"
+    HEARTBEAT_INTERVAL: Final[float] = 5.0
+    NETWORK_TIMEOUT: Final[float] = 2.0
+    PROTOCOL_VERSION: Final[int] = 1
+    RANDOM_SEED: Final[int] = 1970
+    VERSION: Final[str] = "0.15.1"
 
 
 # HydraMsg class constants
-class DHydraMsg:
+class DHydraMsg(StrEnum):
     """
-    Atribute definitions for HydraMsg class messages.
-    """
-
-    ID: str = "id"
-    SENDER: str = "sender"
-    TARGET: str = "target"
-    METHOD: str = "method"
-    PAYLOAD: str = "payload"
-    V: str = "version"
-
-
-# HydraServer defaults
-class DHydraServerDef:
-    """
-    Default configuration values for HydraServer instances.
-
-    Provides standard hostname and port values used when no explicit
-    configuration is provided during server initialization.
+    Attribute definitions for HydraMsg class messages.
     """
 
-    HOSTNAME: str = "localhost"
-    PORT: int = 5757
+    METHOD = "method"
+    SENDER = "sender"
+    TARGET = "target"
+    PAYLOAD = "payload"
+    PROTOCOL_VERSION = "protocol_version"
 
 
 # HydraClient messages
@@ -63,18 +50,20 @@ class DHydraClientMsg:
     values. Use .format() method to substitute actual values.
     """
 
-    CLEANUP: str = "HydraClient cleanup complete"
-    CONNECTED: str = "HydraClient connected to {server_address}"
-    ERROR: str = "HydraClient error: {e}"
-    LOGLEVEL_HELP: str = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
-    PORT_HELP: str = "Server port to connect to (default: {server_port})"
-    RECEIVED: str = "Received response: {response}"
-    SENDING: str = "Sending request: {message}"
-    SERVER_HELP: str = "Server hostname to connect to (default: {server_address})"
+    CLEANUP: Final[str] = "HydraClient cleanup complete"
+    CONNECTED: Final[str] = "HydraClient connected to {server_address}"
+    ERROR: Final[str] = "HydraClient error: {e}"
+    LOGLEVEL_HELP: Final[str] = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
+    PORT_HELP: Final[str] = "Server port to connect to (default: {server_port})"
+    RECEIVED: Final[str] = "Received response: {response}"
+    SENDING: Final[str] = "Sending request: {message}"
+    SERVER_HELP: Final[str] = (
+        "Server hostname to connect to (default: {server_address})"
+    )
 
 
 # HydraLog levels
-class DHydraLog:
+class DHydraLog(StrEnum):
     """
     Logging level constants for HydraLog configuration.
 
@@ -82,31 +71,42 @@ class DHydraLog:
     to Python's standard logging levels via the LOG_LEVELS dictionary.
     """
 
-    INFO: str = "info"
-    DEBUG: str = "debug"
-    WARNING: str = "warning"
-    ERROR: str = "error"
-    CRITICAL: str = "critical"
-    DEFAULT: str = "warning"
+    INFO = "info"
+    DEBUG = "debug"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
 
 
-# HydraRouter defauolts
+# HydraLog defaults
+class DHydraLogDef:
+    """
+    Hydra Log defaults.
+    """
+
+    DEFAULT_LOG_LEVEL: Final[DHydraLog] = DHydraLog.DEBUG
+
+
+# HydraRouter defaults
 class DHydraRouterDef:
     """
     Hydra Router defaults.
     """
 
-    HOSTNAME: str = "localhost"
-    PORT: int = 5757
-    HEARTBEAT_PORT: int = 5758
+    HOSTNAME: Final[str] = "localhost"
+    PORT: Final[int] = 5757
+    HEARTBEAT_PORT: Final[int] = 5758
+
 
 # HydraServer defaults
 class DHydraServerDef:
     """
     Hydra Server defaults.
     """
-    HOSTNAME: str = "localhost"
-    PORT: int = 5759
+
+    HOSTNAME: Final[str] = "localhost"
+    PORT: Final[int] = 5759
+
 
 # HydraServer messages
 class DHydraServerMsg:
@@ -117,35 +117,37 @@ class DHydraServerMsg:
     values. Use .format() method to substitute actual values.
     """
 
-    ADDRESS_HELP: str = "Address to bind to (default: '*' for all interfaces)"
-    BIND: str = "HydraServer bound to {bind_address}"
-    CLEANUP: str = "HydraServer cleanup complete"
-    ERROR: str = "HydraServer error: {e}"
-    LOGLEVEL_HELP: str = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
-    LOOP_UP: str = "HydraServer message loop on {address}:{port} is up and running"
-    PORT_HELP: str = "Port to bind to (default: {port})"
-    RECEIVE: str = "Received request: {message}"
-    SENT: str = "Sent response: {response}"
-    SHUTDOWN: str = "HydraServer shutting down..."
-    STARTING: str = "Starting HydraServer on {address}:{port}"
-    STOP_HELP: str = "Press Ctrl+C to stop the server"
-    USER_STOP: str = "Server stopped by user"
+    ADDRESS_HELP: Final[str] = "Address to bind to (default: '*' for all interfaces)"
+    BIND: Final[str] = "HydraServer bound to {bind_address}"
+    CLEANUP: Final[str] = "HydraServer cleanup complete"
+    ERROR: Final[str] = "HydraServer error: {e}"
+    LOGLEVEL_HELP: Final[str] = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
+    LOOP_UP: Final[str] = (
+        "HydraServer message loop on {address}:{port} is up and running"
+    )
+    PORT_HELP: Final[str] = "Port to bind to (default: {port})"
+    RECEIVE: Final[str] = "Received request: {message}"
+    SENT: Final[str] = "Sent response: {response}"
+    SHUTDOWN: Final[str] = "HydraServer shutting down..."
+    STARTING: Final[str] = "Starting HydraServer on {address}:{port}"
+    STOP_HELP: Final[str] = "Press Ctrl+C to stop the server"
+    USER_STOP: Final[str] = "Server stopped by user"
 
 
 # Hydra ZeroMQ RPC Methods
-class DMethod:
-    HEARTBEAT: str = "heartbeat"
-    HEARTBEAT_REPLY: str = "heartbeat_reply"
-    PING: str = "ping"
-    PING_ROUTER: str = "ping_router"
-    PING_SERVER: str = "ping_server"
-    PONG: str = "pong"
-    START: str = "start"
-    STOP: str = "stop"
+class DMethod(StrEnum):
+    HEARTBEAT = "heartbeat"
+    HEARTBEAT_REPLY = "heartbeat_reply"
+    PING = "ping"
+    PING_ROUTER = "ping_router"
+    PING_SERVER = "ping_server"
+    PONG = "pong"
+    START = "start"
+    STOP = "stop"
 
 
 # Hydra Router Modules
-class DModule:
+class DModule(StrEnum):
     """
     Module identifier constants for HydraRouter components.
 
@@ -153,23 +155,20 @@ class DModule:
     modules, used in logging and component identification.
     """
 
-    HYDRA_CLIENT: str = "HydraClient"
-    HYDRA_MQ: str = "HydraMQ"
-    HYDRA_ROUTER: str = "HydraRouter"
-    HYDRA_SERVER: str = "HydraServer"
+    HYDRA_CLIENT = "HydraClient"
+    HYDRA_MQ = "HydraMQ"
+    HYDRA_ROUTER = "HydraRouter"
+    HYDRA_SERVER = "HydraServer"
 
 
 # HydraLog levels dictionary
 # Mapping of HydraLog level strings to Python logging level integers.
 # Used by HydraLog to convert string-based log level configuration
 # to the integer values expected by Python's logging module.
-LOG_LEVELS: Dict[str, int] = {
+LOG_LEVELS: Mapping[DHydraLog, int] = {
     DHydraLog.INFO: logging.INFO,
     DHydraLog.DEBUG: logging.DEBUG,
     DHydraLog.WARNING: logging.WARNING,
     DHydraLog.ERROR: logging.ERROR,
     DHydraLog.CRITICAL: logging.CRITICAL,
-    DHydraLog.DEFAULT: logging.WARNING,
 }
-
-

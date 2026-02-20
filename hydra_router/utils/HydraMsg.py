@@ -1,6 +1,6 @@
 # hydra_router/utils/HydraMsg.py
 #
-#   Hydra Router
+#    Hydra Router
 #    Author: Nadim-Daniel Ghaznavi
 #    Copyright: (c) 2025-2026 Nadim-Daniel Ghaznavi
 #    GitHub: https://github.com/NadimGhaznavi/hydra_router
@@ -8,8 +8,7 @@
 #    License: GPL 3.0
 
 import json
-import uuid
-from typing import Any, Dict, Optional
+from typing import Any
 
 from hydra_router.constants.DHydra import DHydra, DHydraMsg
 
@@ -25,15 +24,6 @@ class HydraMsg:
     Internal representation uses Python objects (dict for payload).
     Serialization to JSON happens only when converting to wire format.
 
-    Example:
-        # Create message
-        msg = HydraMsg(
-            sender="client-123",
-            target="service-x",
-            method="ping",
-            payload={"sequence": 1, "data": "test"}
-        )
-
         # Serialize for transmission
         json_bytes = msg.to_json()
 
@@ -43,11 +33,10 @@ class HydraMsg:
 
     def __init__(
         self,
-        sender: Optional[str] = None,
-        target: Optional[str] = None,
-        method: Optional[str] = None,
-        payload: Optional[Dict[str, Any]] = None,
-        msg_id: Optional[str] = None,
+        sender: str,
+        target: str,
+        method: str,
+        payload: dict[str, Any] | None = None,
     ) -> None:
         """
         Initialize a new HydraMsg instance.
@@ -57,7 +46,6 @@ class HydraMsg:
             target: Identifier of the intended message recipient
             method: RPC method or action to be performed
             payload: Message data as a dictionary (not JSON string)
-            msg_id: Unique message identifier (auto-generated if None)
 
         Returns:
             None
@@ -66,10 +54,9 @@ class HydraMsg:
         self._target = target
         self._method = method
         self._payload = payload if payload is not None else {}
-        self._id = msg_id if msg_id is not None else str(uuid.uuid4())
 
     @property
-    def sender(self) -> Optional[str]:
+    def sender(self) -> str:
         """Get the message sender identifier."""
         return self._sender
 
@@ -79,7 +66,7 @@ class HydraMsg:
         self._sender = value
 
     @property
-    def target(self) -> Optional[str]:
+    def target(self) -> str:
         """Get the message target identifier."""
         return self._target
 
@@ -89,7 +76,7 @@ class HydraMsg:
         self._target = value
 
     @property
-    def method(self) -> Optional[str]:
+    def method(self) -> str:
         """Get the RPC method name."""
         return self._method
 
@@ -99,22 +86,17 @@ class HydraMsg:
         self._method = value
 
     @property
-    def payload(self) -> Dict[str, Any]:
+    def payload(self) -> dict[str, Any]:
         """Get the message payload as a dictionary."""
         return self._payload
 
     @payload.setter
-    def payload(self, value: Dict[str, Any]) -> None:
+    def payload(self, value: dict[str, Any]) -> None:
         """Set the message payload from a dictionary."""
         self._payload = value
 
-    @property
-    def id(self) -> str:
-        """Get the unique message identifier."""
-        return self._id
-
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "HydraMsg":
+    def from_dict(cls, data: dict[str, Any]) -> "HydraMsg":
         """
         Create a HydraMsg from a dictionary.
 
@@ -127,12 +109,19 @@ class HydraMsg:
         Raises:
             KeyError: If required fields are missing
         """
+        pv = data[DHydraMsg.PROTOCOL_VERSION]
+        if pv != DHydra.PROTOCOL_VERSION:
+            raise ValueError(f"Unsupported Hydra protocol version: {pv}")
+
+        payload = data.get(DHydraMsg.PAYLOAD) or {}
+        if not isinstance(payload, dict):
+            raise TypeError("Payload must be a dict")
+
         return cls(
-            sender=data.get(DHydraMsg.SENDER),
-            target=data.get(DHydraMsg.TARGET),
-            method=data.get(DHydraMsg.METHOD),
-            payload=data.get(DHydraMsg.PAYLOAD, {}),
-            msg_id=data.get(DHydraMsg.ID),
+            sender=data[DHydraMsg.SENDER],
+            target=data[DHydraMsg.TARGET],
+            method=data[DHydraMsg.METHOD],
+            payload=payload,
         )
 
     @classmethod
@@ -150,11 +139,9 @@ class HydraMsg:
             json.JSONDecodeError: If json_data is not valid JSON
             UnicodeDecodeError: If json_data cannot be decoded as UTF-8
         """
-        if isinstance(json_data, bytes):
-            json_data = json_data.decode("utf-8")
-        return cls.from_dict(json.loads(json_data))
+        return cls.from_dict(json.loads(json_data.decode("utf-8")))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert message to dictionary representation.
 
@@ -162,12 +149,11 @@ class HydraMsg:
             Dictionary containing all message fields including version
         """
         return {
-            DHydraMsg.ID: self._id,
             DHydraMsg.SENDER: self._sender,
             DHydraMsg.TARGET: self._target,
             DHydraMsg.METHOD: self._method,
             DHydraMsg.PAYLOAD: self._payload,
-            DHydraMsg.V: DHydra.PROTOCOL_VERSION,
+            DHydraMsg.PROTOCOL_VERSION: DHydra.PROTOCOL_VERSION,
         }
 
     def to_json(self) -> bytes:
@@ -190,8 +176,7 @@ class HydraMsg:
             String showing message structure
         """
         return (
-            f"HydraMsg(id={self._id}, sender={self._sender}, "
-            f"target={self._target}, method={self._method})"
+            f"HydraMsg:{self._sender}->{self._target}:{self._method}({self._payload})"
         )
 
     def __str__(self) -> str:
@@ -201,7 +186,4 @@ class HydraMsg:
         Returns:
             Formatted string with message details
         """
-        return (
-            f"HydraMsg: {self._sender} -> {self._target} "
-            f"[{self._method}] (id: {self._id})"
-        )
+        return f"HydraMsg:{self._sender}->{self._target}:{self._method}()"

@@ -22,6 +22,7 @@ if __package__ in (None, ""):
 from hydra_router.utils.HydraLog import HydraLog
 from hydra_router.utils.HydraMQ import HydraMQ, HydraMsg
 from hydra_router.constants.DHydra import (
+    DHydraLogDef,
     DHydraRouterDef,
     DHydraServerDef,
     DModule,
@@ -45,6 +46,7 @@ class HydraServer:
         router_address: str = DHydraRouterDef.HOSTNAME,
         router_port: int = DHydraRouterDef.PORT,
         id: Optional[str] = DModule.HYDRA_SERVER,
+        log_level: Optional[str] = DHydraLogDef.DEFAULT_LOG_LEVEL,
     ):
         """
         Initialize the HydraServer with binding parameters.
@@ -60,11 +62,11 @@ class HydraServer:
         self.router_address = router_address
         self.router_port = router_port
         self.id = id
-        self.log = None
         self._methods = {
             DMethod.PING: self.ping,
         }
         self.mq: Optional[HydraMQ] = None
+        self.log = HydraLog(client_id=self.id, log_level=log_level, to_console=True)
         self.main_loop()
 
     def main_loop(self) -> None:
@@ -82,7 +84,7 @@ class HydraServer:
             await asyncio.sleep(1)
 
     async def ping(self, msg: HydraMsg):
-        print(f"Received ping from {msg.sender}")
+        self.log.info(f"Received ping from {msg.sender}")
         reply_msg = HydraMsg(
             sender=DModule.HYDRA_SERVER,
             target=msg.sender,
@@ -90,7 +92,7 @@ class HydraServer:
         )
         if self.mq is not None:
             await self.mq.send(reply_msg)
-
+            self.log.info(f"Sent pong to {msg.sender}")
 
     def loglevel(self, log_level: str) -> None:
         """
@@ -102,7 +104,14 @@ class HydraServer:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Hydra ZeroMQ server")
     parser.add_argument("--address", default="*", help="Address to bind to")
-    parser.add_argument("--port", type=int, default=DHydraServerDef.PORT, help="Server port")
+    parser.add_argument(
+        "--log_level",
+        default=DHydraLogDef.DEFAULT_LOG_LEVEL,
+        help="Log level [DEBUG|INFO|WARNING|ERROR|CRITICAL]",
+    )
+    parser.add_argument(
+        "--port", type=int, default=DHydraServerDef.PORT, help="Server port"
+    )
     parser.add_argument(
         "--router-address",
         default=DHydraRouterDef.HOSTNAME,
@@ -123,6 +132,7 @@ def main() -> None:
         router_address=args.router_address,
         router_port=args.router_port,
         id=args.id,
+        log_level=args.log_level,
     )
 
 
