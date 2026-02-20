@@ -1,17 +1,16 @@
-import sys
 import asyncio
+import sys
 
-from textual.theme import Theme
-from textual.app import App, ComposeResult
-from textual.widgets import Label, Button, Log
-from textual.containers import Vertical, Horizontal
 from textual import work
+from textual.app import App, ComposeResult
+from textual.containers import Horizontal, Vertical
+from textual.theme import Theme
+from textual.widgets import Button, Label, Log
 
+from hydra_router.constants.DHydra import DHydra, DHydraRouterDef, DMethod, DModule
+from hydra_router.constants.DHydraTui import DField, DFile, DLabel, DStatus
 from hydra_router.utils.HydraMQ import HydraMQ
 from hydra_router.utils.HydraMsg import HydraMsg
-from hydra_router.constants.DHydra import DHydra, DHydraRouterDef, DModule, DMethod
-from hydra_router.constants.DHydraTui import DLabel, DField, DFile, DStatus
-
 
 HYDRA_THEME = Theme(
     name="hydra_theme",
@@ -46,11 +45,11 @@ class HydraClientTui(App):
         """Constructor"""
         super().__init__()
 
-        self._address = address
+        self._address: str = address
         self._port = port
-        self._id = DModule.HYDRA_CLIENT
+        self._identity = DModule.HYDRA_CLIENT
         self._connected_msg = DStatus.BAD + " " + DLabel.DISCONNECTED
-        self.mq = None
+        self.mq: HydraMQ | None = None
 
     def compose(self) -> ComposeResult:
         """The TUI is created here"""
@@ -86,7 +85,11 @@ class HydraClientTui(App):
     @work(exclusive=True)
     async def check_connection_bg(self) -> None:
         while True:
-            if self.mq.connected():
+            mq = self.mq
+            if mq is None:
+                raise TypeError("self.mq is None!!!")
+
+            if mq.connected():
                 self._connected_msg = DStatus.GOOD + " " + DLabel.CONNECTED
             else:
                 self._connected_msg = DStatus.BAD + " " + DLabel.DISCONNECTED
@@ -108,10 +111,13 @@ class HydraClientTui(App):
                 method=DMethod.PING,
             )
             self.console_msg("Sending ping to router")
-            await self.mq.send(msg)
+            mq = self.mq
+            if mq is None:
+                raise TypeError("self.mq is None!!!")
+            await mq.send(msg)
 
             try:
-                reply = await self.mq.recv()
+                reply = await mq.recv()
                 if reply.method == DMethod.PONG:
                     self.console_msg("Received pong")
             except asyncio.TimeoutError:
@@ -124,10 +130,13 @@ class HydraClientTui(App):
                 method=DMethod.PING,
             )
             self.console_msg("Sending ping to server")
-            await self.mq.send(msg)
+            mq = self.mq
+            if mq is None:
+                raise TypeError("self.mq is None!!!")
+            await mq.send(msg)
 
             try:
-                reply = await self.mq.recv()
+                reply = await mq.recv()
                 if reply.method == DMethod.PONG:
                     self.console_msg("Received pong")
             except asyncio.TimeoutError:
@@ -138,7 +147,9 @@ class HydraClientTui(App):
 
     def on_mount(self):
         self.mq = HydraMQ(
-            router_address=self._address, router_port=self._port, id=self._id
+            router_address=self._address,
+            router_port=self._port,
+            identity=self._identity,
         )
         self.mq.start()
         self.check_connection_bg()

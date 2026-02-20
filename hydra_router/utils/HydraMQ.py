@@ -9,12 +9,13 @@
 #
 
 import asyncio
+import sys
 import time
+from collections.abc import Awaitable, Callable
+
 import zmq
 import zmq.asyncio
 from zmq.sugar.frame import Frame
-import sys
-from typing import Callable, Optional
 
 from hydra_router.constants.DHydra import (
     DHydra,
@@ -23,8 +24,8 @@ from hydra_router.constants.DHydra import (
     DMethod,
     DModule,
 )
-from hydra_router.utils.HydraMsg import HydraMsg
 from hydra_router.constants.DHydraTui import DLabel
+from hydra_router.utils.HydraMsg import HydraMsg
 
 
 def _ensure_bytes(data: bytes | Frame) -> bytes:
@@ -71,10 +72,12 @@ class HydraMQ:
         router_address: str = DHydraRouterDef.HOSTNAME,
         router_port: int = DHydraRouterDef.PORT,
         router_hb_port: int = DHydraRouterDef.HEARTBEAT_PORT,
-        id: str = DModule.HYDRA_MQ,
+        identity: str = DModule.HYDRA_MQ,
         srv_bind_address: str = "*",
         srv_bind_port: int = DHydraServerDef.PORT,
-        srv_methods: Optional[dict[str, Callable[[HydraMsg], object]]] = None,
+        srv_methods: (
+            dict[str, Callable[[HydraMsg], object | Awaitable[object]]] | None
+        ) = None,
     ) -> None:
         """
         Initialize HydraMQ client.
@@ -102,7 +105,7 @@ class HydraMQ:
         self.hb_socket = self.ctx.socket(zmq.DEALER)
 
         # Generate unique identity: base-id + random 4-char suffix
-        self.identity = id
+        self.identity = identity
 
         # Set ZeroMQ socket identity (must be bytes)
         self.socket.setsockopt(zmq.IDENTITY, self.identity.encode("utf-8"))

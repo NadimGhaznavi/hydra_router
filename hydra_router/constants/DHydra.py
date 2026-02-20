@@ -8,8 +8,8 @@
 #    License: GPL 3.0
 
 import logging
-from typing import Mapping, Final
 from enum import StrEnum
+from typing import Final, Mapping
 
 
 # Project globals
@@ -57,9 +57,9 @@ class DHydraClientMsg:
     PORT_HELP: Final[str] = "Server port to connect to (default: {server_port})"
     RECEIVED: Final[str] = "Received response: {response}"
     SENDING: Final[str] = "Sending request: {message}"
-    SERVER_HELP: Final[str] = (
-        "Server hostname to connect to (default: {server_address})"
-    )
+    SERVER_HELP: Final[
+        str
+    ] = "Server hostname to connect to (default: {server_address})"
 
 
 # HydraLog levels
@@ -122,9 +122,9 @@ class DHydraServerMsg:
     CLEANUP: Final[str] = "HydraServer cleanup complete"
     ERROR: Final[str] = "HydraServer error: {e}"
     LOGLEVEL_HELP: Final[str] = "Log level: DEBUG, INFO, WARNING, ERROR or CRITICAL"
-    LOOP_UP: Final[str] = (
-        "HydraServer message loop on {address}:{port} is up and running"
-    )
+    LOOP_UP: Final[
+        str
+    ] = "HydraServer message loop on {address}:{port} is up and running"
     PORT_HELP: Final[str] = "Port to bind to (default: {port})"
     RECEIVE: Final[str] = "Received request: {message}"
     SENT: Final[str] = "Sent response: {response}"

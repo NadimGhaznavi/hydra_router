@@ -7,27 +7,27 @@
 #    Website: https://hydra-router.readthedocs.io/en/latest
 #    License: GPL 3.0
 
-from typing import Optional
-
-import asyncio
 import argparse
+import asyncio
 import os
 import sys
+from typing import Callable, Optional
 
 if __package__ in (None, ""):
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     if project_root not in sys.path:
         sys.path.insert(0, project_root)
 
-from hydra_router.utils.HydraLog import HydraLog
-from hydra_router.utils.HydraMQ import HydraMQ, HydraMsg
 from hydra_router.constants.DHydra import (
+    DHydraLog,
     DHydraLogDef,
     DHydraRouterDef,
     DHydraServerDef,
-    DModule,
     DMethod,
+    DModule,
 )
+from hydra_router.utils.HydraLog import HydraLog
+from hydra_router.utils.HydraMQ import HydraMQ, HydraMsg
 
 
 class HydraServer:
@@ -45,8 +45,8 @@ class HydraServer:
         port: int = DHydraServerDef.PORT,
         router_address: str = DHydraRouterDef.HOSTNAME,
         router_port: int = DHydraRouterDef.PORT,
-        id: Optional[str] = DModule.HYDRA_SERVER,
-        log_level: Optional[str] = DHydraLogDef.DEFAULT_LOG_LEVEL,
+        identity: str = DModule.HYDRA_SERVER,
+        log_level: DHydraLog = DHydraLogDef.DEFAULT_LOG_LEVEL,
     ):
         """
         Initialize the HydraServer with binding parameters.
@@ -61,12 +61,14 @@ class HydraServer:
         self.port = port
         self.router_address = router_address
         self.router_port = router_port
-        self.id = id
-        self._methods = {
-            DMethod.PING: self.ping,
+        self.identity = identity
+        self._methods: dict[str, Callable[[HydraMsg], object]] = {
+            str(DMethod.PING): self.ping,
         }
         self.mq: Optional[HydraMQ] = None
-        self.log = HydraLog(client_id=self.id, log_level=log_level, to_console=True)
+        self.log = HydraLog(
+            client_id=self.identity, log_level=log_level, to_console=True
+        )
         self.main_loop()
 
     def main_loop(self) -> None:
@@ -76,7 +78,7 @@ class HydraServer:
         self.mq = HydraMQ(
             router_address=self.router_address,
             router_port=self.router_port,
-            id=self.id,
+            identity=self.identity,
             srv_methods=self._methods,
         )
         self.mq.start()
@@ -94,11 +96,13 @@ class HydraServer:
             await self.mq.send(reply_msg)
             self.log.info(f"Sent pong to {msg.sender}")
 
-    def loglevel(self, log_level: str) -> None:
+    def loglevel(self, log_level: DHydraLog) -> None:
         """
         Initialize console logging for the server instance.
         """
-        self.log = HydraLog(client_id=self.id, log_level=log_level, to_console=True)
+        self.log = HydraLog(
+            client_id=self.identity, log_level=log_level, to_console=True
+        )
 
 
 def main() -> None:
@@ -123,7 +127,9 @@ def main() -> None:
         default=DHydraRouterDef.PORT,
         help="HydraRouter main port",
     )
-    parser.add_argument("--id", default=DModule.HYDRA_SERVER, help="Server identity")
+    parser.add_argument(
+        "--identity", default=DModule.HYDRA_SERVER, help="Server identity"
+    )
     args = parser.parse_args()
 
     HydraServer(
@@ -131,7 +137,7 @@ def main() -> None:
         port=args.port,
         router_address=args.router_address,
         router_port=args.router_port,
-        id=args.id,
+        identity=args.identity,
         log_level=args.log_level,
     )
 

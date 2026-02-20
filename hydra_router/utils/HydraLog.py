@@ -10,7 +10,7 @@
 import logging
 from typing import Any, Dict, Optional
 
-from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLogDef, DHydraLog
+from hydra_router.constants.DHydra import LOG_LEVELS, DHydraLog, DHydraLogDef
 
 
 class HydraLog:
@@ -74,7 +74,7 @@ class HydraLog:
         Set the logging level for this logger instance.
 
         Args:
-            loglevel (str): Log level string from DHydraLog constants
+            loglevel (DHydraLog): Log level string from DHydraLog constants
 
         Returns:
             None
