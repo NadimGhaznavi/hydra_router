@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Releae 0.16.0] - 2026-02-20 20:13
+## [Release 0.16.1] - 2026-02-20 21:31
+
+### Fixed
+- Black formatting issue.
+
+---
+
+## [Release 0.16.0] - 2026-02-20 20:13
 
 ### Fixed
 - Fixed mypy strict issues
