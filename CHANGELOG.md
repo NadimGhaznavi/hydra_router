@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Releae 0.16.0] - 2026-02-20 20:13
+
+### Fixed
+- Fixed mypy strict issues
+- Removed dead code
+- Tightened the Hydra Router protocol
+
+---
+
 ## [Release 0.15.1] - 2026-02-16 14:29
 
 ### Fixed
