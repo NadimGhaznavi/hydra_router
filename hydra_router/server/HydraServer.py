@@ -69,7 +69,7 @@ class HydraServer:
         self.log = HydraLog(
             client_id=self.identity, log_level=log_level, to_console=True
         )
-        self.log.info(f"Initialized, starting main loop")
+        self.log.info("Initialized, starting main loop")
         self.main_loop()
 
     def main_loop(self) -> None:
