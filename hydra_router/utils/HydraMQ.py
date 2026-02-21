@@ -95,8 +95,6 @@ class HydraMQ:
         self.port = router_port
         self.hb_port = router_hb_port
         # Legacy parameters retained for compatibility with existing callers.
-        self.srv_bind_address = srv_bind_address
-        self.srv_bind_port = srv_bind_port
         self.srv_methods = srv_methods or {}
 
         # Create async ZeroMQ context and DEALER socket
